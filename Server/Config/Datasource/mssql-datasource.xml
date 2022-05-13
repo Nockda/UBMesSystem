@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datasource usable="true" config="database.config.mssql">
+	<!-- JDBC Driver 위치 -->
+	<DriverClassName>com.microsoft.sqlserver.jdbc.SQLServerDriver
+	</DriverClassName>
+	<!-- 연결 주소 -->
+	<!-- <Url>jdbc:sqlserver://192.168.0.37:1433;databasename=Product_SmartFactory_2_2 -->
+	<!-- <Url>jdbc:sqlserver://192.168.10.17;databasename=ULVAC_MES</Url>  -->
+	<!-- <Url>jdbc:sqlserver://119.194.67.61:8001;databasename=PROD_SMARTFACTORY_2_3</Url> -->
+<!-- 	<Url>jdbc:sqlserver://106.249.236.252:8001;databasename=ULVAC_MES_DEV</Url> -->
+	
+	<Url>jdbc:sqlserver://106.249.236.252:8001;databasename=ULVAC_MES_DEV</Url>
+
+	<!-- 계정 / 비밀번호 -->
+	<Username>prod_factory</Username>
+	<!-- <Password>micube2171!@</Password> -->
+	<Password>7180</Password>
+	<!-- Pool 최대 동시 가능 연결 갯수 -->
+	<MaxTotal>100</MaxTotal>
+	<!-- Pool 최대 연결 가 대기 갯수 -->
+	<MaxIdle>100</MaxIdle>
+	<!-- Pool 최소 연결 갯수 -->
+	<MinIdle>100</MinIdle>
+	<!-- Pool 초기 연결 갯수 -->
+	<InitialSize>100</InitialSize>
+	<!-- Pool 연결 대기 시간 -->
+	<MaxWaitMillis>10000</MaxWaitMillis>
+	<!-- 사용하지 않는 Connection 제거 검사 -->
+	<TestWhileIdle>true</TestWhileIdle>
+	<!-- Pool 유휴 객체 테스트 -->
+	<ValidationQuery>select 1</ValidationQuery>
+	<ValidationQueryTimeout>10</ValidationQueryTimeout>
+	<TestOnBorrow>true</TestOnBorrow>
+</datasource>

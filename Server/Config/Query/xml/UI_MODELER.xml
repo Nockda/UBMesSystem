@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list>
+	<query id="GetObjectAttibuteInfoForModeler" version="00001">
+		<statement>
+			<![CDATA[	
+				SELECT OA.OBJECTID
+					, OA.OBJECTATTRIBUTENAME
+					, OA.SEQUENCE
+					, OA.ISPRIMARYKEY
+					, OA.ATTRIBUTETYPE
+					, OA.DATATYPE
+					, O.HASEXTENDEDTABLE
+					, O.HASEXTENDEDTABLE
+					, O.TABLENAME
+					, O.HASHISTORYTABLE
+					, O.HISTORYOBJECTID
+					, OA.COLUMNNAME
+					, OA.OBJECTCOLUMNNAME
+					, OA.DEFAULTVALUE
+					, OA.DATAFORMAT 
+					, OA.UICONTROLEXPRESSION
+					, OA.UIDEPENDENTATTRIBUTEID
+					, OA.UICONTROLTRANSACTION
+				FROM SF_OBJECTATTRIBUTE OA, SF_OBJECT O 
+				WHERE OA.OBJECTID = O.OBJECTID 
+				ORDER BY ATTRIBUTETYPE, OBJECTID, SEQUENCE
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetObjectListToColumn" version="1">
+		<statement>
+			<![CDATA[
+				SELECT *
+				  FROM SF_CODECLASS
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetCodeList" version="90003">
+		<statement>
+			<![CDATA[
+				SELECT * 
+				  FROM SF_CODE
+				 WHERE CODECLASSID = '$!{CODECLASSID}'
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetEquipments" version= "1">
+		<statement>
+			<![CDATA[
+				SELECT *
+				  FROM SF_EQUIPMENT				
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetEquipmentClass" version= "1">
+		<statement>
+			<![CDATA[
+					SELECT *
+					  FROM SF_EQUIPMENTCLASS
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetUIIdForModeler" version= "00001">
+		<statement>
+			<![CDATA[
+					SELECT UIID, UINAME 
+					FROM SF_UI
+					WHERE VALIDSTATE = 'Valid'
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetValidStateForModeler" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT CodeName AS TEXT,
+				       CodeID AS VALUE
+				FROM SF_CODE
+				WHERE 1=1
+				      AND CODECLASSID = 'VALIDSTATE'
+				      AND VALIDSTATE IN ('Valid')
+				ORDER BY DISPLAYSEQUENCE ASC
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetUICondItemForModeler" version= "00001">
+		<statement>
+			<![CDATA[
+					SELECT * 
+					FROM SF_UICONDITEM
+			]]>
+		</statement>
+	</query>
+</list>

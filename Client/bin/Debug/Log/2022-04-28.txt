@@ -1,0 +1,43 @@
+2022-04-28 09:26:35.0432|INFO|Get language list start. 
+2022-04-28 09:26:38.4586|INFO|Get language list complete. 
+2022-04-28 09:26:38.4586|INFO|Get message list start. 
+2022-04-28 09:26:38.9426|INFO|Get message list complete. 
+2022-04-28 09:26:38.9426|INFO|Get service list start. 
+2022-04-28 09:26:38.9576|INFO|Get service list complete. 
+2022-04-28 09:26:39.1086|INFO|Get langauge type list start. 
+2022-04-28 09:26:39.2417|INFO|Get langauge type list complete. 
+2022-04-28 09:26:39.2417|INFO|Get plant list start. 
+2022-04-28 09:26:39.3517|INFO|Get plant list complete. 
+2022-04-28 09:26:39.3517|INFO|Get save id YN start. 
+2022-04-28 09:26:39.3517|INFO|Get save id YN complete. 
+2022-04-28 09:26:39.3517|INFO|Get save id start. 
+2022-04-28 09:26:39.3517|INFO|Get save id complete. 
+2022-04-28 09:32:43.6122|INFO|Get language list start. 
+2022-04-28 09:32:46.7136|INFO|Get language list complete. 
+2022-04-28 09:32:46.7136|INFO|Get message list start. 
+2022-04-28 09:32:47.1941|INFO|Get message list complete. 
+2022-04-28 09:32:47.1941|INFO|Get service list start. 
+2022-04-28 09:32:47.1941|INFO|Get service list complete. 
+2022-04-28 09:32:47.3181|INFO|Get langauge type list start. 
+2022-04-28 09:32:47.4692|INFO|Get langauge type list complete. 
+2022-04-28 09:32:47.4692|INFO|Get plant list start. 
+2022-04-28 09:32:47.5774|INFO|Get plant list complete. 
+2022-04-28 09:32:47.5774|INFO|Get save id YN start. 
+2022-04-28 09:32:47.5774|INFO|Get save id YN complete. 
+2022-04-28 09:32:47.5854|INFO|Get save id start. 
+2022-04-28 09:32:47.5854|INFO|Get save id complete. 
+2022-04-28 09:53:06.1831|INFO|Get language list start. 
+2022-04-28 09:53:09.3247|INFO|Get language list complete. 
+2022-04-28 09:53:09.3247|INFO|Get message list start. 
+2022-04-28 09:53:09.8017|INFO|Get message list complete. 
+2022-04-28 09:53:09.8017|INFO|Get service list start. 
+2022-04-28 09:53:09.8017|INFO|Get service list complete. 
+2022-04-28 09:53:09.9277|INFO|Get langauge type list start. 
+2022-04-28 09:53:10.0600|INFO|Get langauge type list complete. 
+2022-04-28 09:53:10.0600|INFO|Get plant list start. 
+2022-04-28 09:53:10.1772|INFO|Get plant list complete. 
+2022-04-28 09:53:10.1772|INFO|Get save id YN start. 
+2022-04-28 09:53:10.1772|INFO|Get save id YN complete. 
+2022-04-28 09:53:10.1772|INFO|Get save id start. 
+2022-04-28 09:53:10.1772|INFO|Get save id complete. 
+2022-04-28 09:54:27.3755|ERROR|개체 참조가 개체의 인스턴스로 설정되지 않았습니다. 

@@ -1,0 +1,667 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list>
+
+	<query id="GetMenuObjectList" version="1">
+		<statement>
+			<![CDATA[
+				WITH SDATA
+				     AS (SELECT MOJ.DISPLAYSEQUENCE,
+				                MOJ.TOOLBARID,
+				                CASE WHEN (DIC.DICTIONARYNAME IS NULL OR DIC.DICTIONARYNAME = '') THEN MOJ.TOOLBARNAME
+				                     ELSE DIC.DICTIONARYNAME
+				                END TOOLBARNAME,
+				                MEC.MESSAGENAME,
+				                MOJ.TOOLBARTYPE,
+				                MOJ.UIID,
+				                MOJ.OPTIONS
+				           FROM SF_USERCLASSUSER UCU
+				                INNER JOIN
+				                SF_TOOLBARAUTHORITY MOA
+				                   ON     UCU.USERCLASSID = MOA.USERCLASSID
+				                      AND UCU.VALIDSTATE = MOA.VALIDSTATE
+				                INNER JOIN
+				                SF_TOOLBAR MOJ
+				                   ON     MOA.TOOLBARID = MOJ.TOOLBARID
+				                      AND MOA.VALIDSTATE = MOJ.VALIDSTATE
+				                      AND MOA.UIID = MOJ.UIID
+				                LEFT OUTER JOIN
+				                SF_DICTIONARY DIC
+				                   ON     MOJ.DICTIONARYID = DIC.DICTIONARYID
+				                      AND MOJ.VALIDSTATE = DIC.VALIDSTATE
+				                      AND DIC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				                LEFT OUTER JOIN
+				                SF_MESSAGE MEC
+				                   ON     MOJ.MESSAGEID = MEC.MESSAGEID
+				                      AND MOJ.VALIDSTATE = MEC.VALIDSTATE
+				                      AND MEC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				          WHERE     UCU.USERID = '$!{USERID}'
+				                AND UCU.VALIDSTATE = '$!{VALIDSTATE}'
+				                AND MOA.MENUID = '$!{MENUID}'
+				                AND MOA.UIID = '$!{UIID}')
+				  SELECT DISPLAYSEQUENCE,
+				         TOOLBARID,
+				         TOOLBARNAME,
+				         MESSAGENAME,
+				         TOOLBARTYPE,
+				         OPTIONS
+				    FROM SDATA
+				GROUP BY DISPLAYSEQUENCE,
+				         TOOLBARID,
+				         TOOLBARNAME,
+				         MESSAGENAME,
+				         TOOLBARTYPE,
+				         OPTIONS
+				ORDER BY DISPLAYSEQUENCE
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetMenuObjectList" version="1" dbms="POSTGRESQL">
+		<statement>
+			<![CDATA[
+				WITH RECURSIVE SDATA
+				     AS (SELECT MOJ.DISPLAYSEQUENCE,
+				                MOJ.TOOLBARID,
+				                CASE WHEN (DIC.DICTIONARYNAME IS NULL OR DIC.DICTIONARYNAME = '') THEN MOJ.TOOLBARNAME
+				                     ELSE DIC.DICTIONARYNAME
+				                END TOOLBARNAME,
+				                MEC.MESSAGENAME,
+				                MOJ.TOOLBARTYPE,
+				                MOJ.UIID,
+				                MOJ.OPTIONS
+				           FROM SF_USERCLASSUSER UCU
+				                INNER JOIN
+				                SF_TOOLBARAUTHORITY MOA
+				                   ON     UCU.USERCLASSID = MOA.USERCLASSID
+				                      AND UCU.VALIDSTATE = MOA.VALIDSTATE
+				                INNER JOIN
+				                SF_TOOLBAR MOJ
+				                   ON     MOA.TOOLBARID = MOJ.TOOLBARID
+				                      AND MOA.VALIDSTATE = MOJ.VALIDSTATE
+				                      AND MOA.UIID = MOJ.UIID
+				                LEFT OUTER JOIN
+				                SF_DICTIONARY DIC
+				                   ON     MOJ.DICTIONARYID = DIC.DICTIONARYID
+				                      AND MOJ.VALIDSTATE = DIC.VALIDSTATE
+				                      AND DIC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				                LEFT OUTER JOIN
+				                SF_MESSAGE MEC
+				                   ON     MOJ.MESSAGEID = MEC.MESSAGEID
+				                      AND MOJ.VALIDSTATE = MEC.VALIDSTATE
+				                      AND MEC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				          WHERE     UCU.USERID = '$!{USERID}'
+				                AND UCU.VALIDSTATE = '$!{VALIDSTATE}'
+				                AND MOA.MENUID = '$!{MENUID}'
+				                AND MOA.UIID = '$!{UIID}')
+				  SELECT DISPLAYSEQUENCE,
+				         TOOLBARID,
+				         TOOLBARNAME,
+				         MESSAGENAME,
+				         TOOLBARTYPE,
+				         OPTIONS
+				    FROM SDATA
+				GROUP BY DISPLAYSEQUENCE,
+				         TOOLBARID,
+				         TOOLBARNAME,
+				         MESSAGENAME,
+				         TOOLBARTYPE,
+				         OPTIONS
+				ORDER BY DISPLAYSEQUENCE
+			]]>
+		</statement>
+	</query>
+
+	<query id="GetCommonCodeList" version="2">
+		<statement>
+			<![CDATA[
+				  SELECT CASE WHEN (C.DICTIONARYNAME IS NULL OR C.DICTIONARYNAME = '') THEN A.CODENAME
+				              ELSE C.DICTIONARYNAME
+				         END CODENAME,
+				         A.CODEID,
+				         A.DISPLAYSEQUENCE
+				    FROM SF_CODE A
+				         LEFT OUTER JOIN SF_CODECLASS B ON A.CODECLASSID = B.CODECLASSID
+				         LEFT OUTER JOIN
+				         SF_DICTIONARY C
+				            ON     A.DICTIONARYID = C.DICTIONARYID
+				               AND C.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				   WHERE     A.VALIDSTATE = 'Valid'
+				         AND B.VALIDSTATE = 'Valid'
+				         AND A.CODECLASSID = '$!{CODECLASSID}'
+				ORDER BY A.DISPLAYSEQUENCE	
+			]]>
+		</statement>
+	</query>
+
+	<query id="GetMessageClassList" version="90002">
+		<statement>
+			<![CDATA[
+				SELECT MESSAGECLASSID,
+				       MESSAGECLASSNAME,
+				       DESCRIPTION,
+				       VALIDSTATE,
+				       CREATOR,
+				       CREATEDTIME,
+				       MODIFIER,
+				       MODIFIEDTIME
+				  FROM SF_MESSAGECLASS
+				 WHERE     VALIDSTATE = '$!{VALIDSTATE}'
+				       AND MESSAGECLASSID LIKE '%$!{MESSAGECLASSID}%'
+				       AND MESSAGECLASSNAME LIKE '%$!{MESSAGECLASSNAME}%'
+			]]>
+		</statement>
+	</query>
+
+	<query id="GetMessageList" version="2">
+		<statement>
+			<![CDATA[
+			  SELECT M.MESSAGEID,
+			         M.MESSAGECLASSID,
+			         M.MESSAGENAME,
+			         M.LANGUAGETYPE,
+			         M.DESCRIPTION,
+			         M.CREATOR,
+			         M.CREATEDTIME,
+			         M.MODIFIER,
+			         M.MODIFIEDTIME,
+			         M.VALIDSTATE
+			    FROM SF_MESSAGE M
+			   INNER JOIN SF_CODE C
+			      ON C.CODECLASSID = 'LANGUAGETYPE' AND M.LANGUAGETYPE = C.CODEID  AND C.VALIDSTATE = 'Valid'
+			   WHERE M.VALIDSTATE = '$!{VALIDSTATE}'
+			         AND MESSAGEID LIKE '%$!{MESSAGEID}%'
+			         AND MESSAGENAME LIKE '%$!{MESSAGENAME}%'
+			         AND MESSAGECLASSID LIKE '%$!{MESSAGECLASSID}%'
+			ORDER BY MESSAGEID, DISPLAYSEQUENCE
+			]]>
+		</statement>
+	</query>
+
+	<query id="GetAllGroupCodeList" version="1">
+		<statement>
+			<![CDATA[
+				SELECT A.CODECLASSID, A.CODECLASSNAME, A.VALIDSTATE FROM SF_CODECLASS A
+			]]>
+		</statement>
+	</query>
+
+	<query id="GetGroupCodeList" version="1">
+		<statement>
+			<![CDATA[
+				SELECT
+					A.CODECLASSID,
+					A.CODECLASSNAME,
+					A.DESCRIPTION,
+					A.CREATOR,
+					A.CREATEDTIME,
+					A.MODIFIER,
+					A.MODIFIEDTIME,
+					A.VALIDSTATE
+				FROM
+					SF_CODECLASS A
+				WHERE
+					(
+						'$!{CODECLASSID}' = ''
+						OR A.CODECLASSID LIKE '%' + UPPER('$!{CODECLASSID}') + '%'
+					)
+				AND A.VALIDSTATE = '$!{VALIDSTATE}'
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetGroupCodeList" version="1" dbms="ORACLE">
+		<statement>
+			<![CDATA[
+				SELECT
+					A.CODECLASSID,
+					A.CODECLASSNAME,
+					A.DESCRIPTION,
+					A.CREATOR,
+					A.CREATEDTIME,
+					A.MODIFIER,
+					A.MODIFIEDTIME,
+					A.VALIDSTATE
+				FROM
+					SF_CODECLASS A
+				WHERE
+					(
+						'$!{CODECLASSID}' = ''
+						OR A.CODECLASSID LIKE '%' || UPPER('$!{CODECLASSID}') || '%'
+					)
+				AND A.VALIDSTATE = '$!{VALIDSTATE}'
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetCommonCodeList" version="1">
+		<statement>
+			<![CDATA[
+				SELECT A.CODEID
+				     , A.CODENAME
+				  FROM SF_CODE A
+				     , SF_CODECLASS B 
+				 WHERE A.CODECLASSID = B.CODECLASSID 
+				   AND B.CODECLASSID = '$!{CODECLASSID}'
+				ORDER BY A.DISPLAYSEQUENCE
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetDictionaryClassList" version="90002">
+		<statement>
+			<![CDATA[
+				SELECT
+					DC.DICTIONARYCLASSID,
+					CASE WHEN (D.DICTIONARYNAME IS NULL OR D.DICTIONARYNAME = '') THEN DC.DICTIONARYCLASSNAME ELSE D.DICTIONARYNAME END DICTIONARYCLASSNAME,
+					DC.DESCRIPTION,
+					DC.CREATOR,
+					DC.CREATEDTIME,
+					DC.MODIFIER,
+					DC.MODIFIEDTIME,
+					DC.VALIDSTATE
+				FROM
+					SF_DICTIONARYCLASS DC
+				LEFT OUTER JOIN SF_DICTIONARY D ON D.DICTIONARYID = DC.DICTIONARYCLASSID
+				AND D.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				WHERE	DC.DICTIONARYCLASSID LIKE '%$!{DICTIONARYCLASSID}%'
+				 AND	DC.DICTIONARYCLASSNAME LIKE '%$!{DICTIONARYCLASSNAME}%' 
+				 AND	DC.VALIDSTATE = '$!{VALIDSTATE}'
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetUserList" version="1">
+		<statement>
+			<![CDATA[
+				SELECT
+					 USERID
+					,USERNAME
+					,DESCRIPTION
+					,DEPARTMENT
+					,POSITION
+					,SHIFTID
+					,EMAILADDRESS
+					,HOMEADDRESS
+					,CELLPHONENUMBER
+					,LANGUAGETYPE
+					,CREATEDTIME
+					,CREATOR
+					,MODIFIEDTIME
+					,MODIFIER
+					,VALIDSTATE
+				FROM
+					SF_USER
+				WHERE
+					USERID LIKE '%$!{USERID}%' AND USERNAME LIKE '%$!{USERNAME}%' AND VALIDSTATE = '$!{VALIDSTATE}'
+				ORDER BY USERID, USERNAME
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetUserGroupList" version="1">
+		<statement>
+			<![CDATA[
+				SELECT A.USERCLASSID
+				     , CASE WHEN (B.DICTIONARYNAME IS NULL OR B.DICTIONARYNAME = '') THEN A.USERCLASSNAME ELSE B.DICTIONARYNAME END USERCLASSNAME
+				     , A.DESCRIPTION
+				     , A.CREATEDTIME
+				     , A.CREATOR
+				     , A.MODIFIEDTIME
+				     , A.MODIFIER
+				     , A.VALIDSTATE
+				  FROM SF_USERCLASS A
+				  LEFT OUTER JOIN SF_DICTIONARY B ON A.DICTIONARYID = B.DICTIONARYID
+				   AND B.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				  WHERE A.VALIDSTATE = '$!{VALIDSTATE}'
+				    AND A.USERCLASSID LIKE '%' + UPPER('$!{USERCLASSID}') + '%'
+				    AND A.USERCLASSNAME LIKE '%' + UPPER('$!{USERCLASSNAME}') + '%'
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetUserGroupList" version="1" dbms="ORACLE">
+		<statement>
+			<![CDATA[
+				SELECT A.USERCLASSID
+				     , CASE WHEN (B.DICTIONARYNAME IS NULL OR B.DICTIONARYNAME = '') THEN A.USERCLASSNAME ELSE B.DICTIONARYNAME END USERCLASSNAME
+				     , A.DESCRIPTION
+				     , A.CREATEDTIME
+				     , A.CREATOR
+				     , A.MODIFIEDTIME
+				     , A.MODIFIER
+				     , A.VALIDSTATE
+				  FROM SF_USERCLASS A
+				  LEFT OUTER JOIN SF_DICTIONARY B ON A.DICTIONARYID = B.DICTIONARYID
+				   AND B.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				  WHERE A.VALIDSTATE = '$!{VALIDSTATE}'
+				    AND A.USERCLASSID LIKE '%' || UPPER('$!{USERCLASSID}') || '%'
+				    AND A.USERCLASSNAME LIKE '%' || UPPER('$!{USERCLASSNAME}') || '%'
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetUserListByGroup" version="1">
+		<statement>
+			<![CDATA[
+				SELECT A.USERCLASSID
+				     , C.USERCLASSNAME
+				     , B.USERID
+				     , B.USERNAME
+				     , B.DEPARTMENT
+				     , B.POSITION
+				  FROM SF_USERCLASSUSER A INNER JOIN SF_USER B ON A.USERID = B.USERID   
+				  INNER JOIN SF_USERCLASS C ON C.USERCLASSID = A.USERCLASSID
+				   AND A.USERCLASSID = '$!{USERCLASSID}'
+				  WHERE A.VALIDSTATE = '$!{VALIDSTATE}'
+				    AND B.VALIDSTATE = '$!{VALIDSTATE}'
+				    AND C.VALIDSTATE = '$!{VALIDSTATE}' 
+				  ORDER BY USERCLASSID, USERCLASSNAME, USERID, USERNAME
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetAllMenuList" version="1">
+		<statement>
+			<![CDATA[
+				WITH MAKETREE 
+				AS(    
+				 SELECT A.MENUID            
+				 , A.MENUNAME            
+				 , A.PARENTMENUID            
+				 , A.DISPLAYSEQUENCE            
+				 , A.MENUTYPE            
+				 , A.DICTIONARYID    
+				 , A.UIID  
+				 FROM SF_MENU A        
+				WHERE (A.PARENTMENUID IS NULL OR A.PARENTMENUID = '')
+				AND A.UIID = '$!{UIID}' 
+				  
+				  UNION ALL       
+				  
+				 SELECT B.MENUID            
+				 , B.MENUNAME            
+				 , B.PARENTMENUID            
+				 , B.DISPLAYSEQUENCE            
+				 , B.MENUTYPE            
+				 , B.DICTIONARYID  
+				 , B.UIID     
+				  FROM SF_MENU B 
+				INNER JOIN MAKETREE AS C ON B.PARENTMENUID = C.MENUID AND B.UIID = C.UIID
+				AND B.UIID = '$!{UIID}'
+				)  
+				SELECT X.MENUID       
+			      , CASE WHEN (Y.DICTIONARYNAME IS NULL OR Y.DICTIONARYNAME = '') THEN
+			    				                    CASE WHEN(X.MENUNAME IS NULL OR X.MENUNAME = '') THEN X.MENUID
+			                                      ELSE X.MENUNAME END
+			             ELSE Y.DICTIONARYNAME END AS MENUNAME   
+						, X.PARENTMENUID   
+						, X.DISPLAYSEQUENCE       
+						, X.MENUTYPE       
+						, X.DICTIONARYID 
+						, X.UIID
+						FROM MAKETREE X    
+						LEFT OUTER JOIN SF_DICTIONARY Y ON X.DICTIONARYID = Y.DICTIONARYID      AND Y.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'  
+						ORDER BY DISPLAYSEQUENCE, MENUID, MENUNAME
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetAllMenuList" version="1" dbms="ORACLE">
+		<statement>
+			<![CDATA[
+				WITH MAKETREE (MENUID, MENUNAME, PARENTMENUID, DISPLAYSEQUENCE, MENUTYPE, DICTIONARYID, UIID)
+				AS(    
+				 SELECT A.MENUID            
+				 , A.MENUNAME            
+				 , A.PARENTMENUID            
+				 , A.DISPLAYSEQUENCE            
+				 , A.MENUTYPE            
+				 , A.DICTIONARYID    
+				 , A.UIID  
+				 FROM SF_MENU A        
+				WHERE (A.PARENTMENUID IS NULL OR A.PARENTMENUID = '')
+				AND A.UIID = '$!{UIID}' 
+				  
+				  UNION ALL       
+				  
+				 SELECT B.MENUID            
+				 , B.MENUNAME            
+				 , B.PARENTMENUID            
+				 , B.DISPLAYSEQUENCE            
+				 , B.MENUTYPE            
+				 , B.DICTIONARYID  
+				 , B.UIID     
+				  FROM SF_MENU B 
+				INNER JOIN MAKETREE C ON B.PARENTMENUID = C.MENUID AND B.UIID = C.UIID
+				AND B.UIID = '$!{UIID}'
+				)  
+				SELECT X.MENUID       
+			      , CASE WHEN (Y.DICTIONARYNAME IS NULL OR Y.DICTIONARYNAME = '') THEN
+			    				                    CASE WHEN(X.MENUNAME IS NULL OR X.MENUNAME = '') THEN X.MENUID
+			                                      ELSE X.MENUNAME END
+			             ELSE Y.DICTIONARYNAME END AS MENUNAME   
+						, X.PARENTMENUID   
+						, X.DISPLAYSEQUENCE       
+						, X.MENUTYPE       
+						, X.DICTIONARYID 
+						, X.UIID
+						FROM MAKETREE X    
+						LEFT OUTER JOIN SF_DICTIONARY Y ON X.DICTIONARYID = Y.DICTIONARYID      AND Y.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'  
+						ORDER BY DISPLAYSEQUENCE, MENUID, MENUNAME
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetAllMenuList" version="1" dbms="POSTGRESQL">
+		<statement>
+			<![CDATA[
+				WITH RECURSIVE MAKETREE 
+				AS(    
+				 SELECT A.MENUID            
+				 , A.MENUNAME            
+				 , A.PARENTMENUID            
+				 , A.DISPLAYSEQUENCE            
+				 , A.MENUTYPE            
+				 , A.DICTIONARYID    
+				 , A.UIID  
+				 FROM SF_MENU A        
+				WHERE (A.PARENTMENUID IS NULL OR A.PARENTMENUID = '')
+				AND A.UIID = '$!{UIID}' 
+				  
+				  UNION ALL       
+				  
+				 SELECT B.MENUID            
+				 , B.MENUNAME            
+				 , B.PARENTMENUID            
+				 , B.DISPLAYSEQUENCE            
+				 , B.MENUTYPE            
+				 , B.DICTIONARYID  
+				 , B.UIID     
+				  FROM SF_MENU B 
+				INNER JOIN MAKETREE AS C ON B.PARENTMENUID = C.MENUID AND B.UIID = C.UIID
+				AND B.UIID = '$!{UIID}'
+				)  
+				SELECT X.MENUID       
+			      , CASE WHEN (Y.DICTIONARYNAME IS NULL OR Y.DICTIONARYNAME = '') THEN
+			    				                    CASE WHEN(X.MENUNAME IS NULL OR X.MENUNAME = '') THEN X.MENUID
+			                                      ELSE X.MENUNAME END
+			             ELSE Y.DICTIONARYNAME END AS MENUNAME   
+						, X.PARENTMENUID   
+						, X.DISPLAYSEQUENCE       
+						, X.MENUTYPE       
+						, X.DICTIONARYID 
+						, X.UIID
+						FROM MAKETREE X    
+						LEFT OUTER JOIN SF_DICTIONARY Y ON X.DICTIONARYID = Y.DICTIONARYID      AND Y.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'  
+						ORDER BY DISPLAYSEQUENCE, MENUID, MENUNAME
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetMenuAuthority" version="1">
+		<statement>
+			<![CDATA[
+				 SELECT A.MENUID
+				 	 , A.UIID
+				     , A.USERCLASSID
+				     , C.USERCLASSNAME
+				  FROM SF_MENUAUTHORITY A
+				  inner JOIN SF_MENU B ON A.UIID = B.UIID and A.MENUID = B.MENUID
+				  LEFT OUTER JOIN SF_USERCLASS C ON A.USERCLASSID = C.USERCLASSID 
+				 WHERE A.MENUID = '$!{MENUID}'
+				   AND A.VALIDSTATE = 'Valid'
+				   AND A.UIID = '$!{UIID}'
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetMenuObjectList" version="3">
+		<statement>
+			<![CDATA[
+				SELECT
+  					CASE WHEN AUTH.TOOLBARID IS NULL THEN 'FALSE' ELSE 'TRUE' END AS ACTIVE,
+  					O.DISPLAYSEQUENCE,
+  					O.TOOLBARID,
+  					CASE WHEN (D.DICTIONARYNAME IS NULL OR D.DICTIONARYNAME = '') THEN O.TOOLBARNAME ELSE D.DICTIONARYNAME END TOOLBARNAME,
+  					O.DESCRIPTION,
+						O.UIID
+  				FROM
+  					SF_TOOLBAR O
+  				LEFT OUTER JOIN SF_DICTIONARY D ON CASE WHEN (O.DICTIONARYID IS NULL OR O.DICTIONARYID = '') THEN O.TOOLBARID ELSE O.DICTIONARYID END = D.DICTIONARYID
+  				AND D.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+  				LEFT OUTER JOIN SF_TOOLBARAUTHORITY AUTH ON AUTH.MENUID = '$!{MENUID}' AND AUTH.USERCLASSID = '$!{USERCLASSID}' AND AUTH.VALIDSTATE = '$!{VALIDSTATE}' AND O.TOOLBARID = AUTH.TOOLBARID AND O.UIID = AUTH.UIID 
+  				WHERE O.UIID = '$!{UIID}'
+  				ORDER BY
+  					O.DISPLAYSEQUENCE
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetUIList" version="1">
+		<statement>
+			<![CDATA[
+				SELECT UIID
+				  , UINAME
+				  , DESCRIPTION 
+				FROM SF_UI 
+				WHERE VALIDSTATE = '$!{VALIDSTATE}'
+				ORDER BY DISPLAYSEQUENCE
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetParentMenuList" version="1">
+		<statement>
+			<![CDATA[
+				SELECT DISTINCT(A.MENUID) AS PARENTMENUID
+				     , A.MENUNAME AS PARENTMENUNAME
+				     , A.DISPLAYSEQUENCE
+				  FROM SF_MENU A
+				 WHERE A.MENUTYPE = 'FOLDER'
+				   AND A.VALIDSTATE = '$!{VALIDSTATE}' 
+				 ORDER BY A.DISPLAYSEQUENCE, A.MENUID
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetAllUsers" version="1">
+		<statement>
+			<![CDATA[
+				SELECT A.USERID
+				     , A.USERNAME
+				     , A.DEPARTMENT
+				     , A.POSITION 
+				  FROM SF_USER A
+				 WHERE A.VALIDSTATE = '$!{VALIDSTATE}'
+				 ORDER BY USERID, USERNAME
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetMenuAuthorityList" version="1">
+		<statement>
+			<![CDATA[	
+				SELECT (SELECT 'Y'
+				          FROM SF_MENUAUTHORITY B
+				         WHERE B.USERCLASSID = A.USERCLASSID
+				           AND B.UIID = '$!{UIID}'
+				           AND B.MENUID = '$!{MENUID}' ) AS ISAUTHORITY
+				     , A.USERCLASSID 
+				     , CASE WHEN (B.DICTIONARYNAME IS NULL OR B.DICTIONARYNAME = '') THEN A.USERCLASSNAME ELSE B.DICTIONARYNAME END USERCLASSNAME
+				     , A.DESCRIPTION
+				  FROM SF_USERCLASS A
+				  LEFT OUTER JOIN SF_DICTIONARY B ON A.DICTIONARYID = B.DICTIONARYID
+				   AND B.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				 WHERE A.VALIDSTATE = '$!{VALIDSTATE}'
+ 			]]>
+		</statement>
+	</query>
+	
+	<query id="UpdateUserSetting" version="1">
+		<statement>
+			<![CDATA[	
+				UPDATE SF_USER 
+				SET LANGUAGETYPE = 
+				    CASE WHEN '$!{LANGUAGE}' IS NULL OR '$!{LANGUAGE}' = '' THEN
+						LANGUAGETYPE
+					ELSE
+						'$!{LANGUAGE}'
+					END,
+				
+					MAINSKIN = 
+					CASE WHEN '$!{MAINSKIN}' IS NULL OR '$!{MAINSKIN}' = '' THEN 
+						MAINSKIN
+					ELSE
+						'$!{MAINSKIN}'
+					END
+				WHERE USERID = '$!{USERID}'
+ 			]]>
+		</statement>
+	</query>
+	
+		<query id="GetDictionaryList" version="00001">
+		<statement>
+			<![CDATA[	
+				SELECT  
+					DICTIONARYID,
+					DICTIONARYNAME,
+					DICTIONARYCLASSID,
+					DESCRIPTION,
+				    LANGUAGETYPE
+				FROM    
+					SF_DICTIONARY
+				WHERE
+					1=1
+				AND
+					VALIDSTATE = 'Valid'
+				ORDER BY 
+					DICTIONARYID
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetDictionaryListByClass" version="00001">
+		<statement>
+			<![CDATA[	
+				SELECT  
+					DICTIONARYID,
+					DICTIONARYNAME,
+					DICTIONARYCLASSID,
+					DESCRIPTION,
+				    LANGUAGETYPE
+				FROM    
+					SF_DICTIONARY
+				WHERE
+					1=1
+				#if ( $!DICTIONARYCLASSID != "") 
+				AND 
+					DICTIONARYCLASSID = '$!{_TXNINFO.DICTIONARYCLASSID}'
+				#end
+				AND
+					VALIDSTATE = 'Valid'
+				ORDER BY 
+					DICTIONARYID
+			]]>
+		</statement>
+	</query>
+</list>

@@ -1,0 +1,23 @@
+{
+	"Name": "SF_OBJECT",
+	"Keys": [
+		"ObjectID"
+	],
+	"Attributes": {
+		"ObjectID" : "OBJECTID",
+		"TableName" : "TABLENAME",
+		"ObjectName" : "OBJECTNAME",
+		"ExtendedTableType" : "EXTENDEDTABLETYPE",
+		"ExtendedTableName" : "EXTENDEDTABLENAME",
+		"Description" : "DESCRIPTION",
+		"HistoryObjectID" : "HISTORYOBJECTID",
+		"IsHistoryTable" : "ISHISTORYTABLE",
+		"HasHistoryTable" : "HASHISTORYTABLE",
+		"HistoryTableName" : "HISTORYTABLENAME",
+		"HasExtendedColumn" : "HASEXTENDEDCOLUMN",
+		"HasExtendedTable" : "HASEXTENDEDTABLE",
+		"IsSystem" : "ISSYSTEM",
+		"PackageName" : "PACKAGENAME",
+		"ValidState" : "VALIDSTATE"
+	}
+}

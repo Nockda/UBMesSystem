@@ -1,0 +1,22 @@
+{
+	"usable": true,
+	"usepool": true,
+	"config": "database.config.postgresql",
+	"properties": {
+		"DriverClassName": "org.postgresql.Driver",
+		"Url": "jdbc:postgresql://192.168.0.109:5432/postgres?currentSchema=mesmgr&targetServerType=master",
+		"Username": "mesmgr",
+		"Password": "mesmgr",
+		"MaxTotal": 10,
+		"MaxIdle": 5,
+		"MinIdle": 1,
+		"InitialSize": 1,
+		"MaxWaitMillis": 10000,
+		"TestWhileIdle": true,
+		"ValidationQuery": "select 1",
+		"ValidationQueryTimeout": 10,
+		"TestOnBorrow": true,
+		"DefaultAutoCommit": false,
+		"EnableAutoCommitOnReturn": false
+	}
+}

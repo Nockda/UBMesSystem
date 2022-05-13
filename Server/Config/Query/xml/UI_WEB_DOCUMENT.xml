@@ -1,0 +1,748 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list>
+
+	------------------------- SCHEDULE
+	-------------------------------------
+	<query id="GET_SMART_DOCUMENT_SCHEDULE_LIST" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT
+					TASKID as "taskID", "START" as "start", END as "end", DESCRIPTION as "description", ISALLDAY as "isallday"
+				FROM
+					SD_SCHEDULE
+			]]>
+		</statement>
+	</query>
+
+	------------------------- PRODUCT -------------------------------------
+	<query id="GET_SMART_DOCUMENT_PRODUCT_LIST" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT 
+					   'N' AS "_CHK",
+				       P.PRODUCT_ID,
+				       P.PRODUCT_NAME,
+				       P.BI_FILE_ID,
+				       BF.FILENAME AS BI_FILE_NAME,
+				       BF.FILEPATH AS BI_FILE_PATH,
+				       P.PRODUCT_INTRODUCTION_FILE_ID,
+				       PIF.FILENAME AS PRODUCT_INTRODUCTION_FILE_NAME,
+				       PIF.FILEPATH AS PRODUCT_INTRODUCTION_FILE_PATH,
+				       P.DESCRIPTION,
+				       P.VALIDSTATE
+				FROM SD_PRODUCT P
+				LEFT JOIN SF_FILE BF ON P.BI_FILE_ID = BF.FILEID
+				LEFT JOIN SF_FILE PIF ON P.PRODUCT_INTRODUCTION_FILE_ID = PIF.FILEID
+				WHERE 
+				      P.PRODUCT_ID LIKE  '%' || :PRODUCT_ID || '%'
+				      AND P.PRODUCT_NAME LIKE  '%' || :PRODUCT_NAME || '%'
+		       ORDER BY 
+		       		  P.PRODUCT_ID
+			]]>
+		</statement>
+	</query>
+
+	<query id="GET_SMART_DOCUMENT_VALID_PRODUCT_LIST" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT 
+				       P.PRODUCT_ID AS "VALUE", 
+				       P.PRODUCT_NAME AS "TEXT"
+				FROM SD_PRODUCT P
+				WHERE 
+				      P.VALIDSTATE IN ('Valid')
+			]]>
+		</statement>
+	</query>
+
+	------------------------- PRODUCT_CLASS -------------------------------
+
+	------------------------- PRODUCT_VERSION -----------------------------
+	<query id="GET_SMART_DOCUMENT_PRODUCT_VERSION_LIST" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT PV.PRODUCT_ID,
+					PV.PRODUCT_VERSION,
+					PV.DESCRIPTION,
+					PV.VALIDSTATE
+				FROM SD_PRODUCT_VERSION PV
+				WHERE 
+					PV.PRODUCT_ID = :PRODUCT_ID
+			]]>
+		</statement>
+	</query>
+
+	------------------------- CATALOG -------------------------------------
+	<query id="GET_SMART_DOCUMENT_CATALOG_LIST" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT 
+					'N' AS "_CHK",
+					C.CATALOG_ID,
+					C.CATALOG_VERSION,
+ 					C.LANGUAGE,
+ 					C.CATALOG_NAME,
+ 					C.DESCRIPTION,
+ 					C.CATALOG_FILE_ID,
+ 					F.FILENAME,
+ 					F.FILEPATH,
+ 					C.PRODUCT_ID_LIST,
+ 					C.VALIDSTATE
+ 				FROM
+ 					SD_CATALOG C
+					INNER JOIN SF_FILE F ON F.FILEID = C.CATALOG_FILE_ID
+				WHERE
+					1 = 1
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GET_SMART_DOCUMENT_VALID_CATALOG_LIST" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT 
+					'N' AS "_CHK",
+					C.CATALOG_ID,
+					C.CATALOG_VERSION,
+ 					C.LANGUAGE,
+ 					C.CATALOG_NAME,
+ 					C.DESCRIPTION,
+ 					C.CATALOG_FILE_ID,
+ 					F.FILENAME,
+ 					F.FILEPATH,
+ 					C.PRODUCT_ID_LIST,
+ 					C.VALIDSTATE
+ 				FROM
+ 					SD_CATALOG C
+					INNER JOIN SF_FILE F ON F.FILEID = C.CATALOG_FILE_ID
+				WHERE
+					1 = 1
+					AND C.VALIDSTATE = 'Valid'
+			]]>
+		</statement>
+	</query>
+
+	------------------------- DEMO -------------------------------------
+	<query id="GET_SMART_DOCUMENT_DEMO_LIST" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT 
+					D.DEMO_ID,
+					D.DEMO_NAME,
+					D.PRODUCT_ID,
+					(SELECT PRODUCT_NAME FROM SD_PRODUCT WHERE PRODUCT_ID = D.PRODUCT_ID) AS PRODUCT_NAME,
+					D.LOGIN_INFORMATION,
+					D.DEMO_URL,
+					D.DESCRIPTION,
+					D.VALIDSTATE
+				FROM SD_DEMO D 
+				WHERE 
+					D.DEMO_ID  LIKE '%' || :DEMO_ID ||'%'
+					AND D.DEMO_NAME LIKE '%' || :DEMO_NAME ||'%'
+#if ( $!PRODUCT_ID != "") 
+					AND D.PRODUCT_ID = :PRODUCT_ID		
+#end
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GET_SMART_DOCUMENT_VALID_DEMO_LIST" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT 
+					D.DEMO_ID,
+					D.DEMO_NAME,
+					D.PRODUCT_ID,
+					(SELECT PRODUCT_NAME FROM SD_PRODUCT WHERE PRODUCT_ID = D.PRODUCT_ID) AS PRODUCT_NAME,
+					D.LOGIN_INFORMATION,
+					D.DEMO_URL,
+					D.DESCRIPTION,
+					D.VALIDSTATE
+				FROM SD_DEMO D 
+				WHERE 
+					D.DEMO_ID  LIKE '%' || :DEMO_ID ||'%'
+					AND D.VALIDSTATE IN ('Valid')
+					AND D.DEMO_NAME LIKE '%' || :DEMO_NAME ||'%'
+#if ( $!PRODUCT_ID != "") 
+					AND D.PRODUCT_ID = :PRODUCT_ID			
+#end
+			]]>
+		</statement>
+	</query>
+
+	------------------------- ISSUE -------------------------------------
+	<query id="GET_SMART_DOCUMENT_ISSUE_LIST" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT 
+					I.ISSUE_ID,
+					I.ISSUE_NAME,
+					I.ISSUE_TYPE,
+					I.PRODUCT_ID,
+					I.IMPORTANCE,
+					I.ISSUE_CONTENT,
+					I.ISSUE_STATE,
+					I.DESCRIPTION,
+					I.VALIDSTATE,
+					I.CREATED_TIME
+				FROM SD_ISSUE I
+				WHERE 
+					I.ISSUE_NAME LIKE '%' || :ISSUE_NAME || '%'
+					AND I.PRODUCT_ID LIKE :PRODUCT_ID || '%'
+					AND I.ISSUE_TYPE LIKE :ISSUE_TYPE || '%'
+					AND I.ISSUE_STATE LIKE :ISSUE_STATE || '%'
+				ORDER BY I.CREATED_TIME DESC
+			]]>
+		</statement>
+	</query>
+
+	<query id="GET_SMART_DOCUMENT_VALID_ISSUE_LIST" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT 
+					I.ISSUE_ID,
+					I.ISSUE_NAME,
+					I.ISSUE_TYPE,
+					I.PRODUCT_ID,
+					I.IMPORTANCE,
+					I.ISSUE_CONTENT,
+					I.ISSUE_STATE,
+					I.DESCRIPTION,
+					I.VALIDSTATE,
+					I.CREATED_TIME
+				FROM SD_ISSUE I 
+				WHERE 
+					I.PRODUCT_ID = :PRODUCT_ID
+					AND I.ISSUE_TYPE LIKE '%' || :ISSUE_TYPE || '%'
+					AND I.ISSUE_STATE LIKE :ISSUE_STATE || '%'
+					AND I.VALIDSTATE IN ('Valid')
+				ORDER BY I.CREATED_TIME DESC
+			]]>
+		</statement>
+	</query>
+
+
+	<query id="GET_SMART_DOCUMENT_ISSUE_TYPE" version="00001">
+		<statement>
+			<![CDATA[
+			SELECT
+				CODEID AS VALUE,
+				CODENAME AS TEXT
+			FROM SF_CODE
+			WHERE 1 = 1
+				AND CODECLASSID = 'ISSUE_TYPE'
+				AND VALIDSTATE IN ('Valid')
+			]]>
+		</statement>
+	</query>
+
+	<query id="GET_SMART_DOCUMENT_ISSUE_STATE" version="00001">
+		<statement>
+			<![CDATA[
+			SELECT
+				CODEID AS VALUE,
+				CODENAME AS TEXT
+			FROM
+				SF_CODE
+			WHERE 1 = 1
+				AND CODECLASSID = 'ISSUE_STATE'
+				AND VALIDSTATE IN ('Valid')
+			]]>
+		</statement>
+	</query>
+
+	------------------------- SUGGESTION ----------------------------
+	<query id="GET_SMART_DOCUMENT_SUGGESTION_LIST" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT 
+					S.SUGGESTION_ID,
+					S.PRODUCT_ID,
+					(SELECT PRODUCT_NAME FROM SD_PRODUCT WHERE PRODUCT_ID = S.PRODUCT_ID) AS PRODUCT_NAME,
+					S.SUGGESTION_CONTENT,
+					S.IS_IDENTIFY,
+					S.DESCRIPTION,
+					S.VALIDSTATE
+				FROM SD_SUGGESTION S
+				WHERE 
+					S.SUGGESTION_ID LIKE '%' || :SUGGESTION_ID || '%' 
+				
+				#if ($!PRODUCT_ID != "")
+					AND S.PRODUCT_ID = :PRODUCT_ID
+				#end
+				
+				#if ($!IS_IDENTIFY != "")
+					AND S.IS_IDENTIFY = :IS_IDENTIFY
+				#end
+			]]>
+		</statement>
+	</query>
+
+	<query id="GET_SMART_DOCUMENT_SUGGESTION_TYPE" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT 
+					C.CODEID AS VALUE,
+					C.CODENAME AS TEXT
+				FROM SF_CODE C 
+				WHERE 
+					C.CODECLASSID = 'IS_IDENTIFY'
+					AND VALIDSTATE IN ('Valid')
+			]]>
+		</statement>
+	</query>
+
+	------------------------- RELEASE_NOTE --------------------------
+	<query id="GET_SMART_DOCUMENT_RELEASE_NOTE_LIST" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT 
+					R.RELEASE_ID,
+					R.RELEASE_NAME,
+					R.RELEASE_VERSION,
+					R.PRODUCT_ID,
+					P.PRODUCT_NAME,
+					R.RELEASE_FILE_ID,
+					F.FILENAME,
+					F.FILEPATH,				
+					R.DESCRIPTION,
+					R.VALIDSTATE
+				FROM SD_RELEASE R
+				LEFT JOIN SF_FILE F ON F.FILEID = R.RELEASE_FILE_ID
+				LEFT JOIN SD_PRODUCT P ON P.PRODUCT_ID = R.PRODUCT_ID
+				#if ($!PRODUCT_ID != "")
+				WHERE
+				R.PRODUCT_ID = :PRODUCT_ID
+				#end
+				ORDER BY
+				R.PRODUCT_ID ASC, R.RELEASE_VERSION DESC
+			]]>
+		</statement>
+	</query>
+
+	<query id="GET_SMART_DOCUMENT_VALID_RELEASE_NOTE_LIST" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT 
+					R.RELEASE_ID,
+					R.RELEASE_NAME,
+					R.RELEASE_VERSION,
+					R.PRODUCT_ID,
+					P.PRODUCT_NAME,
+					R.RELEASE_FILE_ID,
+					F.FILENAME,
+					F.FILEPATH,				
+					R.DESCRIPTION,
+					R.VALIDSTATE
+				FROM SD_RELEASE R
+				LEFT JOIN SF_FILE F ON F.FILEID = R.RELEASE_FILE_ID
+				LEFT JOIN SD_PRODUCT P ON P.PRODUCT_ID = R.PRODUCT_ID
+				WHERE 
+					R.PRODUCT_ID = :PRODUCT_ID
+			]]>
+		</statement>
+	</query>
+
+	<query id="GET_SMART_DOCUMENT_RELEASE_NEWEST" version="00001">
+		<statement>
+			<![CDATA[
+				WITH SUMMARY AS (
+					SELECT
+						R.RELEASE_ID,
+						R.RELEASE_VERSION,
+						R.PRODUCT_ID,
+						R.RELEASE_NAME,
+						R.DESCRIPTION,
+						R.RELEASE_FILE_ID,
+						F.FILENAME,
+						F.FILEPAHT,
+						R.VALIDSTATE,
+						P.PRODUCT_NAME
+						ROW_NUMBER () OVER (PARTITION BY R.PRODUCT_ID ORDER BY	R.RELEASE_VERSION DESC) AS rk
+					FROM
+						SD_RELEASE R
+						INNER JOIN SF_FILE F ON F.FILEID = R.RELEASE_FILE_ID
+						INNER JOIN SD_PRODUCT P ON P .PRODUCT_ID = R.PRODUCT_ID
+				) SELECT
+					S.*
+				FROM
+					SUMMARY S
+				WHERE
+					S.RK = 1
+			]]>
+		</statement>
+	</query>
+
+	<query id="GET_SMART_DOCUMENT_RELEASE_COUNT" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT
+				 COUNT(*) as "COUNT" 
+				FROM SD_RELEASE
+			]]>
+		</statement>
+	</query>
+
+
+	<query id="GET_SMART_DOCUMENT_RELEASE_LIST" version="00002">
+		<statement>
+			<![CDATA[
+					SELECT * 	
+						FROM( 
+							SELECT A.*,
+								ROWNUM AS RNUM,
+								COUNT(*) OVER() AS TOTCNT 
+							FROM(
+									SELECT 
+										R.RELEASE_ID,
+										R.RELEASE_NAME,
+										R.RELEASE_VERSION,
+										R.PRODUCT_ID,
+										P.PRODUCT_NAME,
+										R.RELEASE_FILE_ID,
+										F.FILENAME,
+										F.FILEPATH,				
+										R.DESCRIPTION,
+										R.VALIDSTATE
+									FROM SD_RELEASE R
+									LEFT JOIN SF_FILE F ON F.FILEID = R.RELEASE_FILE_ID
+									LEFT JOIN SD_PRODUCT P ON P.PRODUCT_ID = R.PRODUCT_ID
+									WHERE
+										R.PRODUCT_ID = '$!{PRODUCT_ID}' 
+									AND R.VALIDSTATE IN ('Valid')
+									ORDER BY R.RELEASE_VERSION desc
+							) A
+						)
+					WHERE RNUM >= :FRONTINDEX 
+					AND RNUM <= :BACKINDEX
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GET_SMART_DOCUMENT_RELEASE_FILE_LIST" version="00001">
+		<statement>
+			<![CDATA[
+			SELECT 
+				R.RELEASE_FILE_ID
+			FROM SD_RELEASE R 
+			WHERE RELEASE_ID = '$!{RELEASE_ID}'
+			]]>
+		</statement>
+	</query>
+
+	------------------------- MANUAL -------------------------------------
+	<query id="GET_SMART_DOCUMENT_MANUAL_LIST" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT
+					M.MANUAL_ID,
+					M.MANUAL_VERSION,
+					M.MANUAL_TYPE,
+					M.PRODUCT_ID,
+					M.PRODUCT_VERSION,
+					M.MANUAL_NAME,
+					M.DESCRIPTION,
+					M.MANUAL_FILE_ID,
+					F.FILENAME,
+					F.FILEPATH,
+					M.VALIDSTATE,
+					P.PRODUCT_NAME
+				FROM
+					SD_MANUAL M
+					INNER JOIN SF_FILE F ON F.FILEID = M.MANUAL_FILE_ID
+					INNER JOIN SD_PRODUCT P ON P.PRODUCT_ID = M.PRODUCT_ID
+				WHERE 	1=1			
+				
+				#if($!PRODUCT_ID != "")
+					and M.PRODUCT_ID = :PRODUCT_ID
+				#end
+				
+				#if ("$!{PRODUCT_VERSION}" != "")
+					AND M.PRODUCT_VERSION = '$!{PRODUCT_VERSION}'
+				#end
+			]]>
+		</statement>
+	</query>
+
+	<query id="GET_SMART_DOCUMENT_VALID_MANUAL_LIST" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT
+					M.MANUAL_ID,
+					M.MANUAL_VERSION,
+					M.MANUAL_TYPE,
+					M.PRODUCT_ID,
+					M.PRODUCT_VERSION,
+					M.MANUAL_NAME,
+					M.DESCRIPTION,
+					M.MANUAL_FILE_ID,
+					F.FILENAME,
+					F.FILEPATH,
+					M.VALIDSTATE,
+					P.PRODUCT_NAME
+				FROM
+					SD_MANUAL M
+					INNER JOIN SF_FILE F ON F.FILEID = M.MANUAL_FILE_ID
+					INNER JOIN SD_PRODUCT P ON P.PRODUCT_ID = M.PRODUCT_ID
+				WHERE 				
+					M.PRODUCT_ID = '$!{PRODUCT_ID}'
+					AND M.VALIDSTATE IN ('Valid')
+				#if ("$!{PRODUCT_VERSION}" != "")
+					AND M.PRODUCT_VERSION LIKE '%$!{PRODUCT_VERSION}%'
+				#end
+					ORDER BY M.PRODUCT_VERSION DESC
+			]]>
+		</statement>
+	</query>
+
+	<query id="GET_SMART_DOCUMENT_VALID_MANUAL_TYPE" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT 
+				       C.CODEID AS "VALUE", 
+				       C.CODENAME AS "TEXT"
+				FROM SF_CODE C 
+				WHERE 
+				      C.VALIDSTATE IN ('Valid')
+				      AND C.CODECLASSID = 'MANUAL_TYPE'
+				ORDER BY C.DISPLAYSEQUENCE
+			]]>
+		</statement>
+	</query>
+	------------------------- REFERENCE
+	-------------------------------------
+	<query id="GET_SMART_PRODUCT_REFERENCE_LIST" version="00001">
+		<statement>
+			<![CDATA[
+			SELECT
+				R.REFERENCE_ID,
+				R.REFERENCE_DOMAIN_NAME,
+				R.PRODUCT_ID,
+				R.PRODUCT_VERSION,
+				R.DESCRIPTION,
+				R.VALIDSTATE
+			FROM
+				SD_PRODUCT_REFERENCE R
+			WHERE 	1=1	
+			AND R.REFERENCE_DOMAIN_NAME  LIKE '%' || :REFERENCE_DOMAIN_NAME ||'%'
+#if($!PRODUCT_ID != "")					
+				AND R.PRODUCT_ID = :PRODUCT_ID
+#end
+			]]>
+		</statement>
+	</query>
+
+	<query id="GET_SMART_PRODUCT_REFERENCE_VALID_LIST" version="00001">
+		<statement>
+			<![CDATA[
+			SELECT
+				R.REFERENCE_ID,
+				R.REFERENCE_DOMAIN_NAME,
+				R.PRODUCT_ID,
+				R.PRODUCT_VERSION,
+				R.DESCRIPTION,
+				R.VALIDSTATE
+			FROM
+				SD_PRODUCT_REFERENCE R
+			WHERE 				
+				R.VALIDSTATE IN ('Valid')
+#if($!PRODUCT_ID != "")					
+				AND R.PRODUCT_ID = :PRODUCT_ID
+#end
+		   ORDER BY R.REFERENCE_DOMAIN_NAME, R.PRODUCT_VERSION
+			]]>
+		</statement>
+	</query>
+	
+	------------------------- REFERENCT_ROOM -------------------------------------
+	
+	<query id="GET_SMART_DOCUMENT_REFERENCE_LIBRARY_FILE_LIST" version="00001">
+		<statement>
+			<![CDATA[
+			SELECT 
+				PF.REFERENCE_ROOM_ID,
+				PF.PRODUCT_ID,
+				PF.FILETYPE,
+				PF.DESCRIPTION,
+				F.FILENAME,				
+				F.FILESIZE,
+				F.FILEPATH,
+				PF.VALIDSTATE,
+				PF.FILEID			
+			FROM SD_REFERENCEROOM PF 
+				LEFT JOIN SF_FILE F ON F.FILEID = PF.FILEID
+			WHERE 
+				 1=1
+			#if ("$!{PRODUCT_ID}" != "")
+				AND PF.PRODUCT_ID = '$!{PRODUCT_ID}'
+			#end
+			#if ("$!{FILENAME}" != "")
+				AND F.FILENAME LIKE '%$!{FILENAME}%'
+			#end
+			#if ("$!{FILETYPE}" != "")
+				AND PF.FILETYPE = '$!{FILETYPE}'
+			#end
+			]]>
+		</statement>
+		
+	<!-- 	#if($!PRODUCT_FILE_CLASS_NAME != "")					
+				AND PFC.PRODUCT_FILE_CLASS_NAME LIKE  '%' || :PRODUCT_FILE_CLASS_NAME || '%'
+#end -->
+	</query>
+	
+	<!-- SD_PRODUCT에 등록된 BI파일과 제품소개서를 포함하여 REFERENCE_ROOM 정보를 가져오는 쿼리 _ 2017.06.05 업데이트 -->
+	<query id="GET_SMART_DOCUMENT_REFERENCE_LIBRARY_FILE_LIST" version="00003">
+		<statement>
+			<![CDATA[
+			  SELECT 
+				A.SEQ,
+				A.REFERENCE_ROOM_ID, 
+				A.PRODUCT_ID,
+				A.FILETYPE,
+				A.FILEID,
+				F.FILENAME,				
+				F.FILESIZE,
+				F.FILEPATH,
+				A.DESCRIPTION,
+				A.VALIDSTATE, 
+        A.CREATEDTIME
+		      FROM 
+	    	   (
+	    	    SELECT 1 AS SEQ, PRODUCT_ID AS REFERENCE_ROOM_ID, 'BI' AS FILETYPE, DESCRIPTION, PRODUCT_ID, BI_FILE_ID AS FILEID, VALIDSTATE, CREATEDTIME FROM SD_PRODUCT P
+		         UNION
+		        SELECT 2 AS SEQ, PRODUCT_ID AS REFERENCE_ROOM_ID, '제품소개서' AS FILETYPE, DESCRIPTION, PRODUCT_ID, PRODUCT_INTRODUCTION_FILE_ID AS FILEID, VALIDSTATE, CREATEDTIME FROM SD_PRODUCT P
+		         UNION
+		        SELECT 3 AS SEQ, REFERENCE_ROOM_ID, FILETYPE, DESCRIPTION, PRODUCT_ID, FILEID, VALIDSTATE, CREATEDTIME FROM SD_REFERENCEROOM ORDER BY CREATEDTIME
+		        ) A
+		      LEFT JOIN SF_FILE F ON F.FILEID = A.FILEID
+			WHERE 
+				 1=1
+			#if ("$!{PRODUCT_ID}" != "")
+				AND A.PRODUCT_ID = '$!{PRODUCT_ID}'
+			#end
+			#if ("$!{FILENAME}" != "")
+				AND F.FILENAME LIKE '%$!{FILENAME}%'
+			#end
+			#if ("$!{FILETYPE}" != "")
+				AND A.FILETYPE = '$!{FILETYPE}'
+			#end
+				AND A.VALIDSTATE = 'Valid'
+			ORDER BY SEQ
+			]]>
+		</statement>
+	</query>
+		
+	<query id="GET_SMART_DOCUMENT_MANAGEMENT_REFERENCE_FILE_LIST" version="00001">
+		<statement>
+			<![CDATA[
+			SELECT 
+				PF.REFERENCE_ROOM_ID,
+				PF.PRODUCT_ID,
+				PF.DESCRIPTION,
+				PF.FILETYPE,
+				F.FILENAME,				
+				F.FILESIZE,
+				F.FILEPATH,
+				PF.VALIDSTATE,
+				(SELECT PRODUCT_NAME FROM SD_PRODUCT P WHERE P.PRODUCT_ID = PF.PRODUCT_ID) PRODUCT_NAME
+			FROM 
+				SD_REFERENCEROOM PF 
+				LEFT JOIN SF_FILE F ON F.FILEID = PF.FILEID
+			WHERE 
+				 1=1
+				 
+			#if ("$!{PRODUCT_ID}" != "")
+				AND PF.PRODUCT_ID = '$!{PRODUCT_ID}'
+			#end
+			#if ("$!{FILENAME}" != "")
+				AND F.FILENAME LIKE '%$!{FILENAME}%'
+			#end
+			#if ("$!{FILETYPE}" != "")
+				AND PF.FILETYPE = '$!{FILETYPE}'
+			#end
+			#if ("$!{DESCRIPTION}" != "")				
+				AND PF.DESCRIPTION LIKE '%$!{DESCRIPTION}%'
+			#end
+			]]>
+		</statement>
+	</query>
+	------------------------- e t c -------------------------------------
+	<query id="GET_SMART_PRODUCT_COMPANY_TYPE" version="00001">
+		<statement>
+			<![CDATA[
+			SELECT 
+				CODENAME AS "TEXT",
+				CODEID AS "VALUE"
+			FROM SF_CODE
+			WHERE  
+				CODECLASSID = 'CompanyType'
+				AND VALIDSTATE IN ('Valid')
+			ORDER BY SEQUENCE ASC
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GET_SMART_DOCUMENT_PRODUCT_FILE_LIST" version="00001">
+		<statement>
+			<![CDATA[
+			SELECT 
+				PF.PRODUCT_FILE_ID,
+				F.FILENAME,				
+				F.FILESIZE,
+				F.FILEPATH							
+			FROM SD_PRODUCT_FILE PF 
+				INNER JOIN SF_FILE F ON F.FILEID = PF.PRODUCT_FILE_ID
+			WHERE PF.PRODUCT_FILE_CLASS_ID = :PRODUCT_FILE_CLASS_ID				 
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GET_SMART_DOCUMENT_REFERENCE_LIBRARY_FILE_LIST" version="00002">
+		<statement>
+			<![CDATA[
+			SELECT 
+				PF.REFERENCE_ROOM_ID,
+				PF.PRODUCT_ID,
+				PF.DESCRIPTION,
+				PF.FILETYPE,
+				F.FILENAME,				
+				F.FILESIZE,
+				F.FILEPATH,
+				PF.VALIDSTATE
+			FROM SD_REFERENCEROOM PF 
+				LEFT JOIN SF_FILE F ON F.FILEID = PF.FILEID
+			WHERE 
+				 1=1
+#if($!PRODUCT_ID != "")					
+				AND PFC.PRODUCT_ID = :PRODUCT_ID
+#end
+#if($!FILENAME != "")					
+				AND F.FILENAME = :FILENAME
+#end
+#if($!FILETYPE != "")					
+				AND F.FILETYPE = :FILETYPE
+#end
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GET_REFERENCE_ROOM_FILE_TYPE" version="00001">
+		<statement>
+			<![CDATA[
+			SELECT 
+				CODENAME AS VALUE,
+				CODENAME AS TEXT
+			FROM SF_CODE 
+			WHERE CODECLASSID ='DOCUMENT_CODE_GROUP'
+			AND VALIDSTATE = 'Valid'
+			ORDER BY CODENAME
+			]]>
+		</statement>
+	</query>
+	
+	
+</list>
+
+
+
+

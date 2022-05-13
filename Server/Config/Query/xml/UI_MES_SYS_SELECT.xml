@@ -1,0 +1,1644 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list>
+	<!--
+	프 로 그 램 명	: 시스템 관리 > 코드 관리 > 코드그룹 정보
+	설		명	: 코드그룹 정보 화면의 코드그룹 리스트를 조회한다.
+	작	성	자	: 강호윤
+	작	성	일	: 2019-04-01
+	주요 변경 로그	:
+	-->
+	<query id="SelectCodeClass" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : SelectCodeClass
+				-- Version : 00001
+				SELECT
+						CC.CODECLASSID
+					,	DK.DICTIONARYNAME		AS "CODECLASSNAME$$KO-KR"
+					,	DE.DICTIONARYNAME		AS "CODECLASSNAME$$EN-US"
+					,	DC.DICTIONARYNAME		AS "CODECLASSNAME$$JA-JP"
+					,	DV.DICTIONARYNAME		AS "CODECLASSNAME$$VI-VN"
+					,	CC.DESCRIPTION
+					,	CC.CODECLASSTYPE
+					,	CC.PARENTCODECLASSID
+					,	UC.USERNAME				AS CREATOR
+					,	CC.CREATEDTIME
+					,	UM.USERNAME				AS MODIFIER
+					,	CC.MODIFIEDTIME
+					,	CC.VALIDSTATE
+				FROM	SF_CODECLASS			CC
+				LEFT OUTER JOIN SF_DICTIONARY	DK	ON	CC.DICTIONARYID = DK.DICTIONARYID
+													AND	DK.LANGUAGETYPE = 'ko-KR'
+				LEFT OUTER JOIN SF_DICTIONARY	DE	ON	CC.DICTIONARYID = DE.DICTIONARYID
+													AND	DE.LANGUAGETYPE = 'en-US'
+				LEFT OUTER JOIN SF_DICTIONARY	DC	ON	CC.DICTIONARYID = DC.DICTIONARYID
+													AND	DC.LANGUAGETYPE = 'ja-JP'
+				LEFT OUTER JOIN SF_DICTIONARY	DV	ON	CC.DICTIONARYID = DV.DICTIONARYID
+													AND	DV.LANGUAGETYPE = 'vi-VN'
+				LEFT OUTER JOIN SF_USER			UC	ON	CC.CREATOR = UC.USERID
+				LEFT OUTER JOIN SF_USER			UM	ON	CC.MODIFIER = UM.USERID
+				WHERE	1 = 1
+				#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+					AND		CC.VALIDSTATE = '$!{P_VALIDSTATE}'
+				#end
+				
+				#if ("$!{P_CODECLASSTYPE}" != "*")
+					AND		CC.CODECLASSTYPE = '$!{P_CODECLASSTYPE}'
+				#end
+				
+				#if ("$!{P_CONDITIONVALUE}" != "")
+					#if ("$!{P_CONDITIONITEM}" == "*")
+						AND		(CC.CODECLASSID LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		DK.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		DE.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		DC.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		DV.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		CC.DESCRIPTION LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		CC.PARENTCODECLASSID LIKE '%$!{P_CONDITIONVALUE}%')
+					#else
+						#if ("$!{P_CONDITIONITEM}" == "CODECLASSID")
+							AND		CC.CODECLASSID LIKE '%$!{P_CONDITIONVALUE}%'
+						#elseif ("$!{P_CONDITIONITEM}" == "CODECLASSNAME")
+							AND		(DK.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+							OR		DE.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+							OR		DC.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+							OR		DV.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%')
+						#elseif ("$!{P_CONDITIONITEM}" == "DESCRIPTION")
+							AND		CC.DESCRIPTION LIKE '%$!{P_CONDITIONVALUE}%'
+						#elseif ("$!{P_CONDITIONITEM}" == "PARENTCODECLASSID")
+							AND		CC.PARENTCODECLASSID LIKE '%$!{P_CONDITIONVALUE}%'
+						#end
+					#end
+				#end
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	프 로 그 램 명	: 시스템 관리 > 코드 관리 > 코드 정보
+	설		명	: 코드 정보 화면의 코드그룹 리스트를 조회한다.
+	작	성	자	: 강호윤
+	작	성	일	: 2019-04-01
+	주요 변경 로그	:
+	-->
+	<query id="SelectCodeClassSearch" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : SelectCodeClassSearch
+				-- Version : 00001
+				SELECT	DISTINCT
+						CC.PARENTCODECLASSID
+					,	CC.CODECLASSID
+					,	CCD.DICTIONARYNAME		AS CODECLASSNAME
+				FROM	SF_CODE					C
+				RIGHT OUTER JOIN SF_CODECLASS	CC	ON	C.CODECLASSID = CC.CODECLASSID
+				LEFT OUTER JOIN SF_DICTIONARY	CCD	ON	CC.DICTIONARYID = CCD.DICTIONARYID
+													AND	CCD.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+				LEFT OUTER JOIN SF_DICTIONARY	CD	ON	C.DICTIONARYID = CD.DICTIONARYID
+													AND	CD.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+				WHERE	1 = 1
+				AND		CC.VALIDSTATE = 'Valid'
+				#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+					AND		(C.VALIDSTATE = '$!{P_VALIDSTATE}'
+					OR		C.VALIDSTATE IS NULL)
+				#end
+				
+				#if ("$!{P_CODECLASSID}" != "")
+					AND		C.CODECLASSID = '$!{P_CODECLASSID}'
+				#end
+				
+				#if ("$!{P_CONDITIONVALUE}" != "")
+					#if ("$!{P_CONDITIONITEM}" == "*")
+						AND		(C.CODEID LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		CD.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		C.DESCRIPTION LIKE '%$!{P_CONDITIONVALUE}%')
+					#else
+						#if ("$!{P_CONDITIONITEM}" == "CODEID")
+							AND		C.CODEID LIKE '%$!{P_CONDITIONVALUE}%'
+						#elseif ("$!{P_CONDITIONITEM}" == "CODENAME")
+							AND		CD.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						#elseif ("$!{P_CONDITIONITEM}" == "DESCRIPTION")
+							AND		C.DESCRIPTION LIKE '%$!{P_CONDITIONVALUE}%'
+						#end
+					#end
+				#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 시스템 관리 > 코드 관리 > 코드 정보
+	설		명	: 코드 정보 화면의 코드 리스트를 조회한다.
+	작	성	자	: 강호윤
+	작	성	일	: 2019-04-01
+	주요 변경 로그	:
+	-->
+	<query id="SelectCode" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : SelectCode
+				-- Version : 00001
+				SELECT
+						CC.PARENTCODECLASSID
+					,	C.CODECLASSID
+					,	C.CODEID
+					,	DK.DICTIONARYNAME		AS "CODENAME$$KO-KR"
+					,	DE.DICTIONARYNAME		AS "CODENAME$$EN-US"
+					,	DC.DICTIONARYNAME		AS "CODENAME$$JA-JP"
+					,	DV.DICTIONARYNAME		AS "CODENAME$$VI-VN"
+					,	C.DESCRIPTION
+					,	C.DISPLAYSEQUENCE
+					,	C.PARENTCODEID
+					,	UC.USERNAME				AS CREATOR
+					,	C.CREATEDTIME
+					,	UM.USERNAME				AS MODIFIER
+					,	C.MODIFIEDTIME
+					,	C.VALIDSTATE
+				FROM	SF_CODE					C
+				LEFT OUTER JOIN SF_DICTIONARY	DK	ON	C.DICTIONARYID = DK.DICTIONARYID
+													AND	DK.LANGUAGETYPE = 'ko-KR'
+				LEFT OUTER JOIN SF_DICTIONARY	DE	ON	C.DICTIONARYID = DE.DICTIONARYID
+													AND	DE.LANGUAGETYPE = 'en-US'
+				LEFT OUTER JOIN SF_DICTIONARY	DC	ON	C.DICTIONARYID = DC.DICTIONARYID
+													AND	DC.LANGUAGETYPE = 'ja-JP'
+				LEFT OUTER JOIN SF_DICTIONARY	DV	ON	C.DICTIONARYID = DV.DICTIONARYID
+													AND	DV.LANGUAGETYPE = 'vi-VN'
+				LEFT OUTER JOIN SF_USER			UC	ON	C.CREATOR = UC.USERID
+				LEFT OUTER JOIN SF_USER			UM	ON	C.MODIFIER = UM.USERID
+				LEFT OUTER JOIN SF_CODECLASS	CC	ON	C.CODECLASSID = CC.CODECLASSID
+				WHERE	1 = 1
+				
+				#if ("$!{P_CODECLASSID}" != "")
+					AND		C.CODECLASSID = '$!{P_CODECLASSID}'
+				#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 시스템 관리 > 조건 관리 > 조회조건 정보
+	설		명	: 조회조건 정보 화면의 조회조건 항목 리스트를 조회한다.
+	작	성	자	: 강호윤
+	작	성	일	: 2019-04-01
+	주요 변경 로그	:
+	-->
+	<query id="SelectConditionItem" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : SelectConditionItem
+				-- Version : 00001
+				SELECT
+						CI.UIID
+					,	CI.CONDITIONITEMID
+					,	DK.DICTIONARYNAME		AS "CONDITIONITEMNAME$$KO-KR"
+					,	DE.DICTIONARYNAME		AS "CONDITIONITEMNAME$$EN-US"
+					,	DC.DICTIONARYNAME		AS "CONDITIONITEMNAME$$JA-JP"
+					,	DV.DICTIONARYNAME		AS "CONDITIONITEMNAME$$VI-VN"
+					,	CI.DESCRIPTION
+					,	CI.COLUMNNAME
+					,	CI.ITEMTYPE
+					,	CI.DATAFORMAT
+					,	CI.DEFAULTVALUE
+					,	CI.CONSTANTDATA
+					,	CI.ISREQUIRED
+					,	CI.ISHIDDEN
+					,	CI.ISALL
+					,	CI.EXECUTETYPE
+					,	CI.EXECUTEID
+					,	CI.EXECUTEVERSION
+					,	CI.EXECUTEPARAMETER
+					,	CI.DISPLAYMEMBER
+					,	CI.VALUEMEMBER
+					,	UC.USERNAME				AS CREATOR
+					,	CI.CREATEDTIME
+					,	UM.USERNAME				AS MODIFIER
+					,	CI.MODIFIEDTIME
+					,	CI.VALIDSTATE
+				FROM	SF_UICONDITEM			CI
+				LEFT OUTER JOIN SF_DICTIONARY	DK	ON	CI.DICTIONARYID = DK.DICTIONARYID
+													AND	DK.LANGUAGETYPE = 'ko-KR'
+				LEFT OUTER JOIN SF_DICTIONARY	DE	ON	CI.DICTIONARYID = DE.DICTIONARYID
+													AND	DE.LANGUAGETYPE = 'en-US'
+				LEFT OUTER JOIN SF_DICTIONARY	DC	ON	CI.DICTIONARYID = DC.DICTIONARYID
+													AND	DC.LANGUAGETYPE = 'ja-JP'
+				LEFT OUTER JOIN SF_DICTIONARY	DV	ON	CI.DICTIONARYID = DV.DICTIONARYID
+													AND	DV.LANGUAGETYPE = 'vi-VN'
+				LEFT OUTER JOIN SF_USER			UC	ON	CI.CREATOR = UC.USERID
+				LEFT OUTER JOIN SF_USER			UM	ON	CI.MODIFIER = UM.USERID
+				WHERE	1 = 1
+				AND		CI.UIID = 'MES'
+				#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+					AND		CI.VALIDSTATE = '$!{P_VALIDSTATE}'
+				#end
+				
+				#if ("$!{P_ITEMTYPE}" != "" && "$!{P_ITEMTYPE}" != "*")
+					AND		CI.ITEMTYPE = '$!{P_ITEMTYPE}'
+				#end
+				
+				#if ("$!{P_CONDITIONVALUE}" != "")
+					#if ("$!{P_CONDALLCOND}" == "*")
+						AND		(CI.CONDITIONITEMID LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		DK.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		DE.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		DC.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		DV.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		CI.DESCRIPTION LIKE '%$!{P_CONDITIONVALUE}%')
+					#else
+						#if ("$!{P_CONDALLCOND}" == "CONDITIONITEMID")
+							AND		CI.CONDITIONITEMID LIKE '%$!{P_CONDITIONVALUE}%'
+						#elseif ("$!{P_CONDALLCOND}" == "CONDITIONITEMNAME")
+							AND		(DK.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+							OR		DE.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+							OR		DC.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+							OR		DV.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%')
+						#elseif ("$!{P_CONDALLCOND}" == "DESCRIPTION")
+							AND		CI.DESCRIPTION LIKE '%$!{P_CONDITIONVALUE}%'
+						#end
+					#end
+				#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 시스템 관리 > 접속이력 관리 > 접속이력 조회
+	설		명	: 접속이력 조회 화면의 접속이력 리스트를 조회한다.
+	작	성	자	: 강호윤
+	작	성	일	: 2019-04-01
+	주요 변경 로그	:
+	-->
+	<query id="SelectConnectionHistory" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : SelectConnectionHistory
+				-- Version : 10001
+				SELECT
+						CH.TXNHISTKEY
+					,	CH.USERID
+					,	U.USERNAME
+					,	CH.CONNECTIONTYPE
+					,	CH.UIID
+					,	CH.MENUID
+					,	MN.DICTIONARYNAME		AS MENUNAME
+					,	CH.IPADDRESS
+					,	CH.CONNECTIONTIME
+					,	CH.DISCONNECTIONTIME
+				FROM	SF_CONNECTIONHISTORY	CH
+				LEFT OUTER JOIN SF_USER			U	ON	CH.USERID = U.USERID
+				LEFT OUTER JOIN SF_MENU			M	ON	CH.UIID = M.UIID
+													AND	CH.MENUID = M.MENUID
+				LEFT OUTER JOIN SF_DICTIONARY	MN	ON	M.DICTIONARYID = MN.DICTIONARYID
+													AND	MN.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE	1 = 1
+				AND		CH.CONNECTIONTIME BETWEEN '$!{P_PERIOD_PERIODFR}' AND '$!{P_PERIOD_PERIODTO}'
+				
+				#if ("$!{P_CONNECTIONTYPE}" != "*")
+					AND		CH.CONNECTIONTYPE = '$!{P_CONNECTIONTYPE}'
+				#end
+				
+				#if ("$!{P_CONDITIONVALUE}" != "")
+					#if ("$!{P_CONDITIONITEM}" == "*")
+						AND		(CH.USERID LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		U.USERNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		CH.UIID LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		CH.MENUID LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		MN.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%')
+					#else
+						#if ("$!{P_CONDITIONITEM}" == "USERNAME")
+							AND		U.USERNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						#elseif ("$!{P_CONDITIONITEM}" == "MENUNAME")
+							AND		MN.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						#else
+							AND		CH.$!{P_CONDITIONITEM} LIKE '%$!{P_CONDITIONVALUE}%'
+						#end
+					#end
+				#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 시스템 관리 > 다국어 관리 > 사전 정보
+	설		명	: 사전 정보 화면의 다국어 사전 그룹 리스트를 조회한다.
+	작	성	자	: 강호윤
+	작	성	일	: 2019-04-01
+	주요 변경 로그	: 
+	-->
+	<query id="SelectDictionaryClassOnMapping" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : SelectDictionaryClassOnMapping
+				-- Version : 10001
+				SELECT
+						DC.DICTIONARYCLASSID
+					,	DCN.DICTIONARYNAME		AS DICTIONARYCLASSNAME
+				FROM	SF_DICTIONARYCLASS		DC
+				LEFT OUTER JOIN SF_DICTIONARY	DCN	ON	DC.DICTIONARYID = DCN.DICTIONARYID
+													AND	DCN.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+				WHERE	1 = 1
+				#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+					AND		DC.VALIDSTATE = '$!{P_VALIDSTATE}'
+				#end
+				/*
+				AND		DC.DICTIONARYCLASSID IN
+						(
+							SELECT	DM.DICTIONARYCLASSID
+							FROM	SF_DICTIONARY DM
+							WHERE	1 = 1
+							#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+								AND		DM.VALIDSTATE = '$!{P_VALIDSTATE}'
+							#end
+				#if ("$!{P_CONDITIONVALUE}" != "")
+					#if ("$!{P_CONDITIONITEM}" == "*")
+									AND		(DM.DICTIONARYID LIKE '%$!{P_CONDITIONVALUE}%'
+									OR		DM.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+									OR		DM.DESCRIPTION LIKE '%$!{P_CONDITIONVALUE}%')
+					#else
+									AND		DM.$!{P_CONDITIONITEM} LIKE '%$!{P_CONDITIONVALUE}%'
+					#end
+				#end
+						)
+						*/
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 시스템 관리 > 다국어 관리 > 사전 정보
+	설		명	: 사전 정보 화면의 다국어 사전 리스트를 조회한다.
+	작	성	자	: 강호윤
+	작	성	일	: 2019-04-01
+	주요 변경 로그	: 2021-01-18 정송은  다국어 리스트 영어,한국어,일본어만 가져올 수 있도록 수정
+	-->
+	<query id="SelectDictionary" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : SelectDictionary
+				-- Version : 10001
+				SELECT
+						D.DICTIONARYCLASSID
+					,	D.DICTIONARYID
+					,	DK.DICTIONARYNAME		AS "DICTIONARYNAME$$KO-KR"
+					,	DE.DICTIONARYNAME		AS "DICTIONARYNAME$$EN-US"
+					,	DC.DICTIONARYNAME		AS "DICTIONARYNAME$$JA-JP"
+					,	DV.DICTIONARYNAME		AS "DICTIONARYNAME$$VI-VN"
+					,	D.DESCRIPTION
+					,	UC.USERNAME				AS CREATOR
+					,	MAX(D.CREATEDTIME)		AS CREATEDTIME
+					,	UM.USERNAME				AS MODIFIER
+					,	MAX(D.MODIFIEDTIME)		AS MODIFIEDTIME
+					,	D.VALIDSTATE
+				FROM	SF_DICTIONARY			D
+				LEFT OUTER JOIN SF_DICTIONARY	DK	ON	D.DICTIONARYID = DK.DICTIONARYID
+													AND	DK.LANGUAGETYPE = 'ko-KR'
+				LEFT OUTER JOIN SF_DICTIONARY	DE	ON	D.DICTIONARYID = DE.DICTIONARYID
+													AND	DE.LANGUAGETYPE = 'en-US'
+				LEFT OUTER JOIN SF_DICTIONARY	DC	ON	D.DICTIONARYID = DC.DICTIONARYID
+													AND	DC.LANGUAGETYPE = 'ja-JP'
+				LEFT OUTER JOIN SF_DICTIONARY	DV	ON	D.DICTIONARYID = DV.DICTIONARYID
+													AND	DV.LANGUAGETYPE = 'vi-VN'
+				LEFT OUTER JOIN SF_USER			UC	ON	D.CREATOR = UC.USERID
+				LEFT OUTER JOIN SF_USER			UM	ON	D.MODIFIER = UM.USERID
+				WHERE	1 = 1
+				#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+					AND		D.VALIDSTATE = '$!{P_VALIDSTATE}'
+				#end
+				AND		D.DICTIONARYCLASSID = '$!{P_DICTIONARYCLASSID}'
+				
+				#if ("$!{P_CONDITIONVALUE}" != "")
+					#if ("$!{P_CONDITIONITEM}" == "*")
+						AND		(D.DICTIONARYID LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		DK.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		DE.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		DC.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		DV.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		D.DESCRIPTION LIKE '%$!{P_CONDITIONVALUE}%')
+					#else
+						#if ("$!{P_CONDITIONITEM}" == "DICTIONARYNAME")
+							AND		(DK.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+							OR		DE.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+							OR		DC.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+							OR		DV.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%')
+						#else
+							AND		D.$!{P_CONDITIONITEM} LIKE '%$!{P_CONDITIONVALUE}%'
+						#end
+					#end
+				#end
+				AND 	D.LANGUAGETYPE <> 'vi-VN'
+				
+				GROUP BY D.DICTIONARYCLASSID
+						,D.DICTIONARYID
+						,DK.DICTIONARYNAME
+						,DE.DICTIONARYNAME
+						,DC.DICTIONARYNAME
+						,DV.DICTIONARYNAME
+						,D.DESCRIPTION
+						,UC.USERNAME
+						,UM.USERNAME
+						,D.VALIDSTATE
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 시스템 관리 > 다국어 관리 > 사전그룹 정보
+	설		명	: 사전그룹 정보 화면의 다국어 사전그룹 리스트를 조회한다.
+	작	성	자	: 강호윤
+	작	성	일	: 2019-04-01
+	주요 변경 로그	:
+	-->
+	<query id="SelectDictionaryClass" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : SelectDictionaryClass
+				-- Version : 10001
+				SELECT
+						DC.DICTIONARYCLASSID
+					,	DCK.DICTIONARYNAME		AS "DICTIONARYCLASSNAME$$KO-KR"
+					,	DCE.DICTIONARYNAME		AS "DICTIONARYCLASSNAME$$EN-US"
+					,	DCC.DICTIONARYNAME		AS "DICTIONARYCLASSNAME$$JA-JP"
+					,	DCV.DICTIONARYNAME		AS "DICTIONARYCLASSNAME$$VI-VN"
+					,	DC.DESCRIPTION
+					,	UC.USERNAME				AS CREATOR
+					,	DC.CREATEDTIME
+					,	UM.USERNAME				AS MODIFIER
+					,	DC.MODIFIEDTIME
+					,	DC.VALIDSTATE
+				FROM	SF_DICTIONARYCLASS		DC
+				LEFT OUTER JOIN SF_DICTIONARY	DCK	ON	DC.DICTIONARYID = DCK.DICTIONARYID
+													AND	DCK.LANGUAGETYPE = 'ko-KR'
+				LEFT OUTER JOIN SF_DICTIONARY	DCE	ON	DC.DICTIONARYID = DCE.DICTIONARYID
+													AND	DCE.LANGUAGETYPE = 'en-US'
+				LEFT OUTER JOIN SF_DICTIONARY	DCC	ON	DC.DICTIONARYID = DCC.DICTIONARYID
+													AND	DCC.LANGUAGETYPE = 'ja-JP'
+				LEFT OUTER JOIN SF_DICTIONARY	DCV	ON	DC.DICTIONARYID = DCV.DICTIONARYID
+													AND	DCV.LANGUAGETYPE = 'vi-VN'
+				LEFT OUTER JOIN SF_USER			UC	ON	DC.CREATOR = UC.USERID
+				LEFT OUTER JOIN SF_USER			UM	ON	DC.MODIFIER = UM.USERID
+				WHERE	1 = 1
+				#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+					AND		DC.VALIDSTATE = '$!{P_VALIDSTATE}'
+				#end
+				
+				#if ("$!{P_CONDITIONVALUE}" != "")
+					#if ("$!{P_CONDITIONITEM}" == "*")
+						AND		(DC.DICTIONARYCLASSID LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		DCK.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		DCE.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		DCC.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		DCV.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		DC.DESCRIPTION LIKE '%$!{P_CONDITIONVALUE}%')
+					#else
+						#if ("$!{P_CONDITIONITEM}" == "DICTIONARYCLASSNAME")
+							AND		(DCK.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+							OR		DCE.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+							OR		DCC.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+							OR		DCV.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%')
+						#else
+							AND		DC.$!{P_CONDITIONITEM} LIKE '%$!{P_CONDITIONVALUE}%'
+						#end
+					#end
+				#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 시스템 관리 > 메뉴 관리 > 메뉴 정보
+	설		명	: 메뉴 정보 화면에서 그리드에 바인딩 시킬 메뉴를 조회한다.
+	작	성	자	: 강호윤
+	작	성	일	: 2019-04-01
+	주요 변경 로그	:
+	-->
+	<query id="SelectMenuGrid" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : SelectMenuGrid
+				-- Version : 10001
+				SELECT
+						M.UIID
+					,	M.MENUID
+					,	DK.DICTIONARYNAME		AS "MENUNAME$$KO-KR"
+					,	DE.DICTIONARYNAME		AS "MENUNAME$$EN-US"
+					,	DC.DICTIONARYNAME		AS "MENUNAME$$JA-JP"
+					,	DV.DICTIONARYNAME		AS "MENUNAME$$VI-VN"
+					,	M.DESCRIPTION
+					,	M.PARENTMENUID
+					,	M.DISPLAYSEQUENCE
+					,	M.PROGRAMID
+					,	M.MENUTYPE
+					,	M.VALIDSTATE
+					,	UC.USERNAME				AS CREATOR
+					,	M.CREATEDTIME
+					,	UM.USERNAME				AS MODIFIER
+					,	M.MODIFIEDTIME
+				FROM	SF_MENU					M
+				LEFT OUTER JOIN SF_DICTIONARY	DK	ON	M.DICTIONARYID = DK.DICTIONARYID
+													AND	DK.LANGUAGETYPE = 'ko-KR'
+				LEFT OUTER JOIN SF_DICTIONARY	DE	ON	M.DICTIONARYID = DE.DICTIONARYID
+													AND	DE.LANGUAGETYPE = 'en-US'
+				LEFT OUTER JOIN SF_DICTIONARY	DC	ON	M.DICTIONARYID = DC.DICTIONARYID
+													AND	DC.LANGUAGETYPE = 'ja-JP'
+				LEFT OUTER JOIN SF_DICTIONARY	DV	ON	M.DICTIONARYID = DV.DICTIONARYID
+													AND	DV.LANGUAGETYPE = 'vi-VN'
+				LEFT OUTER JOIN SF_USER			UC	ON	M.CREATOR = UC.USERID
+				LEFT OUTER JOIN SF_USER			UM	ON	M.MODIFIER = UM.USERID
+				WHERE	1 = 1
+				AND		M.UIID = 'MES'
+				#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+					AND		M.VALIDSTATE = '$!{P_VALIDSTATE}'
+				#end
+				
+				#if ($!{P_MENUID.length()} > 0)
+					#if ("$!{P_MENUID}" != "*")
+						AND		M.PARENTMENUID = '$!{P_MENUID}'
+					#else
+						AND		ISNULL(M.PARENTMENUID, '') = ''
+					#end
+				#end
+							
+				#if ("$!{P_CONDITIONVALUE}" != "")
+					#if ("$!{P_CONDITIONITEM}" == "*")
+						AND		(M.MENUID LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		DK.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		DE.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		DC.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		DV.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		M.DESCRIPTION LIKE '%$!{P_CONDITIONVALUE}%')
+					#else
+						#if ("$!{P_CONDITIONITEM}" == "MENUNAME")
+							AND		(DK.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+							OR		DE.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+							OR		DC.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+							OR		DV.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%')
+						#else
+							AND		M.$!{P_CONDITIONITEM} LIKE '%$!{P_CONDITIONVALUE}%'
+						#end
+					#end
+				#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 시스템 관리 > 메뉴 관리 > 메뉴 정보
+	설		명	: 메뉴 정보 화면에서 트리에 바인딩 시킬 메뉴를 조회한다.
+	작	성	자	: 강호윤
+	작	성	일	: 2019-04-01
+	주요 변경 로그	:
+	-->
+	<query id="SelectMenuTree" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : SelectMenuTree
+				-- Version : 10001
+				WITH TEMP AS
+				(
+					SELECT
+							M.MENUID
+						,   M.DICTIONARYID
+						,	M.DESCRIPTION
+						,	M.PARENTMENUID
+						,	M.DISPLAYSEQUENCE
+						,	M.PROGRAMID
+						,	M.MENUTYPE
+						,	M.VALIDSTATE
+						,	'/' + CONVERT(varchar, M.DISPLAYSEQUENCE) AS SORT
+					FROM	SF_MENU					M
+					WHERE	1 = 1
+					AND		M.UIID = 'MES'
+					
+					#if ($!{P_MENUID.length()} > 0)
+						#if ("$!{P_MENUID}" != "*")
+							AND		M.MENUID = '$!{P_MENUID}'
+						#else
+							AND		ISNULL(M.PARENTMENUID, '') = ''
+						#end
+					#end
+					
+					UNION ALL
+					SELECT
+							M.MENUID
+						,   M.DICTIONARYID
+						,	M.DESCRIPTION
+						,	M.PARENTMENUID
+						,	M.DISPLAYSEQUENCE
+						,	M.PROGRAMID
+						,	M.MENUTYPE
+						,	M.VALIDSTATE
+						,	'/' + CONVERT(varchar, M.DISPLAYSEQUENCE) AS SORT
+					FROM	SF_MENU					M
+					INNER JOIN TEMP					T	ON	T.MENUID = M.PARENTMENUID
+														AND	M.VALIDSTATE = 'Valid'
+					WHERE	1 = 1
+					AND		M.UIID = 'MES'
+				)
+				SELECT
+						M.MENUID
+					--,	M.MENUNAME
+					,	ISNULL(MN.DICTIONARYNAME, '')		AS MENUNAME
+					,	M.PARENTMENUID
+					,	M.DISPLAYSEQUENCE
+					,	M.MENUTYPE
+					,	M.VALIDSTATE
+					,	M.MENUID			AS MENUID_COPY
+				FROM	TEMP				M
+				LEFT OUTER JOIN SF_DICTIONARY	MN	ON	M.DICTIONARYID = MN.DICTIONARYID
+													AND	MN.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+				ORDER BY M.SORT
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 시스템 관리 > 메뉴 관리 > 메뉴 권한 정보
+	설		명	: 메뉴 권한 정보 화면에서 메뉴 권한 리스트를 조회한다.
+	작	성	자	: 강호윤
+	작	성	일	: 2019-04-01
+	주요 변경 로그	:
+	-->
+	<query id="SelectMenuAuthority" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : SelectMenuAuthority
+				-- Version : 10001
+				SELECT
+						COALESCE(MA.UIID, 'MES')	AS UIID
+					,	UCS.USERCLASSID
+					,	MA.MENUID
+					,	UCS.DESCRIPTION
+					,	UCS.VALIDSTATE
+					,	UC.USERNAME					AS CREATOR
+					,	UCS.CREATEDTIME
+					,	UM.USERNAME					AS MODIFIER
+					,	UCS.MODIFIEDTIME
+					,	CONVERT(BIT, CASE WHEN MA.USERCLASSID IS NULL THEN 0
+							  			  ELSE 1
+										  END)		AS ACTIVATED
+				FROM	SF_USERCLASS				UCS
+				LEFT OUTER JOIN SF_MENUAUTHORITY	MA	ON	UCS.USERCLASSID = MA.USERCLASSID
+														AND	MA.MENUID = '$!{P_MENUID}'
+														AND	MA.UIID = 'MES'
+				LEFT OUTER JOIN SF_USER				UC	ON	UCS.CREATOR = UC.USERID
+				LEFT OUTER JOIN SF_USER				UM	ON	UCS.MODIFIER = UM.USERID
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 시스템 관리 > 조건 관리 > 메뉴 - 조회조건 매핑
+	설		명	: 메뉴 - 조회조건 매핑 화면에서 메뉴에 매핑되지 않은 조회조건 항목 리스트를 조회한다.
+	작	성	자	: 강호윤
+	작	성	일	: 2019-04-01
+	주요 변경 로그	:
+	-->
+	<query id="SelectMenuConditionItemNotMapping" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : SelectMenuConditionItemNotMapping
+				-- Version : 10001
+				SELECT
+						'$!{P_UIID}'					AS UIID
+					,	'$!{P_MENUID}'					AS MENUID
+					,	C.CONDITIONITEMID
+					,	CN.DICTIONARYNAME				AS CONDITIONITEMNAME
+					,	'ITEM'							AS CONDITIONTYPE
+					,	NULL							AS DISPLAYSEQUENCE
+					,	''								AS VALIDSTATE
+					,	''								AS RELATIONCOLUMNSTACK
+					,	C.DESCRIPTION
+					,	C.COLUMNNAME
+					,	C.ITEMTYPE
+					,	C.DATAFORMAT
+					,	C.DEFAULTVALUE
+					,	C.ISREQUIRED
+					,	C.ISHIDDEN
+					,	C.ISALL
+					,	C.EXECUTETYPE
+				FROM	SF_UICONDITEM					C
+				LEFT OUTER JOIN SF_UIMENUCONDITEMMAP	MCM	ON	C.CONDITIONITEMID = MCM.CONDITIONITEMID
+															AND	C.UIID = MCM.UIID
+															AND	MCM.MENUID = '$!{P_MENUID}'
+				LEFT OUTER JOIN SF_DICTIONARY			CN	ON	C.DICTIONARYID = CN.DICTIONARYID
+															AND	CN.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+				WHERE	1 = 1
+				AND		MCM.CONDITIONITEMID IS NULL
+				AND		C.UIID = '$!{P_UIID}'
+				AND		C.VALIDSTATE = '$!{P_VALIDSTATE}'
+				
+				#if ("$!{P_CONDITIONVALUE}" != "")
+					#if ("$!{P_CONDALLCOND}" == "*")
+						AND		(C.CONDITIONITEMID LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		CN.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%')
+					#else
+						#if ("$!{P_CONDALLCOND}" == "CONDITIONITEMNAME")
+							AND		CN.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						#else
+							AND		C.$!{P_CONDALLCOND} LIKE '%$!{P_CONDITIONVALUE}%'
+						#end
+					#end
+				#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 시스템 관리 > 조건 관리 > 메뉴 - 조회조건 매핑
+	설		명	: 메뉴 - 조회조건 매핑 화면에서 메뉴에 매핑된 조회조건 항목 리스트를 조회한다.
+	작	성	자	: 강호윤
+	작	성	일	: 2019-04-01
+	주요 변경 로그	:
+	-->
+	<query id="SelectMenuConditionItemMapping" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : SelectMenuConditionItemMapping
+				-- Version : 10001
+				SELECT
+						MCM.UIID
+					,	MCM.MENUID
+					,	MCM.CONDITIONITEMID
+					,	CN.DICTIONARYNAME		AS CONDITIONITEMNAME
+					,	MCM.CONDITIONTYPE
+					,	MCM.DISPLAYSEQUENCE
+					,	MCM.VALIDSTATE
+					,	MCM.RELATIONCOLUMNSTACK
+					,	C.DESCRIPTION
+					,	C.COLUMNNAME
+					,	C.ITEMTYPE
+					,	C.DATAFORMAT
+					,	C.DEFAULTVALUE
+					,	C.ISREQUIRED
+					,	C.ISHIDDEN
+					,	C.ISALL
+					,	C.EXECUTETYPE
+				FROM	SF_UIMENUCONDITEMMAP	MCM
+				LEFT OUTER JOIN SF_UICONDITEM	C	ON	MCM.CONDITIONITEMID = C.CONDITIONITEMID
+													AND	MCM.UIID = C.UIID
+													AND	C.VALIDSTATE = '$!{P_VALIDSTATE}'
+				LEFT OUTER JOIN SF_DICTIONARY	CN	ON	C.DICTIONARYID = CN.DICTIONARYID
+													AND	CN.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+				WHERE	MCM.MENUID = '$!{P_MENUID}'
+				AND		MCM.UIID = '$!{P_UIID}'
+				AND		MCM.VALIDSTATE = '$!{P_VALIDSTATE}'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 시스템 관리 > 다국어 관리 > 메세지 정보
+	설		명	: 메세지 정보 화면의 메세지 그룹 리스트를 조회한다.
+	작	성	자	: 강호윤
+	작	성	일	: 2019-04-01
+	주요 변경 로그	:
+	-->
+	<query id="SelectMessageClassOnMapping" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : SelectMessageClassOnMapping
+				-- Version : 10001
+				SELECT
+						DISTINCT MC.MESSAGECLASSID
+					,	MCN.DICTIONARYNAME			AS MESSAGECLASSNAME
+				FROM	SF_MESSAGE					M
+				RIGHT OUTER JOIN SF_MESSAGECLASS	MC	ON	M.MESSAGECLASSID = MC.MESSAGECLASSID
+				LEFT OUTER JOIN SF_DICTIONARY		MCN	ON	MC.DICTIONARYID = MCN.DICTIONARYID
+														AND	MCN.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+				WHERE	1 = 1
+				#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+					AND		M.VALIDSTATE = '$!{P_VALIDSTATE}'
+					AND		(M.VALIDSTATE = '$!{P_VALIDSTATE}'
+					OR		M.VALIDSTATE IS NULL)
+				#end
+				
+				#if ("$!{P_CONDITIONVALUE}" != "")
+					#if ("$!{P_CONDITIONITEM}" == "*")
+						AND		(M.MESSAGEID LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		M.MESSAGENAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		M.DESCRIPTION LIKE '%$!{P_CONDITIONVALUE}%')
+					#else
+						#if ("$!{P_CONDITIONITEM}" == "TITLE")
+							AND		M.MESSAGENAME LIKE '%$!{P_CONDITIONVALUE}%'
+						#elseif ("$!{P_CONDITIONITEM}" == "MESSAGENAME")
+							AND		M.DESCRIPTION LIKE '%$!{P_CONDITIONVALUE}%'
+						#else
+							AND		M.$!{P_CONDITIONITEM} LIKE '%$!{P_CONDITIONVALUE}%'
+						#end
+					#end
+				#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 시스템 관리 > 다국어 관리 > 메세지 정보
+	설		명	: 메세지 정보 화면의 메세지 리스트를 조회한다.
+	작	성	자	: 강호윤
+	작	성	일	: 2019-04-01
+	주요 변경 로그	:
+	-->
+	<query id="SelectMessage" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : SelectMessage
+				-- Version : 10001
+				SELECT
+						M.MESSAGEID
+					,	M.MESSAGENAME	AS TITLE
+					,	M.DESCRIPTION	AS MESSAGENAME
+					,	M.LANGUAGETYPE
+					,	M.MESSAGECLASSID
+					,	M.VALIDSTATE
+					,	UC.USERNAME		AS CREATOR
+					,	M.CREATEDTIME
+					,	UM.USERNAME		AS MODIFIER
+					,	M.MODIFIEDTIME
+				FROM	SF_MESSAGE		M
+				LEFT OUTER JOIN SF_USER	UC	ON	M.CREATOR = UC.USERID
+				LEFT OUTER JOIN SF_USER UM	ON	M.MODIFIER = UM.USERID
+				WHERE	1 = 1
+				#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+					AND		M.VALIDSTATE = '$!{P_VALIDSTATE}'
+				#end
+				AND		M.MESSAGECLASSID = '$!{P_MESSAGECLASSID}'
+				
+				#if ("$!{P_CONDITIONVALUE}" != "")
+					#if ("$!{P_CONDITIONITEM}" == "*")
+						AND		(M.MESSAGEID LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		M.MESSAGENAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		M.DESCRIPTION LIKE '%$!{P_CONDITIONVALUE}%')
+					#else
+						#if ("$!{P_CONDITIONITEM}" == "TITLE")
+							AND		M.MESSAGENAME LIKE '%$!{P_CONDITIONVALUE}%'
+						#elseif ("$!{P_CONDITIONITEM}" == "MESSAGENAME")
+							AND		M.DESCRIPTION LIKE '%$!{P_CONDITIONVALUE}%'
+						#else
+							AND		M.$!{P_CONDITIONITEM} LIKE '%$!{P_CONDITIONVALUE}%'
+						#end
+					#end
+				#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 시스템 관리 > 다국어 관리 > 메세지그룹 정보
+	설		명	: 메세지그룹 정보 화면의 메세지그룹 리스트를 조회한다.
+	작	성	자	: 강호윤
+	작	성	일	: 2019-04-01
+	주요 변경 로그	:
+	-->
+	<query id="SelectMessageClass" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : SelectMessageClass
+				-- Version : 10001
+				SELECT
+						MC.MESSAGECLASSID
+					,	DK.DICTIONARYNAME		AS "MESSAGECLASSNAME$$KO-KR"
+					,	DE.DICTIONARYNAME		AS "MESSAGECLASSNAME$$EN-US"
+					,	DC.DICTIONARYNAME		AS "MESSAGECLASSNAME$$JA-JP"
+					,	DV.DICTIONARYNAME		AS "MESSAGECLASSNAME$$VI-VN"
+					,	MC.DESCRIPTION
+					,	UC.USERNAME				AS CREATOR
+					,	MC.CREATEDTIME
+					,	UM.USERNAME				AS MODIFIER
+					,	MC.MODIFIEDTIME
+					,	MC.VALIDSTATE
+				FROM	SF_MESSAGECLASS			MC
+				LEFT OUTER JOIN SF_DICTIONARY	DK	ON	MC.DICTIONARYID = DK.DICTIONARYID
+													AND	DK.LANGUAGETYPE = 'ko-KR'
+				LEFT OUTER JOIN SF_DICTIONARY	DE	ON	MC.DICTIONARYID = DE.DICTIONARYID
+													AND	DE.LANGUAGETYPE = 'en-US'
+				LEFT OUTER JOIN SF_DICTIONARY	DC	ON	MC.DICTIONARYID = DC.DICTIONARYID
+													AND	DC.LANGUAGETYPE = 'ja-JP'
+				LEFT OUTER JOIN SF_DICTIONARY	DV	ON	MC.DICTIONARYID = DV.DICTIONARYID
+													AND	DV.LANGUAGETYPE = 'vi-VN'
+				LEFT OUTER JOIN SF_USER			UC	ON	MC.CREATOR = UC.USERID
+				LEFT OUTER JOIN SF_USER			UM	ON	MC.MODIFIER = UM.USERID
+				WHERE	1 = 1
+				#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+					AND		MC.VALIDSTATE = '$!{P_VALIDSTATE}'
+				#end
+				
+				#if ("$!{P_CONDITIONVALUE}" != "")
+					#if ("$!{P_CONDITIONITEM}" == "*")
+						AND		(MC.MESSAGECLASSID LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		DK.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		DE.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		DC.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		DV.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		MC.DESCRIPTION LIKE '%$!{P_CONDITIONVALUE}%')
+					#else
+						#if ("$!{P_CONDITIONITEM}" == "MESSAGECLASSNAME")
+							AND		(DK.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+							OR		DE.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+							OR		DC.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+							OR		DV.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%')
+						#else
+							AND		MC.$!{P_CONDITIONITEM} LIKE '%$!{P_CONDITIONVALUE}%'
+						#end
+					#end
+				#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 시스템 관리 > 메뉴 관리 > 툴바 정보
+	설		명	: 툴바 정보 화면의 툴바 리스트를 조회한다.
+	작	성	자	: 강호윤
+	작	성	일	: 2019-04-01
+	주요 변경 로그	:
+	-->
+	<query id="SelectToolbar" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : SelectToolbar
+				-- Version : 10001
+				SELECT
+						T.UIID
+					,	T.TOOLBARID
+					,	TDK.DICTIONARYNAME		AS "TOOLBARNAME$$KO-KR"
+					,	TDE.DICTIONARYNAME		AS "TOOLBARNAME$$EN-US"
+					,	TDC.DICTIONARYNAME		AS "TOOLBARNAME$$JA-JP"
+					,	TDV.DICTIONARYNAME		AS "TOOLBARNAME$$VI-VN"
+					,	T.DESCRIPTION
+					,	T.TOOLBARTYPE
+					,	T.OPTIONS
+					,	T.DISPLAYSEQUENCE
+					,	MMK.MESSAGENAME			AS "MESSAGENAME$$KO-KR"
+					,	MME.MESSAGENAME			AS "MESSAGENAME$$EN-US"
+					,	MMC.MESSAGENAME			AS "MESSAGENAME$$JA-JP"
+					,	MMV.MESSAGENAME			AS "MESSAGENAME$$VI-VN"
+					,	T.VALIDSTATE
+					,	UC.USERNAME				AS CREATOR
+					,	T.CREATEDTIME
+					,	UM.USERNAME				AS MODIFIER
+					,	T.MODIFIEDTIME
+				FROM	SF_TOOLBAR		T
+				LEFT OUTER JOIN SF_DICTIONARY	TDK	ON	T.DICTIONARYID = TDK.DICTIONARYID
+													AND	TDK.LANGUAGETYPE = 'ko-KR'
+				LEFT OUTER JOIN SF_DICTIONARY	TDE	ON	T.DICTIONARYID = TDE.DICTIONARYID
+													AND	TDE.LANGUAGETYPE = 'en-US'
+				LEFT OUTER JOIN SF_DICTIONARY	TDC	ON	T.DICTIONARYID = TDC.DICTIONARYID
+													AND	TDC.LANGUAGETYPE = 'ja-JP'
+				LEFT OUTER JOIN SF_DICTIONARY	TDV	ON	T.DICTIONARYID = TDV.DICTIONARYID
+													AND	TDV.LANGUAGETYPE = 'vi-VN'
+				LEFT OUTER JOIN SF_MESSAGE		MMK	ON	T.MESSAGEID = MMK.MESSAGEID
+													AND	MMK.LANGUAGETYPE = 'ko-KR'
+				LEFT OUTER JOIN SF_MESSAGE		MME	ON	T.MESSAGEID = MME.MESSAGEID
+													AND	MME.LANGUAGETYPE = 'en-US'
+				LEFT OUTER JOIN SF_MESSAGE		MMC	ON	T.MESSAGEID = MMC.MESSAGEID
+													AND	MMC.LANGUAGETYPE = 'ja-JP'
+				LEFT OUTER JOIN SF_MESSAGE		MMV	ON	T.MESSAGEID = MMV.MESSAGEID
+													AND	MMV.LANGUAGETYPE = 'vi-VN'
+				LEFT OUTER JOIN SF_CODE			TT	ON	T.TOOLBARTYPE = TT.CODEID
+													AND	TT.CODECLASSID = 'ToolbarType'
+				LEFT OUTER JOIN SF_DICTIONARY	TTN	ON	TT.DICTIONARYID = TTN.DICTIONARYID
+													AND	TTN.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+				LEFT OUTER JOIN SF_USER			UC	ON	T.CREATOR = UC.USERID
+				LEFT OUTER JOIN SF_USER			UM	ON	T.MODIFIER = UM.USERID
+				WHERE	1 = 1
+				AND		T.UIID = 'MES'
+				#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+					AND		T.VALIDSTATE = '$!{P_VALIDSTATE}'
+				#end
+				
+				#if ("$!{P_CONDITIONVALUE}" != "")
+					#if ("$!{P_CONDITIONITEM}" == "*")
+						AND		(T.TOOLBARID LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		TDK.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		TDE.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		TDC.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		TDV.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		T.DESCRIPTION LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		TTN.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		CONVERT(VARCHAR, T.DISPLAYSEQUENCE) LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		T.MESSAGEID LIKE '%$!{P_CONDITIONVALUE}%')
+					#else
+						#if ("$!{P_CONDITIONITEM}" == "TOOLBARNAME")
+							AND		(TDK.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+							OR		TDE.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+							OR		TDC.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+							OR		TDV.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%')
+						#elseif ("$!{P_CONDITIONITEM}" == "TOOLBARTYPE")
+							AND		TTN.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						#else
+							and		T.$!{P_CONDITIONITEM} LIKE '%$!{P_CONDITIONVALUE}%'
+						#end
+					#end
+				#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 시스템 관리 > 메뉴 관리 > 툴바 정보
+	설		명	: 툴바 정보 화면의 툴바 리스트를 조회한다.
+	작	성	자	: 장선미
+	작	성	일	: 2019-10-28
+	주요 변경 로그	:
+	-->
+	<query id="SelectToolbar" version="10002">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : SelectToolbar
+				-- Version : 10002
+				SELECT
+						T.UIID
+					,	T.TOOLBARID
+					,	TDK.DICTIONARYNAME		AS "TOOLBARNAME$$KO-KR"
+					,	TDE.DICTIONARYNAME		AS "TOOLBARNAME$$EN-US"
+					,	TDC.DICTIONARYNAME		AS "TOOLBARNAME$$JA-JP"
+					,	TDV.DICTIONARYNAME		AS "TOOLBARNAME$$VI-VN"
+					,	T.DESCRIPTION
+					,	T.TOOLBARTYPE
+					,	T.OPTIONS
+					,   'Y'						AS ISWRITE
+					,	T.DISPLAYSEQUENCE
+					,	MMK.MESSAGENAME			AS "MESSAGENAME$$KO-KR"
+					,	MME.MESSAGENAME			AS "MESSAGENAME$$EN-US"
+					,	MMC.MESSAGENAME			AS "MESSAGENAME$$JA-JP"
+					,	MMV.MESSAGENAME			AS "MESSAGENAME$$VI-VN"
+					,	T.VALIDSTATE
+					,	UC.USERNAME				AS CREATOR
+					,	T.CREATEDTIME
+					,	UM.USERNAME				AS MODIFIER
+					,	T.MODIFIEDTIME
+				FROM	SF_TOOLBAR		T
+				LEFT OUTER JOIN SF_DICTIONARY	TDK	ON	T.DICTIONARYID = TDK.DICTIONARYID
+													AND	TDK.LANGUAGETYPE = 'ko-KR'
+				LEFT OUTER JOIN SF_DICTIONARY	TDE	ON	T.DICTIONARYID = TDE.DICTIONARYID
+													AND	TDE.LANGUAGETYPE = 'en-US'
+				LEFT OUTER JOIN SF_DICTIONARY	TDC	ON	T.DICTIONARYID = TDC.DICTIONARYID
+													AND	TDC.LANGUAGETYPE = 'ja-JP'
+				LEFT OUTER JOIN SF_DICTIONARY	TDV	ON	T.DICTIONARYID = TDV.DICTIONARYID
+													AND	TDV.LANGUAGETYPE = 'vi-VN'
+				LEFT OUTER JOIN SF_MESSAGE		MMK	ON	T.MESSAGEID = MMK.MESSAGEID
+													AND	MMK.LANGUAGETYPE = 'ko-KR'
+				LEFT OUTER JOIN SF_MESSAGE		MME	ON	T.MESSAGEID = MME.MESSAGEID
+													AND	MME.LANGUAGETYPE = 'en-US'
+				LEFT OUTER JOIN SF_MESSAGE		MMC	ON	T.MESSAGEID = MMC.MESSAGEID
+													AND	MMC.LANGUAGETYPE = 'ja-JP'
+				LEFT OUTER JOIN SF_MESSAGE		MMV	ON	T.MESSAGEID = MMV.MESSAGEID
+													AND	MMV.LANGUAGETYPE = 'vi-VN'
+				LEFT OUTER JOIN SF_CODE			TT	ON	T.TOOLBARTYPE = TT.CODEID
+													AND	TT.CODECLASSID = 'ToolbarType'
+				LEFT OUTER JOIN SF_DICTIONARY	TTN	ON	TT.DICTIONARYID = TTN.DICTIONARYID
+													AND	TTN.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+				LEFT OUTER JOIN SF_USER			UC	ON	T.CREATOR = UC.USERID
+				LEFT OUTER JOIN SF_USER			UM	ON	T.MODIFIER = UM.USERID
+				WHERE	1 = 1
+				AND		T.UIID = 'MES'
+				#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+					AND		T.VALIDSTATE = '$!{P_VALIDSTATE}'
+				#end
+				
+				#if ("$!{P_CONDITIONVALUE}" != "")
+					#if ("$!{P_CONDITIONITEM}" == "*")
+						AND		(T.TOOLBARID LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		TDK.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		TDE.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		TDC.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		TDV.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		T.DESCRIPTION LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		TTN.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		CONVERT(VARCHAR, T.DISPLAYSEQUENCE) LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		T.MESSAGEID LIKE '%$!{P_CONDITIONVALUE}%')
+					#else
+						#if ("$!{P_CONDITIONITEM}" == "TOOLBARNAME")
+							AND		(TDK.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+							OR		TDE.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+							OR		TDC.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+							OR		TDV.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%')
+						#elseif ("$!{P_CONDITIONITEM}" == "TOOLBARTYPE")
+							AND		TTN.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						#else
+							and		T.$!{P_CONDITIONITEM} LIKE '%$!{P_CONDITIONVALUE}%'
+						#end
+					#end
+				#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 시스템 관리 > 메뉴 관리 > 툴바 권한 정보
+	설		명	: 툴바 권한 정보 화면의 사용자그룹 리스트를 조회한다.
+	작	성	자	: 강호윤
+	작	성	일	: 2019-04-01
+	주요 변경 로그	:
+	-->
+	<query id="SelectToolbarAuthorityUserClass" version="10001">
+		<statement>
+			<![CDATA[
+				-- 
+				-- Id : SelectToolbarAuthorityUserClass
+				-- Version : 10001
+				SELECT
+						UC.USERCLASSID
+					,	UCN.DICTIONARYNAME			AS USERCLASSNAME
+					,	CONVERT(BIT, CASE WHEN MA.MENUID IS NULL THEN 0
+							  			  ELSE 1
+						 				  END)		AS ACTIVATED
+				FROM	SF_USERCLASS				UC
+				LEFT OUTER JOIN
+				(
+					SELECT
+							MA.USERCLASSID
+						,	MA.MENUID
+					FROM	SF_MENUAUTHORITY		MA
+					INNER JOIN
+					(
+						SELECT
+								UCU.USERCLASSID
+						FROM	SF_USERCLASSUSER	UCU
+						WHERE	1=1
+								--AND 	UCU.USERID = '$!{P_USERID}'
+								AND		UCU.VALIDSTATE = '$!{P_VALIDSTATE}'
+					)								UCU	ON	MA.USERCLASSID = UCU.USERCLASSID
+					WHERE	MA.VALIDSTATE = '$!{P_VALIDSTATE}'
+					AND		MA.UIID = 'MES'
+					AND		MA.MENUID = '$!{P_MENUID}'
+					GROUP BY MA.USERCLASSID, MA.MENUID
+				)									MA	ON	UC.USERCLASSID = MA.USERCLASSID
+				LEFT OUTER JOIN SF_DICTIONARY		UCN	ON	UC.DICTIONARYID = UCN.DICTIONARYID
+														AND	UCN.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+				WHERE	MA.USERCLASSID IS NOT NULL
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 시스템 관리 > 메뉴 관리 > 툴바 권한 정보
+	설		명	: 툴바 권한 정보 화면의 툴바 리스트를 조회한다.
+	작	성	자	: 강호윤
+	작	성	일	: 2019-04-01
+	주요 변경 로그	:
+	-->
+	<query id="SelectToolbarAuthorityToolbar" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : SelectToolbarAuthorityToolbar
+				-- Version : 10001
+				SELECT
+						T.UIID
+					,	T.TOOLBARID
+					,	TN.DICTIONARYNAME		AS TOOLBARNAME
+					,	TA.MENUID
+					,	T.TOOLBARTYPE
+					,	TA.USERCLASSID
+					,	CONVERT(BIT, CASE WHEN TA.MENUID IS NULL THEN 0
+							  			  ELSE 1
+							  			  END)					AS ACTIVATED
+				FROM	SF_TOOLBAR				T
+				LEFT OUTER JOIN
+				(
+					SELECT
+							TA.UIID
+						,	TA.TOOLBARID
+						,	TA.MENUID
+						,	TA.USERCLASSID
+					FROM	SF_TOOLBARAUTHORITY	TA
+					WHERE	TA.VALIDSTATE = '$!{P_VALIDSTATE}'
+					AND		TA.MENUID = '$!{P_MENUID}'
+					AND		TA.USERCLASSID = '$!{P_USERCLASSID}'
+					GROUP BY TA.UIID, TA.TOOLBARID, TA.MENUID, TA.USERCLASSID
+				)								TA	ON	T.TOOLBARID = TA.TOOLBARID
+													AND	T.UIID = TA.UIID
+				LEFT OUTER JOIN SF_DICTIONARY	TN	ON	T.DICTIONARYID = TN.DICTIONARYID
+													AND	TN.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+				WHERE	T.VALIDSTATE = '$!{P_VALIDSTATE}'
+				AND		T.UIID = 'MES'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 시스템 관리 > 사용자 관리 > 사용자 정보
+	설		명	: 사용자 정보 화면의 사용자 리스트를 조회한다.
+	작	성	자	: 강호윤
+	작	성	일	: 2019-04-01
+	주요 변경 로그	:
+	-->
+	<query id="SelectUser" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : SelectUser
+				-- Version : 10001
+				SELECT
+						U.USERID
+					,	U.USERNAME
+					,	U.DESCRIPTION
+					,	''					AS PASSWORD
+					,	U.NICKNAME
+					,	U.DEPARTMENT
+					,	U.POSITION
+					,	U.DUTY
+					,	U.SHIFTID
+					,	U.EMAILADDRESS
+					,	U.HOMEADDRESS
+					,	U.CELLPHONENUMBER
+					,	U.LANGUAGETYPE		AS DEFAULTLANGUAGETYPE
+					,	U.SEED
+					,	UC.USERNAME			AS CREATOR
+					,	U.CREATEDTIME
+					,	UM.USERNAME			AS MODIFIER
+					,	U.MODIFIEDTIME
+					,	U.VALIDSTATE
+					,	U.USERSTATE
+				FROM	SF_USER				U
+				LEFT OUTER JOIN SF_USER		UC	ON	U.CREATOR = UC.USERID
+				LEFT OUTER JOIN SF_USER		UM	ON	U.MODIFIER = UM.USERID
+				WHERE	1 = 1
+				#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+					AND		U.VALIDSTATE = '$!{P_VALIDSTATE}'
+				#end
+				
+				#if ("$!{P_CONDITIONVALUE}" != "")
+					#if ("$!{P_CONDITIONITEM}" == "*")
+						AND		(U.USERID LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		U.USERNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		U.DESCRIPTION LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		U.DEPARTMENT LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		U.POSITION LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		U.DUTY LIKE '%$!{P_CONDITIONVALUE}%')
+					#else
+						AND		U.$!{P_CONDITIONITEM} LIKE '%$!{P_CONDITIONVALUE}%'
+					#end
+				#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 시스템 관리 > 사용자 관리 > 사용자그룹 정보
+	설		명	: 사용자그룹 정보 화면의 사용자그룹 리스트를 조회한다.
+	작	성	자	: 강호윤
+	작	성	일	: 2019-04-01
+	주요 변경 로그	:
+	-->
+	<query id="SelectUserClass" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : SelectUserClass
+				-- Version : 10001
+				SELECT
+						U.USERCLASSID
+					,	DK.DICTIONARYNAME		AS "USERCLASSNAME$$KO-KR"
+					,	DE.DICTIONARYNAME		AS "USERCLASSNAME$$EN-US"
+					,	DC.DICTIONARYNAME		AS "USERCLASSNAME$$JA-JP"
+					,	DV.DICTIONARYNAME		AS "USERCLASSNAME$$VI-VN"
+					,	U.DESCRIPTION
+					,	U.VALIDSTATE
+					,	UC.USERNAME				AS CREATOR
+					,	U.CREATEDTIME
+					,	UM.USERNAME				AS MODIFIER
+					,	U.MODIFIEDTIME
+				FROM	SF_USERCLASS			U
+				LEFT OUTER JOIN SF_DICTIONARY	DK	ON	U.DICTIONARYID = DK.DICTIONARYID
+													AND	DK.LANGUAGETYPE = 'ko-KR'
+				LEFT OUTER JOIN SF_DICTIONARY	DE	ON	U.DICTIONARYID = DE.DICTIONARYID
+													AND	DE.LANGUAGETYPE = 'en-US'
+				LEFT OUTER JOIN SF_DICTIONARY	DC	ON	U.DICTIONARYID = DC.DICTIONARYID
+													AND	DC.LANGUAGETYPE = 'ja-JP'
+				LEFT OUTER JOIN SF_DICTIONARY	DV	ON	U.DICTIONARYID = DV.DICTIONARYID
+													AND	DV.LANGUAGETYPE = 'vi-VN'
+				LEFT OUTER JOIN SF_USER			UC	ON	U.CREATOR = UC.USERID
+				LEFT OUTER JOIN SF_USER			UM	ON	U.MODIFIER = UM.USERID
+				WHERE	1 = 1
+				#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+					AND		U.VALIDSTATE = '$!{P_VALIDSTATE}'
+				#end
+				
+				#if ("$!{P_CONDITIONVALUE}" != "")
+					#if ("$!{P_CONDITIONITEM}" == "*")
+						AND		(U.USERCLASSID LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		DK.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		DE.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		DC.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		DV.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		U.DESCRIPTION LIKE '%$!{P_CONDITIONVALUE}%')
+					#else
+						#if ("$!{P_CONDITIONITEM}" == "USERCLASSNAME")
+							AND		(DK.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+							OR		DE.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+							OR		DC.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+							OR		DV.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%')
+						#else
+							AND		U.$!{P_CONDITIONITEM} LIKE '%$!{P_CONDITIONVALUE}%'
+						#end
+					#end
+				#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 시스템 관리 > 사용자 관리 > 사용자그룹 정보
+	설		명	: 사용자그룹 정보 화면의 사용자그룹 리스트를 조회한다.
+	작	성	자	: 장선미
+	작	성	일	: 2019-10-31
+	주요 변경 로그	:
+	-->
+	<query id="SelectUserClass" version="10002">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : SelectUserClass
+				-- Version : 10002
+				SELECT
+						U.USERCLASSID
+					,	DK.DICTIONARYNAME		AS "USERCLASSNAME$$KO-KR"
+					,	DE.DICTIONARYNAME		AS "USERCLASSNAME$$EN-US"
+					,	DC.DICTIONARYNAME		AS "USERCLASSNAME$$JA-JP"
+					,	DV.DICTIONARYNAME		AS "USERCLASSNAME$$VI-VN"
+					,	U.DESCRIPTION
+					,	U.ISAUDIT
+					,	U.VALIDSTATE
+					,	UC.USERNAME				AS CREATOR
+					,	U.CREATEDTIME
+					,	UM.USERNAME				AS MODIFIER
+					,	U.MODIFIEDTIME
+				FROM	SF_USERCLASS			U
+				LEFT OUTER JOIN SF_DICTIONARY	DK	ON	U.DICTIONARYID = DK.DICTIONARYID
+													AND	DK.LANGUAGETYPE = 'ko-KR'
+				LEFT OUTER JOIN SF_DICTIONARY	DE	ON	U.DICTIONARYID = DE.DICTIONARYID
+													AND	DE.LANGUAGETYPE = 'en-US'
+				LEFT OUTER JOIN SF_DICTIONARY	DC	ON	U.DICTIONARYID = DC.DICTIONARYID
+													AND	DC.LANGUAGETYPE = 'ja-JP'
+				LEFT OUTER JOIN SF_DICTIONARY	DV	ON	U.DICTIONARYID = DV.DICTIONARYID
+													AND	DV.LANGUAGETYPE = 'vi-VN'
+				LEFT OUTER JOIN SF_USER			UC	ON	U.CREATOR = UC.USERID
+				LEFT OUTER JOIN SF_USER			UM	ON	U.MODIFIER = UM.USERID
+				WHERE	1 = 1
+				AND		U.VALIDSTATE = '$!{P_VALIDSTATE}'
+				
+				#if ("$!{P_CONDITIONVALUE}" != "")
+					#if ("$!{P_CONDITIONITEM}" == "*")
+						AND		(U.USERCLASSID LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		DK.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		DE.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		DC.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		DV.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		U.DESCRIPTION LIKE '%$!{P_CONDITIONVALUE}%')
+					#else
+						#if ("$!{P_CONDITIONITEM}" == "USERCLASSNAME")
+							AND		(DK.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+							OR		DE.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+							OR		DC.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+							OR		DV.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%')
+						#else
+							AND		U.$!{P_CONDITIONITEM} LIKE '%$!{P_CONDITIONVALUE}%'
+						#end
+					#end
+				#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 시스템 관리 > 사용자 관리 > 사용자 그룹 - 사용자 매핑
+	설		명	: 사용자 그룹 - 사용자 매핑 화면의 매핑된 사용자 리스트를 조회한다.
+	작	성	자	: 강호윤
+	작	성	일	: 2019-04-01
+	주요 변경 로그	:
+	-->
+	<query id="SelectUserClassMapping" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : SelectUserClassMapping
+				-- Version : 10001
+				SELECT
+						UC.USERCLASSID
+					,	UCN.DICTIONARYNAME		AS USERCLASSNAME
+				FROM	SF_USERCLASS			UC
+				LEFT OUTER JOIN SF_DICTIONARY	UCN	ON	UC.DICTIONARYID = UCN.DICTIONARYID
+													AND	UCN.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+				WHERE	1 = 1
+				AND		UC.VALIDSTATE = '$!{P_VALIDSTATE}'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 시스템 관리 > 사용자 관리 > 사용자 그룹 - 사용자 매핑
+	설		명	: 사용자 그룹 - 사용자 매핑 화면에 사용자 조회 팝업의 사용자 리스트를 조회한다.
+	작	성	자	: 강호윤
+	작	성	일	: 2019-04-01
+	주요 변경 로그	:
+	-->
+	<query id="SelectUserClassUserSearch" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : SelectUserClassUserSearch
+				-- Version : 10001
+				SELECT
+						U.USERID
+					,	U.USERNAME
+					,	U.DEPARTMENT
+					,	U.POSITION
+					,	U.EMAILADDRESS
+					,	U.CELLPHONENUMBER
+					,	UCU.USERCLASSID
+				FROM	SF_USER					U
+				INNER JOIN SF_USERCLASSUSER		UCU	ON	U.USERID = UCU.USERID
+				WHERE	1 = 1
+				AND		UCU.USERCLASSID = '$!{P_USERCLASSID}'
+				
+				#if ("$!{P_CONDITIONVALUE}" != "")
+					#if ("$!{P_CONDITIONITEM}" == "*")
+						AND		(U.USERID LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		U.USERNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		U.DEPARTMENT LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		U.POSITION LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		U.EMAILADDRESS LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		U.CELLPHONENUMBER LIKE '%$!{P_CONDITIONVALUE}%')
+					#else
+						AND		U.$!{P_CONDITIONITEM} LIKE '%$!{P_CONDITIONVALUE}%'
+					#end
+				#end
+			]]>
+		</statement>
+	</query>
+	
+		
+	<!--
+	프 로 그 램 명	: 시스템 관리 > 요청 관리 > 요청 정보
+	설		명	: 메뉴 트리 클릭시 메뉴 ID에 해당하는 그리드 정보를 조회한다.
+	작	성	자	: 한주석
+	작	성	일	: 2019-10-21
+	주요 변경 로그	:
+	-->
+	<query id="SelectUserClassRequestSearch" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : SelectUserClassRequestSearch
+				-- Version : 10001
+				SELECT
+						SV.SRNO
+					,	SV.REQUESTDATE
+					,	SV.MENUID
+					,	SV.REQUESTUSER
+					,	SV.TITLE
+					,	SV.SRSTATE				AS SRSTATEID
+					,	D.DICTIONARYNAME 		AS SRSTATENAME
+					,	SV.WORKER
+					,	SV.ENDDATE
+				FROM	CT_SERVIESR				SV
+				LEFT OUTER JOIN SF_CODE 		C 	ON 	C.CODEID = SV.SRSTATE
+													AND C.CODECLASSID = 'RequestState'
+				LEFT OUTER JOIN SF_DICTIONARY 	D 	ON 	D.DICTIONARYID = C.DICTIONARYID
+													AND D.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE	1 = 1
+				AND		SV.VALIDSTATE = '$!{P_VALIDSTATE}'
+				AND		SV.MENUID = '$!{P_MENUID}'
+				ORDER BY SV.SRNO
+				
+			]]>
+		</statement>
+	</query>
+	
+	
+	<!--
+	프 로 그 램 명	: 시스템 관리 > 요청 관리 > 요청 정보
+	설		명	: 조회 버튼 클릭시 모든 요청 정보 조회
+	작	성	자	: 한주석
+	작	성	일	: 2019-10-22
+	주요 변경 로그	:
+	-->
+	<query id="SelectAllRequestSearch" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : SelectAllRequestSearch
+				-- Version : 10001
+				SELECT
+						SV.SRNO
+					,	SV.MENUID
+					,	SV.REQUESTDATE
+					,	SV.REQUESTUSER
+					,	SV.TITLE
+					,	SV.SRSTATE				AS SRSTATEID
+					,	D.DICTIONARYNAME 		AS SRSTATENAME
+					,	SV.WORKER
+					,	SV.ENDDATE
+				FROM	CT_SERVIESR				SV
+				LEFT OUTER JOIN SF_CODE 		C 	ON 	C.CODEID = SV.SRSTATE
+													AND C.CODECLASSID = 'RequestState'
+				LEFT OUTER JOIN SF_DICTIONARY 	D 	ON 	D.DICTIONARYID = C.DICTIONARYID
+													AND D.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE	1 = 1
+				AND		SV.VALIDSTATE = '$!{P_VALIDSTATE}'
+				
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 시스템 관리 > 사용자 관리 > 사이트 - 사용자 매핑
+	설		명	: 사이트 - 사용자 매핑 화면의 사이트를 조회한다.
+	작	성	자	: 장선미
+	작	성	일	: 2019-10-23
+	주요 변경 로그	:
+	-->
+	<query id="SelectPlantMapping" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : SelectPlantMapping
+				-- Version : 10001
+				SELECT
+						P.PLANTID
+					,   P.ENTERPRISEID
+					,	PN.DICTIONARYNAME		AS PLANTNAME
+				FROM	SF_PLANT				P
+				LEFT OUTER JOIN SF_DICTIONARY	PN	ON	P.PLANTNAME = PN.DICTIONARYID
+													AND	PN.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+				WHERE	1 = 1
+				AND		P.VALIDSTATE = '$!{P_VALIDSTATE}'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 시스템 관리 > 사용자 관리 > 사이트 - 사용자 매핑
+	설		명	: 사이트 - 사용자 매핑 화면에 사용자 조회 팝업의 사용자 리스트를 조회한다.
+	작	성	자	: 장선미
+	작	성	일	: 2019-10-23
+	주요 변경 로그	:
+	-->
+	<query id="SelectPlantUserSearch" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : "SelectPlantUserSearch"
+				-- Version : 10001
+				SELECT
+						U.USERID
+					,	U.USERNAME
+					,	U.DEPARTMENT
+					,	U.POSITION
+					,	U.EMAILADDRESS
+					,	U.CELLPHONENUMBER
+					,	U.PLANTID
+					,   U.ENTERPRISEID
+				FROM	SF_USER				U
+				WHERE	1 = 1
+				AND		U.PLANTID = '$!{P_PLANTID}'
+				UNION 
+				SELECT
+						U.USERID
+					,	U.USERNAME
+					,	U.DEPARTMENT
+					,	U.POSITION
+					,	U.EMAILADDRESS
+					,	U.CELLPHONENUMBER
+					,	PU.PLANTID
+					,   PU.ENTERPRISEID
+				FROM	CT_PLANTUSER		PU
+				INNER JOIN SF_USER			U	ON	PU.USERID = U.USERID 
+				WHERE	1 = 1
+				AND		PU.PLANTID = '$!{P_PLANTID}'
+				
+				#if ("$!{P_CONDITIONVALUE}" != "")
+					#if ("$!{P_CONDITIONITEM}" == "*")
+						AND		(U.USERID LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		U.USERNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		U.DEPARTMENT LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		U.POSITION LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		U.EMAILADDRESS LIKE '%$!{P_CONDITIONVALUE}%'
+						OR		U.CELLPHONENUMBER LIKE '%$!{P_CONDITIONVALUE}%')
+					#else
+						AND		U.$!{P_CONDITIONITEM} LIKE '%$!{P_CONDITIONVALUE}%'
+					#end
+				#end
+			]]>
+		</statement>
+	</query>
+</list>

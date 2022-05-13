@@ -1,0 +1,12 @@
+<html>
+  <head></head> 
+  <body>
+    <div style="width:600px;text-align:center;">
+        <div style="display:table-row;font-size:10pt;">
+          <div style="display:table-cell;vertical-align:middle;padding:10px;">
+            ${CONTENT}
+          </div>
+        </div>   
+    </div>
+  </body>
+</html>

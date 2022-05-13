@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.pde.ui.EquinoxLauncher">
+<booleanAttribute key="append.args" value="true"/>
+<booleanAttribute key="automaticAdd" value="true"/>
+<booleanAttribute key="automaticValidate" value="true"/>
+<stringAttribute key="bootstrap" value=""/>
+<stringAttribute key="checked" value="[NONE]"/>
+<booleanAttribute key="clearConfig" value="true"/>
+<stringAttribute key="configLocation" value="${workspace_loc}/.metadata/.plugins/org.eclipse.pde.core/ulbac"/>
+<booleanAttribute key="default" value="true"/>
+<booleanAttribute key="default_auto_start" value="true"/>
+<intAttribute key="default_start_level" value="4"/>
+<setAttribute key="deselected_workspace_bundles"/>
+<booleanAttribute key="includeOptional" value="true"/>
+<booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
+<stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -consoleLog -Xms=4096m &#13;&#10;-Xmx4096m &#13;&#10;-XX:+UseG1GC -console"/>
+<stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Declipse.ignoreApp=true &#13;&#10;-Dosgi.noShutdown=true &#13;&#10;-Dsf.server.home=&quot;${workspace_loc}&quot;&#10;&#13;&#10;-Dsf.server.config=&quot;${workspace_loc}/Config&quot;&#13;&#10;-Dsf.server.mode=DEV&#13;&#10;-Dsf.server.name=SmartFrame&#13;&#10;-Dsf.server.sequence=2.1&#13;&#10;-Dsf.server.module.manage=none&#10;&#13;&#10;-Duser.language=ko&#13;&#10;&#10;-Duser.country=KR&#13;&#10;-Djava.io.tmpdir=&quot;${workspace_loc}/Tmp&quot;&#13;&#10;&#10;-Djava.net.preferIPv4Stack=true&#13;&#10;&#10;-Djava.library.path=&quot;${workspace_loc}/Lib/Other&quot;"/>
+<stringAttribute key="pde.version" value="3.3"/>
+<setAttribute key="selected_target_bundles">
+<setEntry value="org.apache.felix.gogo.command@default:default"/>
+<setEntry value="org.apache.felix.gogo.runtime@default:default"/>
+<setEntry value="org.apache.felix.gogo.shell@default:default"/>
+<setEntry value="org.eclipse.equinox.console.ssh@default:default"/>
+<setEntry value="org.eclipse.equinox.console@default:default"/>
+<setEntry value="org.eclipse.osgi@-1:true"/>
+<setEntry value="s-commons-factory@default:default"/>
+<setEntry value="s-commons-netty@default:default"/>
+<setEntry value="s-commons-nio.http@default:default"/>
+<setEntry value="s-commons-spring@default:default"/>
+<setEntry value="s-commons-util.message@default:default"/>
+<setEntry value="s-commons-util.plugin@default:default"/>
+<setEntry value="s-commons-util.sql@default:default"/>
+<setEntry value="s-commons-util@default:default"/>
+<setEntry value="s-component-command@default:default"/>
+<setEntry value="s-component-dbms.jdbc.driver.mssql.jre8.x64@default:false"/>
+<setEntry value="s-component-dbms.jdbc.driver.oracle@default:false"/>
+<setEntry value="s-component-dbms.jdbc.driver.sqllite@default:false"/>
+<setEntry value="s-component-dbms.jdbc.driver@default:default"/>
+<setEntry value="s-component-dbms.jdbc@default:default"/>
+<setEntry value="s-component-nio.ftp@default:default"/>
+<setEntry value="s-component-nio.kafka@default:default"/>
+<setEntry value="s-component-nio.socket@default:default"/>
+<setEntry value="s-component-nio.web@default:default"/>
+<setEntry value="s-component-scheduler@default:default"/>
+<setEntry value="s-components-factory.core@default:default"/>
+<setEntry value="s-core-nio@default:default"/>
+<setEntry value="s-core-sql@default:default"/>
+<setEntry value="s-core@default:default"/>
+<setEntry value="s-launcher-plugin@default:default"/>
+<setEntry value="s-rule-common.querys@default:default"/>
+<setEntry value="s-rule-common@default:default"/>
+<setEntry value="s-rule-factory.DA@default:default"/>
+<setEntry value="s-rule-factory.action@default:default"/>
+<setEntry value="s-rule-factory.alarm@default:default"/>
+<setEntry value="s-rule-factory.code@default:default"/>
+<setEntry value="s-rule-factory.consumable@default:default"/>
+<setEntry value="s-rule-factory.durable@default:default"/>
+<setEntry value="s-rule-factory.equipment@default:default"/>
+<setEntry value="s-rule-factory.inspection@default:default"/>
+<setEntry value="s-rule-factory.lot@default:default"/>
+<setEntry value="s-rule-factory.processpath@default:default"/>
+<setEntry value="s-rule-factory.sublot@default:default"/>
+<setEntry value="s-rule-factory.wip@default:default"/>
+<setEntry value="s-rule-munit@default:default"/>
+<setEntry value="s-tool-cache@default:default"/>
+<setEntry value="s-tool-calculate.jdk1.8@default:default"/>
+<setEntry value="s-tool-management.user@default:default"/>
+<setEntry value="s-tool-message.dataset@default:default"/>
+<setEntry value="s-tool-monitor.service@default:default"/>
+<setEntry value="s-tool-nio.email@default:default"/>
+<setEntry value="s-tool-so.mes@default:default"/>
+<setEntry value="s-tool-so.support@default:default"/>
+<setEntry value="s-tool-so@default:default"/>
+<setEntry value="s-tool-worker@default:default"/>
+</setAttribute>
+<setAttribute key="selected_workspace_bundles">
+<setEntry value="s-commons-com@default:default"/>
+<setEntry value="s-rule-mes.com@default:default"/>
+<setEntry value="s-rule-service.worker@default:default"/>
+<setEntry value="ulvac-mes-equipment@default:default"/>
+<setEntry value="ulvac-mes-material@default:default"/>
+<setEntry value="ulvac-mes-process@default:default"/>
+<setEntry value="ulvac-mes-product@default:default"/>
+<setEntry value="ulvac-mes-quality@default:default"/>
+<setEntry value="ulvac-mes-standard@default:default"/>
+</setAttribute>
+<booleanAttribute key="show_selected_only" value="false"/>
+<booleanAttribute key="tracing" value="false"/>
+<booleanAttribute key="useCustomFeatures" value="false"/>
+<booleanAttribute key="useDefaultConfigArea" value="true"/>
+</launchConfiguration>

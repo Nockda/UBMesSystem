@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list>
+	<!--
+	프 로 그 램 명	: 자재관리 > 간반요청출고
+	설		명	: 간반요청리스트를 출력한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-04-27
+	주요 변경 로그	: 2020-06-11 | JYLEE | 테이블수정 반영, 전체 쿼리 수정
+				: 2020-06-15 | JYLEE | STATE => KAN.STATE(combobox)수정
+									 | ITEM => CONSUMABLEDEF
+				  2020-06-19 | JYLEE | 부서 쿼리 변경
+				  2020-07-02 | JYLEE | 정렬순서 변경
+	-->
+ 	<query id="GetKanbanList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- id : "GetKanbanList"
+				-- version : 00001
+			
+					SELECT
+						KAN.REQCODE														AS		REQCODE 			-- 요청번호
+							,	KAN.REQDATE												AS		REQDATE     		-- 요청일자
+							, 	KAN.STATE												AS 		STATE
+							,	KAN.RESDATE												AS		RESDATE 			-- 처리일자
+							,	KAN.CELLID												AS		CELLID 				-- 간반코드
+							,	CELL.CELLNAME											AS		CELLNAME 			-- 간반명
+							,	CELL.LOCATION											AS		LOCATION 			-- 위치
+							,	CELL.CONSUMABLEDEFID									AS		CONSUMABLEDEFID 	-- 자재ID
+							,	COND.PARTNUMBER
+							,	COND.CONSUMABLEDEFNAME									AS		CONSUMABLEDEFNAME   -- 자재명
+							,	COND.CONSUMABLETYPE 									AS 		CONSUMABLETYPE
+							,	ISNULL(DIC4.DICTIONARYNAME,CODE2.CODENAME)				AS		CONSUMABLETYPENAME 	-- 자재타입
+							,	KAN.QTY												AS		CONSUMABLELOTQTY 	-- 수량
+							,	KAN.LOTQTY 												AS 		LOTQTY 				-- 투입수량
+							,	ISNULL(DIC3.DICTIONARYNAME,UNIT.UNITNAME)				AS		UNIT 				-- 단위
+							,	KAN.TOWAREHOUSEID		 								AS 		TOWAREHOUSEID 		-- TO창고ID
+							,	ISNULL(DIC2.DICTIONARYNAME, WARE.WAREHOUSENAME)			AS		TOWAREHOUSENAME		-- TO창고
+							,	KAN.FROMWAREHOUSEID										AS      FROMWAREHOUSEID		-- FROM창고ID
+							,	ISNULL(DIC5.DICTIONARYNAME, WARE2.WAREHOUSENAME)		AS      FROMWAREHOUSENAME   -- FROM창고
+							,	dept.DEPARTMENTID 										AS      DEPARTMENTID 		-- 부서ID
+							,	ISNULL(DIC.DICTIONARYNAME, DEPT.DEPARTMENTNAME)			AS		DEPARTMENT  		-- 부서
+							,	US.USERID												AS      USERID 
+							,	US.USERNAME      									    AS		USERNAME 			-- 요청자
+					FROM UL_KANBAN KAN
+							LEFT JOIN UL_CELL CELL ON CELL.CELLID = KAN.CELLID
+							LEFT JOIN UL_CELLGROUP CEG ON CEG.CELLGROUPID =  CELL.CELLGROUPID
+							LEFT JOIN SF_CONSUMABLEDEFINITION  COND ON COND.CONSUMABLEDEFID = KAN.CONSUMABLEDEFID
+							LEFT JOIN SF_WAREHOUSE WARE ON WARE.WAREHOUSEID = KAN.TOWAREHOUSEID
+							LEFT JOIN SF_WAREHOUSE WARE2 ON WARE2.WAREHOUSEID = KAN.FROMWAREHOUSEID
+							LEFT JOIN SF_USER US ON US.USERID = KAN.USERID
+							LEFT JOIN CT_DEPARTMENT DEPT ON CAST(DEPT.DEPARTMENTID AS INT) = US.DEPARTMENT
+							LEFT JOIN CT_UNITDEFINITION UNIT ON UNIT.UNITID = COND.UNIT 
+														AND UNIT.VALIDSTATE = 'Valid'
+							LEFT JOIN SF_CODE CODE2 ON CODE2.CODEID = COND.CONSUMABLETYPE
+														AND CODE2.CODECLASSID = 'ItemDefType'
+														AND CODE2.VALIDSTATE = 'Valid'
+							LEFT JOIN SF_DICTIONARY DIC ON DIC.DICTIONARYID = DEPT.DICTIONARYID 
+														AND DIC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+														AND DIC.VALIDSTATE = 'Valid'
+							LEFT JOIN SF_DICTIONARY DIC2 ON DIC2.DICTIONARYID = WARE.WAREHOUSEID
+														AND DIC2.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+														AND DIC2.VALIDSTATE = 'Valid'
+							LEFT JOIN SF_DICTIONARY DIC3 ON DIC3.DICTIONARYID = COND.UNIT
+														AND DIC3.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+														AND DIC3.VALIDSTATE = 'Valid'
+							LEFT JOIN SF_DICTIONARY DIC4 ON DIC4.DICTIONARYID = CODE2.DICTIONARYID
+														AND DIC4.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+														AND DIC4.VALIDSTATE = 'Valid'
+							LEFT JOIN SF_DICTIONARY DIC5 ON DIC5.DICTIONARYID = WARE2.WAREHOUSEID
+														AND DIC5.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+														AND DIC5.VALIDSTATE = 'Valid'
+					WHERE 1 = 1
+
+								AND	 KAN.REQDATE BETWEEN '$!{P_DATEPERIOD_PERIODFR}' AND DATEADD(DAY, DATEDIFF(DAY, 0,  '$!{P_DATEPERIOD_PERIODTO}'), '23:59:59')
+							#if ("$!{P_KANBANSTATE}" != "" && "$!{P_KANBANSTATE}" != "*")
+								AND	KAN.STATE = '$!{P_KANBANSTATE}'
+							#end
+							
+							ORDER BY KAN.REQCODE DESC
+							
+			]]>
+		</statement>
+	</query>
+	<!--
+	프 로 그 램 명	: 자재관리 > 간반요청출고
+	설		명	: 사용자 요청품목에 따른 Lot리스트를 보여준다.
+	작	성	자	: jylee
+	작	성	일	: 2020-04-27
+	주요 변경 로그	: 2020-06-12 | JYLEE | CT_UNITDEFINITION 정보 반영
+	-->
+ 	<query id="GetKanbanLotList" version="00001">
+		<statement>
+			<![CDATA[
+			SELECT 
+				LOT.LOTID AS LOTID,
+				LOT.QTY AS QTY, 
+				UNIT.UNITNAME AS UNIT
+			FROM UL_KANBANMAPPINGLOT LOT
+			LEFT JOIN CT_UNITDEFINITION UNIT ON UNIT.UNITID = LOT.UNIT
+											AND UNIT.VALIDSTATE = 'Valid'
+			WHERE 1=1
+				#if ("$!{P_REQCODE}" != "")
+					AND REQCODE = '$!{P_REQCODE}'
+				#end
+			]]>
+		</statement>
+	</query>
+	<!--
+	프 로 그 램 명	: 자재관리 > 간반요청출고 > 간반요청(팝업)
+	설		명	: 사용자 간반요청 팝업
+	작	성	자	: jylee
+	작	성	일	: 2020-04-27
+	주요 변경 로그	: 2020-06-12 | JYLEE | 쿼리수정(테이블수정 반영)
+				: 2020-06-15 | JYLEE | ITEM => CONSUMABLE 변경, 다국어처리
+	-->
+	 <query id="GetReqKanban" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- id : "GetReqKanban"
+				-- version : 00001
+				
+				SELECT
+					CELL.CELLID											AS KANBANCODE			-- 간반코드
+					,	CELL.CELLNAME									AS KANBANNAME			-- 간반
+					,	CELL.LOCATION									AS LOCATION				-- 위치
+					,	CELL.CONSUMABLEDEFID							AS CONSUMABLEDEFID		-- 품목ID
+					,	COND.PARTNUMBER
+					,	COND.CONSUMABLEDEFNAME							AS CONSUMABLEDEFNAME	-- 품목명
+					,	ISNULL(DIC2.DICTIONARYNAME,CODE.CODENAME)		AS CONSUMABLETYPE		-- 품목타입
+					,	CELL.QTY										AS QTY					-- 수량
+					,	UNIT.UNITNAME									AS UNIT					-- 단위
+					,	CELLG.WAREHOUSEID 								AS TOWAREHOUSEID 		-- 창고ID
+					,	ISNULL(DIC.DICTIONARYNAME,WAR.WAREHOUSENAME)	AS TOWAREHOUSE			-- 창고
+				FROM UL_CELL CELL
+					LEFT JOIN SF_CONSUMABLEDEFINITION COND ON COND.CONSUMABLEDEFID = CELL.CONSUMABLEDEFID
+					LEFT JOIN UL_CELLGROUP CELLG ON CELLG.CELLGROUPID = CELL.CELLGROUPID
+					LEFT JOIN SF_WAREHOUSE WAR ON WAR.WAREHOUSEID = CELLG.WAREHOUSEID
+					LEFT JOIN SF_CODE CODE ON CODE.CODEID = COND.CONSUMABLETYPE
+										AND CODE.CODECLASSID = 'ItemDefType'
+					LEFT JOIN CT_UNITDEFINITION UNIT ON UNIT.UNITID = COND.UNIT
+										AND UNIT.VALIDSTATE = 'Valid'
+					LEFT JOIN SF_DICTIONARY DIC ON DIC.DICTIONARYID = WAR.DICTIONARYID
+										AND DIC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+										AND DIC.VALIDSTATE = 'Valid'
+					LEFT JOIN SF_DICTIONARY DIC2 ON DIC2.DICTIONARYID = CODE.DICTIONARYID
+										AND DIC2.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+										AND DIC2.VALIDSTATE = 'Valid'
+					
+				WHERE CELLG.TYPE = 'KB'
+					AND CELL.VALIDSTATE = 'Valid'
+					AND CELL.CELLID = '$!{P_CELLID}'
+			]]>
+		</statement>
+	</query>
+		<!--
+	프 로 그 램 명	: 자재관리 > 간반요청출고 > 처리완료(팝업)
+	설		명	: 
+	작	성	자	: jylee
+	작	성	일	: 2020-04-29
+	주요 변경 로그	: 2020-06-19 | JYLEE | 전체 쿼리 변경
+	-->
+	 <query id="GetResMaterialLot" version="00001">
+		<statement>
+			<![CDATA[
+			
+				--
+				-- id : "GetResMaterialLot"
+				-- version : 00001
+			
+				SELECT
+					LOT.CONSUMABLELOTID			AS  CONSUMABLELOTID
+					,	LOT.CONSUMABLEDEFID 	AS 	CONSUMABLEDEFID
+					,	DEF.PARTNUMBER
+					,	DEF.CONSUMABLEDEFNAME 	AS  CONSUMABLEDEFNAME
+					,	DEF.STANDARD 			AS  STANDARD
+					,	LOT.CONSUMABLELOTQTY 	AS 	CONSUMABLELOTQTY
+					,	UNIT.UNITNAME 			AS  UNITNAME
+				FROM SF_CONSUMABLELOT LOT
+					LEFT JOIN SF_CONSUMABLEDEFINITION DEF ON DEF.CONSUMABLEDEFID = LOT.CONSUMABLEDEFID
+					LEFT JOIN CT_UNITDEFINITION UNIT ON UNIT.UNITID = DEF.UNIT
+				WHERE 1=1
+					AND DEF.VALIDSTATE = 'Valid'
+					AND LOT.CONSUMABLELOTID = '$!{P_CONSUMABLELOTID}'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 자재현황 > CELL 현황
+	설		명	: CELL 현황
+	작	성	자	: jhpark
+	작	성	일	: 2020-06-25
+	주요 변경 로그	: 2020-07-16 | JYLEE | CONSUMABLEDEFID => PARTNUMBER (ERP 품목코드 반영)
+	-->
+	<query id="SelectCellStatus" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			--id : SelectCellStatus
+			--version : 00001
+			
+			SELECT 	CEL.CELLID 					AS CELLID 				-- 셀ID
+				,	CEL.CELLNAME 				AS CELLNAME 			-- 셀명
+				,	CEL.CELLGROUPID 			AS CELLGROUPID 			-- 셀그룹ID
+				,	GRP.CELLGROUPNAME 			AS CELLGROUPNAME 		-- 셀그룹명
+				,	CON.PARTNUMBER									-- 품목ID
+				,	CON.CONSUMABLEDEFNAME								-- 품목명
+				,	CON.STANDARD										-- 규격
+				,	CL.CONSUMABLELOTID									-- 자재 LOTID
+				,	CL.CONSUMABLELOTQTY									-- 자재 LOT 수량
+				,	CEL.LOCATION 				AS LOCATION 			-- 위치(간반)
+			FROM 	UL_CELL 					CEL
+			LEFT JOIN UL_CELLGROUP 				GRP ON	CEL.CELLGROUPID 		= GRP.CELLGROUPID
+			LEFT JOIN SF_CONSUMABLELOT			CL 	ON 	CEL.CELLID 				= CL.LOCATIONID
+													AND CL.CONSUMABLESTATE 		= 'Available'
+													AND CL.CONSUMABLELOTQTY 	> 0
+			LEFT JOIN SF_CONSUMABLEDEFINITION 	CON ON 	CON.CONSUMABLEDEFID 	= CL.CONSUMABLEDEFID
+			WHERE 	CEL.VALIDSTATE = 'VALID'
+			#if ("$!{P_CELLGROUPID}" != "")
+				AND	CEL.CELLGROUPID = '$!{P_CELLGROUPID}'
+			#end
+			]]>
+		</statement>
+	</query>
+	<!--
+	프 로 그 램 명	: 자재현황 > 간반요청출고
+	설		명	: 출고창고변경
+	작	성	자	: JYLEE
+	작	성	일	: 2020-07-07
+	주요 변경 로그	: 
+	-->
+	<query id="selectChangeWarehouse" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			--id : selectChangeWarehouse
+			--version : 00001
+							
+					SELECT  
+					DEF.CONSUMABLEDEFID   							   AS   CONSUMABLEDEFID
+					, DEF.PARTNUMBER
+					, DEF.CONSUMABLEDEFNAME  						   AS   CONSUMABLEDEFNAME
+					, CELL.CELLID 									   AS   CELLID
+					, CELL.CELLNAME 								   AS 	CELLNAME
+					, CELLG.WAREHOUSEID 							   AS 	WAREHOUSEID
+					,	ISNULL(DIC.DICTIONARYNAME, WARE.WAREHOUSENAME) AS 	WAREHOUSENAME
+					FROM SF_CONSUMABLEDEFINITION DEF
+					LEFT JOIN UL_CELL CELL ON DEF.CONSUMABLEDEFID = CELL.CONSUMABLEDEFID
+					LEFT JOIN UL_CELLGROUP CELLG ON CELL.CELLGROUPID = CELLG.CELLGROUPID
+					LEFT JOIN SF_WAREHOUSE WARE ON ware.WAREHOUSEID = cellg.WAREHOUSEID
+					LEFT JOIN SF_DICTIONARY DIC ON DIC.DICTIONARYID = WARE.DICTIONARYID
+											AND DIC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+										    AND DIC.VALIDSTATE = 'Valid'
+					WHERE 1=1
+					#if ("$!{P_CONSUMABLEDEFID}" != "")
+						AND		(UPPER(DEF.CONSUMABLEDEFID) LIKE UPPER('%$!{P_CONSUMABLEDEFID}%')
+						OR		 UPPER(DEF.CONSUMABLEDEFNAME) LIKE UPPER(N'%$!{P_CONSUMABLEDEFID}%')
+						OR		 UPPER(DEF.PARTNUMBER) LIKE UPPER(N'%$!{P_CONSUMABLEDEFID}%')
+						)
+					#end
+						AND DEF.VALIDSTATE = 'Valid'
+						AND WARE.WAREHOUSETYPE = '0001'
+					ORDER BY CELLG.WAREHOUSEID
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 자재관리 > 자재재고관리 > 부품출하등록
+	설		명	: 창고별 자재 lot목록
+	작	성	자	: JYLEE
+	작	성	일	: 2020-07-08
+	주요 변경 로그	: 2020-07-16 | JYLEE | CONSUMABLEDEFID => PARTNUMBER
+	-->
+	<query id="GetMaterialLotForShipment" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			--id : GetMaterialLotForShipment
+			--version : 00001
+							
+				SELECT 
+						(
+							SELECT 
+								COUNT(*) 
+							FROM SF_CONSUMABLELOT LOT
+							WHERE  LOT.CONSUMABLESTATE = 'Available'
+						)													AS  TEMP
+					  , DEF.PARTNUMBER										AS  PARTNUMBER
+					  , DEF.CONSUMABLEDEFNAME								AS  CONSUMABLEDEFNAME
+					  , DEF.STANDARD										AS  STANDARD
+				      , LOT.CONSUMABLELOTID								    AS  CONSUMABLELOTID
+				      , ISNULL(DIC.DICTIONARYNAME,WARE.WAREHOUSENAME)		AS  WAREHOUSENAME
+				      , LOT.CONSUMABLELOTQTY                            	AS  CONSUMABLELOTQTY
+				      ,	LOT.CONSUMABLELOTQTY								AS 	SHIPMENTQTY
+				FROM SF_CONSUMABLEDEFINITION DEF 
+					LEFT JOIN SF_CONSUMABLELOT LOT ON LOT.CONSUMABLEDEFID = DEF.CONSUMABLEDEFID
+					LEFT JOIN SF_WAREHOUSE WARE ON WARE.WAREHOUSEID = LOT.WAREHOUSEID
+					LEFT JOIN SF_DICTIONARY DIC ON DIC.DICTIONARYID = WARE.DICTIONARYID
+												AND DIC.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+				WHERE 1=1
+					#if("$!{P_WAREHOUSE}" != "")
+						AND LOT.WAREHOUSEID = '$!{P_WAREHOUSE}'
+					#end
+					#if("$!{P_CONSUMABLEDEFID}" !="")
+						AND DEF.PARTNUMBER LIKE '%$!{P_CONSUMABLEDEFID}%'
+					#end
+					#if ("$!{P_ITEMDEFTYPE}" != "" && "$!{P_ITEMDEFTYPE}" != "*")
+						AND DEF.CONSUMABLETYPE = '$!{P_ITEMDEFTYPE}'
+					#end
+						AND LOT.CONSUMABLESTATE = 'Available'
+						AND LOT.CONSUMABLELOTQTY > 0
+			]]>
+		</statement>
+	</query>
+		<!--
+	프 로 그 램 명	: 자재관리 > 자재재고관리 > 부품출하등록
+	설		명	: 출하이력
+	작	성	자	: JYLEE
+	작	성	일	: 2020-07-24
+	주요 변경 로그	: 
+	-->
+	<query id="GetMaterialLotForShipmentHistory" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			--id : GetMaterialLotForShipmentHistory
+			--version : 00001
+							
+			SELECT 
+				DEF.PARTNUMBER 					AS  PARTNUMBER 			-- 품번
+				, DEF.CONSUMABLEDEFNAME 		AS 	CONSUMABLEDEFNAME 	-- 자재명
+				, DEF.STANDARD 					AS  STANDARD 			-- 규격
+				, LOTHIS.CONSUMABLELOTID 		AS 	CONSUMABLELOTID 	-- 자재LOT
+				, LOTHIS.TXNHISTKEY										-- TXNHISTKEY
+				, WARE.WAREHOUSENAME 			AS 	WAREHOUSENAME 		-- 창고
+				, LOTHIS.QTY 					AS  QTY 				-- 수량
+				, LOTHIS.SHIPPEDQTY 			AS  SHIPPEDQTY 			-- 출하수량
+				, LOTHIS.CREATOR 				AS  CREATOR
+				, LOTHIS.CREATEDTIME 			AS  CREATEDTIME
+			FROM CT_SHIPPEDCONSUMABLELOT LOTHIS
+				LEFT JOIN SF_CONSUMABLELOT LOT ON LOT.CONSUMABLELOTID = LOTHIS.CONSUMABLELOTID
+				LEFT JOIN SF_CONSUMABLEDEFINITION DEF ON DEF.CONSUMABLEDEFID = LOT.CONSUMABLEDEFID
+				LEFT JOIN SF_WAREHOUSE WARE ON WARE.WAREHOUSEID = LOT.WAREHOUSEID
+			WHERE 1=1
+					#if("$!{P_DATEPERIOD_PERIODFR}" != "" && "$!{P_DATEPERIOD_PERIODTO}" != "")
+			      		AND LOTHIS.CREATEDTIME BETWEEN CONVERT(CHAR(10), '$!{P_DATEPERIOD_PERIODFR}', 21) AND CONVERT(CHAR(10), '$!{P_DATEPERIOD_PERIODTO}', 21)
+			      	#end	
+					#if("$!{P_WAREHOUSE}" != "")
+						AND LOT.WAREHOUSEID = '$!{P_WAREHOUSE}'
+					#end
+					#if("$!{P_CONSUMABLEDEFID}" !="")
+						AND DEF.PARTNUMBER LIKE '%$!{P_CONSUMABLEDEFID}%'
+					#end
+					#if ("$!{P_ITEMDEFTYPE}" != "" && "$!{P_ITEMDEFTYPE}" != "*")
+						AND DEF.CONSUMABLETYPE = '$!{P_ITEMDEFTYPE}'
+					#end
+			ORDER BY LOTHIS.CREATEDTIME DESC
+			]]>
+		</statement>
+	</query>
+</list>

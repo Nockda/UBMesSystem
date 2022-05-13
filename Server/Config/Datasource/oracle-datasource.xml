@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datasource usable="true" config="database.config.oracle">
+	<!-- JDBC Driver 위치 -->
+	<DriverClassName>oracle.jdbc.driver.OracleDriver</DriverClassName>
+	<!-- 연결 주소 -->
+	<Url>jdbc:oracle:thin:@{IP}:1521:orcl</Url>
+	<!-- 계정 -->
+	<Username>User ID</Username>
+	<!-- 비밀번호 -->
+	<Password>Password</Password>
+	<!-- Pool 최대 동시 가능 연결 갯수 -->
+	<MaxTotal>10</MaxTotal>
+	<!-- Pool 최대 연결 가 대기 갯수 -->
+	<MaxIdle>10</MaxIdle>
+	<!-- Pool 최소 연결 갯수 -->
+	<MinIdle>10</MinIdle>
+	<!-- Pool 초기 연결 갯수 -->
+	<InitialSize>10</InitialSize>
+	<!-- Pool 연결 대기 시간 -->
+	<MaxWaitMillis>10000</MaxWaitMillis>
+	<!-- 사용하지 않는 Connection 제거 검사 -->
+	<TestWhileIdle>true</TestWhileIdle>
+	<!-- Pool 유휴 객체 테스트 -->
+	<ValidationQuery>select 1 from dual</ValidationQuery>
+	<ValidationQueryTimeout>10</ValidationQueryTimeout>
+	<TestOnBorrow>true</TestOnBorrow>
+</datasource>

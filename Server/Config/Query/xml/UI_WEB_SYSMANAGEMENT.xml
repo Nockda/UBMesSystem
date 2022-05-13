@@ -1,0 +1,1114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list>
+
+	<!-- MSSQL은 NULL Value가 상위로 올라감. NULLS LAST 없는 관계로 정렬 시 CASE 문 사용하여 아래로 
+		정렬 하도록 함. -->
+	<query id="SYSTEM_CONDITIONMAP_MANAGEMENT_TREE_SELECT" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT  CASE WHEN B.VALIDSTATE IS NULL THEN 'N'
+				             ELSE 'Y' 
+				        END "CHECK"
+				        , A.CONDITIONCLASSID AS CONDITIONCLASSID, A.ACTIONNAME AS ACTIONNAME
+				        , CASE WHEN A.DESCRIPTION IS NULL THEN C.DESCRIPTION
+				               ELSE A.DESCRIPTION
+				          END DESCRIPTION
+				        , A.VALIDSTATE AS VALIDSTATE
+				        , A.TARGET AS TARGET
+				FROM    SF_CONDITIONCLASS A 
+				        LEFT OUTER JOIN SF_CONDITIONCLASSMAP B
+				            ON  A.CONDITIONCLASSID = B.CONDITIONCLASSID
+				            AND B.VALIDSTATE = 'Valid'
+				            AND B.MENUID = '$!{MENUID}'
+				        LEFT OUTER JOIN SF_DICTIONARY C
+				            ON  A.DICTIONARYID = C.DICTIONARYID
+				            AND C.VALIDSTATE = 'Valid'
+				            AND C.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE   A.VALIDSTATE = 'Valid'
+				ORDER BY CASE WHEN B.VALIDSTATE IS NULL THEN 'ZZZZZZ' ELSE B.VALIDSTATE END, A.CONDITIONCLASSID
+			]]>
+		</statement>
+	</query>
+
+	<query id="SYSTEM_CONDITION_MANAGEMENT_CONDITIONCLASS_LIST"
+		version="00001" dbms="ORACLE">
+		<statement>
+			<![CDATA[
+				SELECT	DISTINCT A.CONDITIONCLASSID
+				FROM	SF_CONDITIONCLASS A
+			#if ("$!{CONDITIONID}" != "" || "$!{CONDITIONNAME}" != "")
+				        INNER JOIN SF_CONDITION B
+				            ON  A.CONDITIONCLASSID = B.CONDITIONCLASSID
+				#if ("$!{CONDITIONID}" != "")				            
+				            AND UPPER(B.CONDITIONID) LIKE '%' || UPPER('$!{CONDITIONID}') || '%'
+				#end
+				#if ("$!{CONDITIONNAME}" != "")
+				            AND UPPER(B.CONDITIONNAME) LIKE '%' || UPPER('$!{CONDITIONNAME}') || '%'
+				#end
+				#if ("$!{VALIDSTATE}" != "")
+				            AND B.VALIDSTATE = '$!{VALIDSTATE}'
+				#end
+			#end				
+		 		WHERE	1=1
+		 	#if ("$!{CONDITIONCLASSID}" != "")
+				AND 	UPPER(A.CONDITIONCLASSID) LIKE '%' || UPPER('$!{CONDITIONCLASSID}') || '%'
+			#end
+			#if ("$!{VALIDSTATE}" != "")
+				AND 	A.VALIDSTATE = '$!{VALIDSTATE}'
+			#end
+			 	ORDER BY A.CONDITIONCLASSID
+			]]>
+		</statement>
+	</query>
+
+	<query id="SYSTEM_CONDITION_MANAGEMENT_CONDITIONCLASS_LIST"
+		version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	DISTINCT A.CONDITIONCLASSID
+				FROM	SF_CONDITIONCLASS A
+			#if ("$!{CONDITIONID}" != "" || "$!{CONDITIONNAME}" != "")
+				        INNER JOIN SF_CONDITION B
+				            ON  A.CONDITIONCLASSID = B.CONDITIONCLASSID
+				#if ("$!{CONDITIONID}" != "")				            
+				            AND UPPER(B.CONDITIONID) LIKE '%' + UPPER('$!{CONDITIONID}') + '%'
+				#end
+				#if ("$!{CONDITIONNAME}" != "")
+				            AND UPPER(B.CONDITIONNAME) LIKE '%' + UPPER('$!{CONDITIONNAME}') + '%'
+				#end
+				#if ("$!{VALIDSTATE}" != "")
+				            AND B.VALIDSTATE = '$!{VALIDSTATE}'
+				#end
+			#end				
+		 		WHERE	1=1
+		 	#if ("$!{CONDITIONCLASSID}" != "")
+				AND 	UPPER(A.CONDITIONCLASSID) LIKE '%' + UPPER('$!{CONDITIONCLASSID}') + '%'
+			#end
+			#if ("$!{VALIDSTATE}" != "")
+				AND 	A.VALIDSTATE = '$!{VALIDSTATE}'
+			#end
+			 	ORDER BY A.CONDITIONCLASSID
+			]]>
+		</statement>
+	</query>
+
+	<query id="SYSTEM_CONDITION_MANAGEMENT_CONDITIONCLASS_COMBO"
+		version="00001">
+		<statement>
+			<![CDATA[
+		        SELECT  CONDITIONCLASSID TEXT, CONDITIONCLASSID VALUE
+		        FROM    SF_CONDITIONCLASS
+		        ORDER BY CONDITIONCLASSID, CREATEDTIME
+			]]>
+		</statement>
+	</query>
+
+	<query id="SYSTEM_DICTIONARY_CLASS_LIST" version="00001" dbms="ORACLE">
+		<statement>
+			<![CDATA[
+				SELECT  DISTINCT A.DICTIONARYCLASSID AS DICTIONARYCLASSID
+				        , CASE WHEN C.DICTIONARYNAME IS NULL THEN A.DICTIONARYCLASSNAME
+				               ELSE C.DICTIONARYNAME
+				          END DICTIONARYCLASSNAME
+				FROM    SF_DICTIONARYCLASS A
+			#if ("$!{DICTIONARYID}" != "" || "$!{DICTIONARYNAME}" != "")
+						INNER JOIN SF_DICTIONARY B
+							ON	A.DICTIONARYCLASSID = B.DICTIONARYCLASSID
+				#if ("$!{DICTIONARYID}" != "")
+							AND UPPER(B.DICTIONARYID) LIKE '%' || UPPER('$!{DICTIONARYID}') || '%'
+				#end
+				#if ("$!{DICTIONARYNAME}" != "")
+							AND UPPER(B.DICTIONARYNAME) LIKE '%' || UPPER('$!{DICTIONARYNAME}') || '%'
+				#end				
+				#if ("$!{VALIDSTATE}" != "")
+							AND B.VALIDSTATE = '$!{VALIDSTATE}'
+				#end
+			#end
+				        LEFT OUTER JOIN SF_DICTIONARY C
+				            ON  A.DICTIONARYID = C.DICTIONARYID
+				            AND C.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				            AND C.VALIDSTATE = 'Valid'
+				WHERE	1=1
+			#if ("$!{DICTIONARYCLASSID}" != "")
+				AND 	UPPER(A.DICTIONARYCLASSID) LIKE '%' || UPPER('$!{DICTIONARYCLASSID}') || '%'
+			#end
+			#if ("$!{DICTIONARYCLASSNAME}" != "")
+				AND		CASE WHEN C.DICTIONARYNAME IS NULL THEN A.DICTIONARYCLASSNAME
+				               ELSE C.DICTIONARYNAME
+				        END LIKE '%$!{DICTIONARYCLASSNAME}%'
+			#end
+			#if ("$!{VALIDSTATE}" != "")
+				AND 	A.VALIDSTATE = '$!{VALIDSTATE}'
+			#end			
+				ORDER BY A.DICTIONARYCLASSID
+			]]>
+		</statement>
+	</query>
+
+	<query id="SYSTEM_DICTIONARY_CLASS_LIST" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT  DISTINCT A.DICTIONARYCLASSID AS DICTIONARYCLASSID
+				        , CASE WHEN C.DICTIONARYNAME IS NULL THEN A.DICTIONARYCLASSNAME
+				               ELSE C.DICTIONARYNAME
+				          END DICTIONARYCLASSNAME
+				          	, A.DESCRIPTION
+				          	, A.CREATOR
+				          	, A.CREATEDTIME
+				          	, A.MODIFIEDTIME
+				          	, A.VALIDSTATE
+				FROM    SF_DICTIONARYCLASS A
+			#if ("$!{DICTIONARYID}" != "" || "$!{DICTIONARYNAME}" != "")
+						INNER JOIN SF_DICTIONARY B
+							ON	A.DICTIONARYCLASSID = B.DICTIONARYCLASSID
+				#if ("$!{DICTIONARYID}" != "")
+							AND UPPER(B.DICTIONARYID) LIKE '%' + UPPER('$!{DICTIONARYID}') + '%'
+				#end
+				#if ("$!{DICTIONARYNAME}" != "")
+							AND UPPER(B.DICTIONARYNAME) LIKE '%' + UPPER('$!{DICTIONARYNAME}') + '%'
+				#end				
+				#if ("$!{VALIDSTATE}" != "")
+							AND B.VALIDSTATE = '$!{VALIDSTATE}'
+				#end
+			#end
+				        LEFT OUTER JOIN SF_DICTIONARY C
+				            ON  A.DICTIONARYID = C.DICTIONARYID
+				            AND C.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				            AND C.VALIDSTATE = 'Valid'
+				WHERE	1=1
+			#if ("$!{DICTIONARYCLASSID}" != "")
+				AND 	UPPER(A.DICTIONARYCLASSID) LIKE '%' + UPPER('$!{DICTIONARYCLASSID}') + '%'
+			#end
+			#if ("$!{DICTIONARYCLASSNAME}" != "")
+				AND		CASE WHEN C.DICTIONARYNAME IS NULL THEN A.DICTIONARYCLASSNAME
+				               ELSE C.DICTIONARYNAME
+				        END LIKE '%$!{DICTIONARYCLASSNAME}%'
+			#end
+			#if ("$!{VALIDSTATE}" != "")
+				AND 	A.VALIDSTATE = '$!{VALIDSTATE}'
+			#end			
+				ORDER BY A.DICTIONARYCLASSID
+			]]>
+		</statement>
+	</query>
+
+	<query id="SYSTEM_DICTIONARY_CLASS_LIST_COMBO" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT  A.DICTIONARYCLASSID AS VALUE
+				        , CASE WHEN B.DICTIONARYNAME IS NULL THEN CASE WHEN A.DICTIONARYCLASSNAME IS NULL THEN A.DICTIONARYCLASSID
+				                                                       ELSE A.DICTIONARYCLASSNAME END
+				               ELSE B.DICTIONARYNAME
+				          END TEXT
+				FROM    SF_DICTIONARYCLASS A
+				        LEFT OUTER JOIN SF_DICTIONARY B
+				            ON  A.DICTIONARYID = B.DICTIONARYID
+				            AND B.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				            AND B.VALIDSTATE = 'Valid'
+				ORDER BY A.DICTIONARYCLASSID
+			]]>
+		</statement>
+	</query>
+
+	<query id="SYSTEM_DICTIONARY_CLASS_LIST_COMBO" version="00002">
+		<statement>
+			<![CDATA[
+				SELECT  A.DICTIONARYCLASSID AS VALUE
+						, A.DICTIONARYCLASSID AS TEXT
+				FROM    SF_DICTIONARYCLASS A
+				ORDER BY A.DICTIONARYCLASSID
+			]]>
+		</statement>
+	</query>
+
+	<query id="SYSTEM_MENUAUTH_MANAGEMENT_TREE_SELECT" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT  C.MENUTYPE AS MENUTYPE, C.MENUID AS MENUID, E.MENUNAME AS MENUNAME
+						, C.USERCLASSID AS USERCLASSID, C.USERCLASSNAME AS USERCLASSNAME
+				        , CASE WHEN D.VALIDSTATE IS NULL THEN 'N'
+				               ELSE 'Y'
+				               END "CHECK"
+				FROM    (
+				            SELECT  A.UIID, A.MENUTYPE, A.MENUID, B.USERCLASSID, B.USERCLASSNAME, A.DISPLAYSEQUENCE
+				            FROM    SF_MENU A
+				                    INNER JOIN  (
+				                                    SELECT  USERCLASSID, USERCLASSNAME
+				                                    FROM    SF_USERCLASS
+				                                    WHERE   VALIDSTATE = 'Valid'
+				                                )B
+				                    	ON  1=1
+				                    WHERE    1=1
+			#if ("$!{VALIDSTATE}" != "")
+				                    AND		A.VALIDSTATE = '$!{VALIDSTATE}'
+			#end
+			#if ("$!{UIID}" != "")
+				                    AND     A.UIID = '$!{UIID}'
+			#end
+				                    AND     A.MENUID = '$!{MENUID}'
+				            ) C
+				             LEFT OUTER JOIN SF_MENUAUTHORITY D
+				                 ON  C.UIID = D.UIID
+				                 AND C.USERCLASSID = D.USERCLASSID
+				                 AND C.MENUID = D.MENUID
+				                 AND D.VALIDSTATE = 'Valid'
+				             LEFT OUTER JOIN (
+				                                 SELECT  A.MENUTYPE
+				                                         , A.MENUID
+				                                         , B.DICTIONARYNAME "MENUNAME"
+				                                 FROM    SF_MENU A
+				                                         LEFT OUTER JOIN SF_DICTIONARY B
+				                                             ON  A.DICTIONARYID = B.DICTIONARYID
+				                                             AND B.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				                                             AND B.VALIDSTATE = 'Valid'
+				                                 WHERE   1=1	--A.MENUTYPE IN ('FOLDER', 'SCREEN', 'POPUP', 'LINK')
+			#if ("$!{UIID}" != "")
+				                                 AND     A.UIID = '$!{UIID}'
+			#end
+				                             ) E
+				                 ON  C.MENUID = E.MENUID
+				ORDER BY "CHECK" DESC, D.VALIDSTATE DESC
+				         , C.MENUTYPE, C.DISPLAYSEQUENCE, C.MENUID, C.USERCLASSID
+			]]>
+		</statement>
+	</query>
+
+	<query id="SYSTEM_MENU_PARENT_COMBO" version="00001">
+		<statement>
+			<![CDATA[
+		        SELECT CASE WHEN C.DICTIONARYNAME IS NULL OR C.DICTIONARYNAME = '' THEN CASE WHEN A.MENUNAME IS NULL OR A.MENUNAME = '' THEN A.MENUID
+                           	ELSE A.MENUNAME END
+                         ELSE C.DICTIONARYNAME END "TEXT"
+                        , A.MENUID "VALUE"
+		        FROM    SF_MENU A
+		                INNER JOIN SF_CODE B
+		                    ON  A.MENUTYPE = B.CODEID
+		                    AND B.CODEID = 'FOLDER'
+		                LEFT OUTER JOIN SF_DICTIONARY C
+		                    ON  A.DICTIONARYID = C.DICTIONARYID
+		                    AND C.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+		                    AND C.VALIDSTATE = 'Valid'
+		        WHERE   A.UIID = '$!{UIID}'
+		        ORDER BY A.MENUID
+			]]>
+		</statement>
+	</query>
+
+	<query id="SYSTEM_MESSAGE_MANAGEMENT_MESSAGECLASS_LIST" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT  DISTINCT A.MESSAGECLASSID AS MESSAGECLASSID
+				        , CASE WHEN (C.DICTIONARYNAME IS NULL OR C.DICTIONARYNAME = '') THEN CASE WHEN (A.MESSAGECLASSNAME IS NULL OR A.MESSAGECLASSNAME = '') THEN  A.MESSAGECLASSID
+				                                                                                  ELSE A.MESSAGECLASSNAME END
+				               ELSE C.DICTIONARYNAME
+				          END MESSAGECLASSNAME
+				FROM    SF_MESSAGECLASS A
+			#if ("$!{MESSAGEID}" != "" || "$!{DESCRIPTION}" != "")
+						INNER JOIN SF_MESSAGE B
+							ON	A.MESSAGECLASSID = B.MESSAGECLASSID
+				#if ("$!{MESSAGEID}" != "")
+							AND	UPPER(B.MESSAGEID) LIKE '%' + UPPER('$!{MESSAGEID}') + '%'
+				#end
+				#if ("$!{DESCRIPTION}" != "")
+							AND	UPPER(B.DESCRIPTION) LIKE '%' + UPPER('$!{DESCRIPTION}') + '%'
+				#end
+				#if ("$!{VALIDSTATE}" != "")
+							AND	B.VALIDSTATE = '$!{VALIDSTATE}'
+				#end				
+			#end
+				        LEFT OUTER JOIN SF_DICTIONARY C
+				            ON  A.DICTIONARYID = C.DICTIONARYID
+				            AND C.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				            AND C.VALIDSTATE = 'Valid'
+				WHERE   1=1
+			#if ("$!{MESSAGECLASSID}" != "")
+				AND 	A.MESSAGECLASSID LIKE '%$!{MESSAGECLASSID}%'
+			#end
+			#if ("$!{VALIDSTATE}" != "")
+				AND 	A.VALIDSTATE = '$!{VALIDSTATE}'
+			#end
+				ORDER BY A.MESSAGECLASSID
+			]]>
+		</statement>
+	</query>
+	
+	<query id="SYSTEM_MESSAGE_MANAGEMENT_MESSAGECLASS_LIST" version="00001" dbms="ORACLE">
+		<statement>
+			<![CDATA[
+				SELECT  DISTINCT A.MESSAGECLASSID AS MESSAGECLASSID
+				        , CASE WHEN (C.DICTIONARYNAME IS NULL OR C.DICTIONARYNAME = '') THEN CASE WHEN (A.MESSAGECLASSNAME IS NULL OR A.MESSAGECLASSNAME = '') THEN  A.MESSAGECLASSID
+				                                                                                  ELSE A.MESSAGECLASSNAME END
+				               ELSE C.DICTIONARYNAME
+				          END MESSAGECLASSNAME
+				FROM    SF_MESSAGECLASS A
+			#if ("$!{MESSAGEID}" != "" || "$!{DESCRIPTION}" != "")
+						INNER JOIN SF_MESSAGE B
+							ON	A.MESSAGECLASSID = B.MESSAGECLASSID
+				#if ("$!{MESSAGEID}" != "")
+							AND	UPPER(B.MESSAGEID) LIKE '%' || UPPER('$!{MESSAGEID}') || '%'
+				#end
+				#if ("$!{DESCRIPTION}" != "")
+							AND	UPPER(B.DESCRIPTION) LIKE '%' || UPPER('$!{DESCRIPTION}') || '%'
+				#end
+				#if ("$!{VALIDSTATE}" != "")
+							AND	B.VALIDSTATE = '$!{VALIDSTATE}'
+				#end				
+			#end
+				        LEFT OUTER JOIN SF_DICTIONARY C
+				            ON  A.DICTIONARYID = C.DICTIONARYID
+				            AND C.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				            AND C.VALIDSTATE = 'Valid'
+				WHERE   1=1
+			#if ("$!{MESSAGECLASSID}" != "")
+				AND 	A.MESSAGECLASSID LIKE '%$!{MESSAGECLASSID}%'
+			#end
+			#if ("$!{VALIDSTATE}" != "")
+				AND 	A.VALIDSTATE = '$!{VALIDSTATE}'
+			#end
+				ORDER BY A.MESSAGECLASSID
+			]]>
+		</statement>
+	</query>
+
+	<query id="SYSTEM_MESSAGE_MANAGEMENT_MESSAGECLASS_LIST_COMBO"
+		version="00001">
+		<statement>
+			<![CDATA[
+				SELECT  A.MESSAGECLASSID AS VALUE
+				        , CASE WHEN (B.DICTIONARYNAME IS NULL OR B.DICTIONARYNAME = '') THEN CASE WHEN A.MESSAGECLASSNAME IS NULL OR A.MESSAGECLASSNAME = '' THEN A.MESSAGECLASSID
+				                                                                              ELSE A.MESSAGECLASSNAME END
+				               ELSE B.DICTIONARYNAME
+				          END TEXT
+				FROM    SF_MESSAGECLASS A
+				        LEFT OUTER JOIN SF_DICTIONARY B
+				            ON  A.DICTIONARYID = B.DICTIONARYID
+				            AND B.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				            AND B.VALIDSTATE = 'Valid'
+				ORDER BY A.MESSAGECLASSID
+			]]>
+		</statement>
+	</query>
+
+	<query id="SYSTEM_MESSAGE_MANAGEMENT_MESSAGE_LIST" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT  MESSAGECLASSID, MESSAGEID, MESSAGENAME, DESCRIPTION, LANGUAGETYPE
+				        , CREATOR, CREATEDTIME, MODIFIER, MODIFIEDTIME, VALIDSTATE
+				FROM    SF_MESSAGE
+				WHERE	1=1
+			#if ("$!{MESSAGECLASSID}" != "")
+				AND     MESSAGECLASSID = '$!{MESSAGECLASSID}'
+			#end
+			#if ("$!{MESSAGEID}" != "")
+				AND     UPPER(MESSAGEID) LIKE '%' + UPPER('$!{MESSAGEID}') + '%'
+			#end
+			#if ("$!{MESSAGENAME}" != "")
+				AND     UPPER(MESSAGENAME) LIKE '%' + UPPER('$!{MESSAGENAME}') + '%'
+			#end
+			#if ("$!{DESCRIPTION}" != "")
+				AND     UPPER(DESCRIPTION) LIKE '%' + UPPER('$!{DESCRIPTION}') + '%'
+			#end
+			#if ("$!{VALIDSTATE}" != "")
+				AND     VALIDSTATE = '$!{VALIDSTATE}'
+			#end
+				ORDER BY MESSAGEID
+			]]>
+		</statement>
+	</query>
+	
+	<query id="SYSTEM_MESSAGE_MANAGEMENT_MESSAGE_LIST" version="00001" dbms="ORACLE">
+		<statement>
+			<![CDATA[
+				SELECT  MESSAGECLASSID, MESSAGEID, MESSAGENAME, DESCRIPTION, LANGUAGETYPE
+				        , CREATOR, CREATEDTIME, MODIFIER, MODIFIEDTIME, VALIDSTATE
+				FROM    SF_MESSAGE
+				WHERE	1=1
+			#if ("$!{MESSAGECLASSID}" != "")
+				AND     MESSAGECLASSID = '$!{MESSAGECLASSID}'
+			#end
+			#if ("$!{MESSAGEID}" != "")
+				AND     UPPER(MESSAGEID) LIKE '%' || UPPER('$!{MESSAGEID}') || '%'
+			#end
+			#if ("$!{MESSAGENAME}" != "")
+				AND     UPPER(MESSAGENAME) LIKE '%' || UPPER('$!{MESSAGENAME}') || '%'
+			#end
+			#if ("$!{DESCRIPTION}" != "")
+				AND     UPPER(DESCRIPTION) LIKE '%' || UPPER('$!{DESCRIPTION}') || '%'
+			#end
+			#if ("$!{VALIDSTATE}" != "")
+				AND     VALIDSTATE = '$!{VALIDSTATE}'
+			#end
+				ORDER BY MESSAGEID
+			]]>
+		</statement>
+	</query>
+
+	<query id="SYSTEM_TOOLBARAUTH_MANAGEMENT_GETMENULIST" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT  A.MENUTYPE AS MENUTYPE, A.PARENTMENUID AS PARENTMENUID, A.DISPLAYSEQUENCE AS DISPLAYSEQUENCE
+				        , A.MENUID AS MENUID
+				        , CASE WHEN B.DICTIONARYNAME IS NULL THEN CASE WHEN A.MENUNAME IS NULL THEN A.MENUID
+				                                                       ELSE A.MENUNAME END
+				               ELSE B.DICTIONARYNAME
+				          END DICMENUNAME
+				        , A.DESCRIPTION AS DESCRIPTION
+				        , A.PROGRAMID AS PROGRAMID
+				        , A.CREATOR AS CREATOR, A.CREATEDTIME AS CREATEDTIME
+				        , A.MODIFIER AS MODIFIER, A.MODIFIEDTIME AS MODIFIEDTIME
+				        , A.VALIDSTATE AS VALIDSTATE
+				FROM    SF_MENU A
+				        LEFT OUTER JOIN (
+				                            SELECT  DICTIONARYID, DICTIONARYNAME
+				                            FROM    SF_DICTIONARY
+				                            WHERE   LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				                            AND     VALIDSTATE = 'Valid'
+				                        ) B
+				            ON  A.DICTIONARYID = B.DICTIONARYID
+				WHERE   1=1
+				AND     A.UIID = '$!{_TXNINFO.UIID}'
+			#if ("$!{VALIDSTATE}" != "")
+				AND 	VALIDSTATE = '$!{VALIDSTATE}'
+			#end	
+				ORDER BY A.PARENTMENUID, A.DISPLAYSEQUENCE, A.MENUTYPE, A.MENUNAME ASC
+			]]>
+		</statement>
+	</query>
+
+	<query id="SYSTEM_TOOLBARAUTH_MANAGEMENT_TREE_SELECT" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT  A.USERCLASSID AS USERCLASSID
+				        , CASE WHEN C.DICTIONARYNAME IS NULL THEN B.USERCLASSNAME
+				               ELSE C.DICTIONARYNAME
+				          END USERCLASSNAME
+				FROM    SF_MENUAUTHORITY A
+				        INNER JOIN SF_USERCLASS B
+				            ON  A.USERCLASSID = B.USERCLASSID
+				        LEFT OUTER JOIN SF_DICTIONARY C
+				            ON  B.DICTIONARYID = C.DICTIONARYID
+				            AND C.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				            AND C.VALIDSTATE = 'Valid'
+				WHERE   A.VALIDSTATE = 'Valid'
+				AND	  	A.UIID = '$!{_TXNINFO.UIID}'
+				AND     A.MENUID = '$!{MENUID}'
+			]]>
+		</statement>
+	</query>
+
+	<query id="SYSTEM_TOOLBARAUTH_MANAGEMENT_USERCLASS_SELECT" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT  CASE WHEN B.VALIDSTATE IS NULL THEN 'N'
+				             ELSE 'Y' 
+				        END "CHECK"
+				        , A.TOOLBARID AS TOOLBARID, A.TOOLBARNAME AS TOOLBARNAME
+				        , CASE WHEN A.DESCRIPTION IS NULL THEN C.DESCRIPTION
+				               ELSE A.DESCRIPTION
+				          END DESCRIPTION
+				        , A.VALIDSTATE AS VALIDSTATE
+				        , A.DISPLAYSEQUENCE AS DISPLAYSEQUENCE
+				FROM    SF_TOOLBAR A 
+				        LEFT OUTER JOIN SF_TOOLBARAUTHORITY B
+				            ON  A.TOOLBARID = B.TOOLBARID
+				            AND B.VALIDSTATE = 'Valid'
+				            AND B.MENUID = '$!{MENUID}'
+				            AND B.USERCLASSID = '$!{USERCLASSID}'
+				        LEFT OUTER JOIN SF_MESSAGE C
+				            ON  A.MESSAGEID = C.MESSAGEID
+				            AND C.VALIDSTATE = 'Valid'
+				            AND C.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE   A.VALIDSTATE = 'Valid'
+				AND		A.UIID = '$!{_TXNINFO.UIID}'
+				ORDER BY CASE WHEN B.VALIDSTATE IS NULL THEN 'ZZZ' ELSE B.VALIDSTATE END, A.DISPLAYSEQUENCE
+			]]>
+		</statement>
+	</query>
+
+	<query id="GET_TOOLBAR_BY_MENUID_AND_USERCLASSID" version="00001">
+		<statement>
+			<![CDATA[
+		        SELECT  A.MENUID AS MENUID, B.OPTIONS AS OPTIONS
+				FROM    (
+				          SELECT  DISTINCT UIID, TOOLBARID, MENUID
+				          FROM    SF_TOOLBARAUTHORITY
+				          WHERE   VALIDSTATE = 'Valid'
+				          AND     UIID = '$!{_TXNINFO.UIID}'
+				          AND     MENUID = '$!{MENUID}'
+				          AND     USERCLASSID IN($!{USERCLASSID})
+				        ) A
+				        LEFT OUTER JOIN SF_TOOLBAR B
+				          ON  A.UIID = B.UIID
+				          AND A.TOOLBARID = B.TOOLBARID
+				ORDER BY B.DISPLAYSEQUENCE
+			]]>
+		</statement>
+	</query>
+
+	<query id="SYSTEM_USERCLASS_MAP_MANAGEMENT_USERCLASS_LIST"
+		version="00001">
+		<statement>
+			<![CDATA[
+				SELECT  A.USERCLASSID
+				        , CASE WHEN B.DICTIONARYNAME IS NULL THEN A.USERCLASSNAME
+				               ELSE B.DICTIONARYNAME
+				          END USERCLASSNAME
+				FROM    SF_USERCLASS A
+				        LEFT OUTER JOIN SF_DICTIONARY B
+				            ON  A.DICTIONARYID = B.DICTIONARYID
+				            AND B.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				            AND B.VALIDSTATE = 'Valid'
+				WHERE   1=1
+			#if ("$!{USERCLASSID}" != "")
+				AND		A.USERCLASSID LIKE '%$!{USERCLASSID}%'
+			#end
+			#if ("$!{USERCLASSNAME}" != "")
+				AND		A.USERCLASSNAME LIKE '%$!{USERCLASSNAME}%'
+			#end
+			#if ("$!{VALIDSTATE}" != "")
+				AND A.VALIDSTATE = '$!{VALIDSTATE}'
+			#end				
+				ORDER BY A.USERCLASSID
+			]]>
+		</statement>
+	</query>
+	<query id="SYSTEM_USERCLASS_MAP_MANAGEMENT_USERCLASSMAP_LIST"
+		version="00001">
+		<statement>
+			<![CDATA[
+	            SELECT  A.USERID, B.USERNAME, B.DEPARTMENT, B.POSITION, B.DUTY
+	            FROM    SF_USERCLASSUSER A
+	                    LEFT OUTER JOIN SF_USER B
+	                        ON  A.USERID = B.USERID
+	                        AND B.VALIDSTATE = 'Valid'
+	            WHERE   A.VALIDSTATE = 'Valid'
+	            AND     A.USERCLASSID = '$!{USERCLASSID}'
+	            ORDER BY A.USERID
+			]]>
+		</statement>
+	</query>
+
+	<query id="SYSTEM_USERCLASS_MANAGEMENT_LIST" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT  USERID, USERNAME, DEPARTMENT, LANGUAGETYPE, POSITION1, POSITION2
+	                    , EMAILADDRESS, CELLPHONENUMBER, HOMEADDRESS
+	                    , CREATEDTIME, CREATOR, MODIFIEDTIME, MODIFIER, VALIDSTATE
+	                    , DICTIONARYID
+	            FROM    SF_USER
+	            ORDER BY USERID
+			]]>
+		</statement>
+	</query>
+
+	<query id="SYS_USER_SELECTOR_USER_SEARCH" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT  'N' "CHECK", USERID, USERNAME, POSITION, DUTY, DEPARTMENT
+				FROM    SF_USER
+				WHERE   VALIDSTATE = 'Valid'
+				and     (upper(userid) like '%' || upper('$!{SEARCH_KEY}') || '%'
+						or      upper(username) like '%' || upper('$!{SEARCH_KEY}') || '%'
+						or      upper(position) like '%' || upper('$!{SEARCH_KEY}') || '%'
+						or      upper(duty) like '%' || upper('$!{SEARCH_KEY}') || '%'
+						or      upper(department) like '%' || upper('$!{SEARCH_KEY}') || '%')
+			]]>
+		</statement>
+	</query>
+
+	<query id="SYS_USER_SELECTOR_USER_SEARCH" version="00001" dbms="MSSQL">
+		<statement>
+			<![CDATA[
+				SELECT  'N' "CHECK", USERID, USERNAME, POSITION, DUTY, DEPARTMENT
+				FROM    SF_USER
+				WHERE   VALIDSTATE = 'Valid'
+				and     (upper(userid) like '%' + upper('$!{SEARCH_KEY}') + '%'
+						or      upper(username) like '%' + upper('$!{SEARCH_KEY}') + '%'
+						or      upper(position) like '%' + upper('$!{SEARCH_KEY}') + '%'
+						or      upper(duty) like '%' + upper('$!{SEARCH_KEY}') + '%'
+						or      upper(department) like '%' + upper('$!{SEARCH_KEY}') + '%')
+			]]>
+		</statement>
+	</query>
+
+	<query id="SYSTEM_USER_MANAGEMENT_LIST" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT  USERID, USERNAME, DEPARTMENT, LANGUAGETYPE, POSITION, DUTY
+				        , EMAILADDRESS, CELLPHONENUMBER, HOMEADDRESS
+				        , CREATEDTIME, CREATOR, MODIFIEDTIME, MODIFIER, VALIDSTATE
+				FROM    SF_USER
+				WHERE	1=1
+			#if ("$!{USERID}" != "")
+				AND 	USERID LIKE '%$!{USERID}%'
+			#end
+			#if ("$!{USERNAME}" != "")
+				AND		USERNAME LIKE '%$!{USERNAME}%'
+			#end
+			#if ("$!{DEPARTMENT}" != "")
+				AND		DEPARTMENT LIKE '%$!{DEPARTMENT}%'
+			#end
+			#if ("$!{POSITION}" != "")
+				AND		POSITION LIKE '%$!{POSITION}%'
+			#end
+			#if ("$!{DUTY}" != "")
+				AND		DUTY LIKE '%$!{DUTY}%'
+			#end									
+			#if ("$!{VALIDSTATE}" != "")
+				AND 	VALIDSTATE = '$!{VALIDSTATE}'
+			#end
+			#if ("$!{LANGUAGETYPE}" != "")
+				AND 	LANGUAGETYPE = '$!{LANGUAGETYPE}'
+			#end								
+				ORDER BY USERID
+			]]>
+		</statement>
+	</query>
+
+	<query id="SYS_CODECLASS" version="00001" dbms="ORACLE">
+		<statement>
+			<![CDATA[
+				SELECT  DISTINCT A.CODECLASSID AS CODECLASSID,
+				        CASE WHEN C.DICTIONARYNAME IS NULL OR C.DICTIONARYNAME = '' THEN A.CODECLASSNAME
+				             ELSE C.DICTIONARYNAME
+				        END CODECLASSNAME
+				FROM    SF_CODECLASS A
+			#if ("$!{CODEID}" != "" || "$!{CODENAME}" != "")
+				        INNER JOIN SF_CODE B
+				            ON  A.CODECLASSID = B.CODECLASSID
+				            AND B.CODEID LIKE '%' || UPPER('$!{CODEID}') || '%'
+				#if ("$!{CODENAME}" != "")
+				            AND B.CODENAME LIKE '%' || UPPER('$!{CODENAME}') || '%'
+				#end
+				#if ("$!{VALIDSTATE}" != "")
+				            AND B.VALIDSTATE = '$!{VALIDSTATE}'
+				#end
+			#end
+				        LEFT OUTER JOIN SF_DICTIONARY C
+				            ON  A.DICTIONARYID = C.DICTIONARYID
+				            AND C.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				            AND C.VALIDSTATE = '$!{VALIDSTATE}'
+				WHERE   1=1
+			#if ("$!{CODECLASSID}" != "")
+				AND 	UPPER(A.CODECLASSID) LIKE '%' || UPPER('$!{CODECLASSID}') || '%'
+			#end
+			#if ("$!{VALIDSTATE}" != "")
+				AND     A.VALIDSTATE = '$!{VALIDSTATE}'
+			#end
+				ORDER BY A.CODECLASSID
+			]]>
+		</statement>
+	</query>
+
+	<query id="SYS_CODECLASS" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT  DISTINCT A.CODECLASSID AS CODECLASSID,
+				        CASE WHEN C.DICTIONARYNAME IS NULL OR C.DICTIONARYNAME = '' THEN A.CODECLASSNAME
+				             ELSE C.DICTIONARYNAME
+				        END CODECLASSNAME
+				FROM    SF_CODECLASS A
+			#if ("$!{CODEID}" != "" || "$!{CODENAME}" != "")
+				        INNER JOIN SF_CODE B
+				            ON  A.CODECLASSID = B.CODECLASSID
+				            AND B.CODEID LIKE '%' + UPPER('$!{CODEID}') + '%'
+				#if ("$!{CODENAME}" != "")
+				            AND B.CODENAME LIKE '%' + UPPER('$!{CODENAME}') + '%'
+				#end
+				#if ("$!{VALIDSTATE}" != "")
+				            AND B.VALIDSTATE = '$!{VALIDSTATE}'
+				#end
+			#end
+				        LEFT OUTER JOIN SF_DICTIONARY C
+				            ON  A.DICTIONARYID = C.DICTIONARYID
+				            AND C.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				            AND C.VALIDSTATE = '$!{VALIDSTATE}'
+				WHERE   1=1
+			#if ("$!{CODECLASSID}" != "")
+				AND 	UPPER(A.CODECLASSID) LIKE '%' + UPPER('$!{CODECLASSID}') + '%'
+			#end
+			#if ("$!{VALIDSTATE}" != "")
+				AND     A.VALIDSTATE = '$!{VALIDSTATE}'
+			#end
+				ORDER BY A.CODECLASSID
+			]]>
+		</statement>
+	</query>
+
+	<query id="SYS_CODECLASS_COMBO" version="00001">
+		<statement>
+			<![CDATA[
+	            SELECT  a.CODECLASSID AS VALUE,
+	                    CASE WHEN B.DICTIONARYNAME IS NULL OR B.DICTIONARYNAME = '' THEN A.CODECLASSNAME
+	                         ELSE B.DICTIONARYNAME
+	                    END TEXT
+	            FROM    SF_CODECLASS A
+	                    LEFT OUTER JOIN SF_DICTIONARY B
+	                        ON  A.DICTIONARYID = B.DICTIONARYID
+	                        AND B.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+	                        AND B.VALIDSTATE = 'Valid'
+	            ORDER BY a.CODECLASSID
+			]]>
+		</statement>
+	</query>
+
+	<query id="SYSTEM_CODECLASS_LIST" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	*
+				FROM	SF_CODECLASS
+				WHERE	1=1
+			#if ("$!{CODECLASSID}" != "")
+				AND 	CODECLASSID LIKE '%$!{CODECLASSID}%'
+			#end
+			#if ("$!{CODECLASSNAME}" != "")
+				AND		CODECLASSNAME LIKE '%$!{CODECLASSNAME}%'
+			#end
+			#if ("$!{VALIDSTATE}" != "")
+				AND 	VALIDSTATE = '$!{VALIDSTATE}'
+			#end
+				ORDER BY CODECLASSID
+			]]>
+		</statement>
+	</query>
+	
+	<query id="SYSTEM_CONDITION_ITEM_MAP_MENUID" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT  MENUID + ' (' + CASE WHEN MENUNAME IS NULL THEN '' ELSE MENUNAME END + ')' AS TEXT, MENUID AS VALUE
+				FROM    SF_MENU
+				WHERE   1=1
+			#if ("$!{UIID}" != "")
+				AND		UIID = '$!{UIID}'
+			#end
+				AND     MENUTYPE NOT IN ('APIREFERENCE', 'FOLDER')
+				ORDER BY MENUID			
+			]]>
+		</statement>
+	</query>
+	
+	<query id="SYSTEM_CONDITION_ITEM_MAP_CONDITEMID_COMBO" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT  A.CONDITIONITEMID + ' (' +
+				        CASE  WHEN  (B.DICTIONARYNAME IS NULL OR B.DICTIONARYNAME = '') THEN CASE  WHEN A.CONDITIONITEMNAME IS NULL THEN '' 
+				                                                                                  ELSE A.CONDITIONITEMNAME END 
+				              ELSE  B.DICTIONARYNAME END + ')' AS TEXT
+				        , A.CONDITIONITEMID AS VALUE
+				FROM    SF_UICONDITEM A
+				        LEFT OUTER JOIN SF_DICTIONARY B
+				          ON  A.DICTIONARYID = B.DICTIONARYID
+				          AND B.VALIDSTATE = 'Valid'
+				          AND B.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				WHERE   1=1
+			#if ("$!{UIID}" != "")
+				AND		A.UIID = '$!{UIID}'
+			#end
+			]]>
+		</statement>
+	</query>
+
+	<query id="SYSTEM_CONDITION_ITEM_MAP_LIST" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT  UIID, CONDITIONITEMID, MENUID, CONDITIONTYPE, DISPLAYSEQUENCE, ISREQUIRED, ISHIDDEN, ISALL, RELATIONCOLUMNSTACK , CREATOR, CREATEDTIME, MODIFIER, MODIFIEDTIME, VALIDSTATE
+				FROM    SF_UIMENUCONDITEMMAP
+				WHERE   1=1
+			#if ("$!{UIID}" != "")
+				AND		UIID = '$!{UIID}'
+			#end
+			]]>
+		</statement>
+	</query>
+	
+	<query id="SYSTEM_CONDITION_ACTION_LIST" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT  UIID, CONDITIONACTIONID, CONDITIONACTIONNAME, DESCRIPTION, HANDLER, "TARGET", EXECUTETYPE, EXECUTEID, EXECUTEVERSION
+				        , CREATOR, CREATEDTIME, MODIFIER, MODIFIEDTIME, VALIDSTATE 
+				FROM    SF_UICONDACTION			
+				WHERE 1=1
+				#if ("$!{UIID}" != "")
+					AND UIID = '$!{UIID}'
+				#end
+				#if ("$!{CONDITIONACTIONID}" != "")
+					AND CONDITIONACTIONID like '%$!{CONDITIONACTIONID}%'
+				#end
+				#if ("$!{CONDITIONACTIONNAME}" != "")
+					AND CONDITIONACTIONNAME like '%$!{CONDITIONACTIONNAME}%'
+				#end
+				#if ("$!{VALIDSTATE}" != "")
+					AND VALIDSTATE = '$!{VALIDSTATE}'
+				#end
+			]]>
+		</statement>
+	</query>
+	
+	<query id="SYSTEM_CONDITION_ACTION_MAP_LIST" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	A.*
+				FROM	(
+							SELECT  CASE WHEN (B.MENUID IS NULL OR B.MENUID = '') THEN 'N' ELSE 'Y' END CHK
+							        , A.UIID, '$!{MENUID}' AS MENUID, A.CONDITIONACTIONID
+							        , B.CREATOR, B.CREATEDTIME
+							FROM    SF_UICONDACTION A
+							        LEFT OUTER JOIN SF_UIMENUCONDACTIONMAP B
+							        	ON  A.UIID = B.UIID
+							         	AND A.CONDITIONACTIONID = B.CONDITIONACTIONID
+						#if ("$!{MENUID}" != "")
+										AND     B.MENUID = '$!{MENUID}'
+						#end
+							WHERE   1=1
+						#if ("$!{UIID}" != "")
+							AND		A.UIID = '$!{UIID}'
+						#end
+						#if ("$!{CONDITIONACTIONID}" != "")				            
+					            AND A.CONDITIONACTIONID like '%$!{CONDITIONACTIONID}%' 
+						#end
+						#if ("$!{CONDITIONACTIONNAME}" != "")				            
+					            AND A.CONDITIONACTIONNAME like '%$!{CONDITIONACTIONNAME}%' 
+						#end
+						#if ("$!{VALIDSTATE}" != "")				            
+					            AND A.VALIDSTATE like '%$!{VALIDSTATE}%' 
+						#end
+						) A
+				ORDER BY A.CHK DESC
+			]]>
+		</statement>
+	</query>
+	
+	<query id="SYSTEM_CONDITION_ITEM_GROUP_LIST" version="00001" dbms="ORACLE">
+		<statement>
+			<![CDATA[
+				SELECT  UIID, CONDITIONITEMGROUPID, CONDITIONITEMGROUPNAME, CREATOR, CREATEDTIME, MODIFIER, MODIFIEDTIME, VALIDSTATE
+				FROM    SF_UICONDITEMGROUP
+				WHERE   1=1
+			#if ("$!{UIID}" != "")
+				AND     UIID = '$!{UIID}'
+			#end
+			#if ("$!{CONDITIONITEMGROUPID}" != "")
+				AND     UPPER(CONDITIONITEMGROUPID) LIKE '%' || UPPER('$!{CONDITIONITEMGROUPID}') || '%'
+			#end
+			#if ("$!{CONDITIONITEMGROUPNAME}" != "")
+				AND     UPPER(CONDITIONITEMGROUPNAME) LIKE '%' || UPPER('$!{CONDITIONITEMGROUPNAME}') || '%'
+			#end
+				ORDER BY UIID, CONDITIONITEMGROUPID
+			]]>
+		</statement>
+	</query>
+	
+	<query id="SYSTEM_CONDITION_ITEM_GROUP_LIST" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT  UIID, CONDITIONITEMGROUPID, CONDITIONITEMGROUPNAME, CREATOR, CREATEDTIME, MODIFIER, MODIFIEDTIME, VALIDSTATE
+				FROM    SF_UICONDITEMGROUP
+				WHERE   1=1
+			#if ("$!{UIID}" != "")
+				AND     UIID = '$!{UIID}'
+			#end
+			#if ("$!{CONDITIONITEMGROUPID}" != "")
+				AND     UPPER(CONDITIONITEMGROUPID) LIKE '%' + UPPER('$!{CONDITIONITEMGROUPID}') + '%'
+			#end
+			#if ("$!{CONDITIONITEMGROUPNAME}" != "")
+				AND     UPPER(CONDITIONITEMGROUPNAME) LIKE '%' + UPPER('$!{CONDITIONITEMGROUPNAME}') + '%'
+			#end
+				ORDER BY UIID, CONDITIONITEMGROUPID
+			]]>
+		</statement>
+	</query>
+	
+	<query id="SYSTEM_CONDITION_ITEM_GROUP_POPUP_LIST" version="00001">
+		<statement>
+			<![CDATA[
+			#if ($!{CONDITIONITEMID} != "")
+				SELECT  'Y' CHK, CONDITIONITEMID, CONDITIONITEMNAME
+				FROM    SF_UICONDITEM
+				WHERE   UIID = '$!{UIID}'
+				AND     CONDITIONITEMID IN ($!{CONDITIONITEMID})
+				AND	    VALIDSTATE = 'Valid'
+				UNION
+			#end
+				SELECT  'N' CHK, CONDITIONITEMID, CONDITIONITEMNAME
+				FROM    SF_UICONDITEM
+				WHERE   UIID = '$!{UIID}'
+				AND	    VALIDSTATE = 'Valid'
+			#if ($!{CONDITIONITEMID} != "")
+				AND     CONDITIONITEMID NOT IN ($!{CONDITIONITEMID})
+			#end
+			]]>
+		</statement>
+	</query>
+	
+	<query id="SYSTEM_CONDITION_ITEM_GROUP_MAP_GROUP_LIST" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT  CONDITIONITEMGROUPID
+				FROM    SF_UICONDITEMGROUP
+				WHERE   1=1
+				AND		UIID = '$!{UIID}'
+				AND		VALIDSTATE = 'Valid'
+			]]>
+		</statement>
+	</query>
+	
+	<query id="SYSTEM_CONDITION_ITEM_GROUP_MAP_MAPPING_LIST" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT  D.CHK, D.UIID, D.DISPLAYSEQUENCE, '$!{CONDITIONITEMGROUPID}' AS CONDITIONITEMGROUPID, D.CONDITIONITEMID, D.CONDITIONITEMNAME, D.CREATOR, D.CREATEDTIME
+				FROM    (
+				          SELECT  CASE  WHEN  C.CONDITIONITEMID IS NULL THEN 'N'
+				                        ELSE  'Y' END CHK
+				                  , A.UIID, A.CONDITIONITEMID
+				                  , CASE  WHEN  B.DICTIONARYNAME IS NULL OR B.DICTIONARYNAME = '' THEN CASE WHEN  A.CONDITIONITEMNAME IS NULL OR A.CONDITIONITEMNAME = '' THEN A.CONDITIONITEMID
+				                                                                                            ELSE  A.CONDITIONITEMNAME END
+				                          ELSE  B.DICTIONARYNAME  END CONDITIONITEMNAME
+				                  , C.DISPLAYSEQUENCE
+				                  , C.CREATOR, C.CREATEDTIME
+				          FROM    SF_UICONDITEM A
+				                  LEFT OUTER JOIN SF_DICTIONARY B
+				                    ON  A.DICTIONARYID = B.DICTIONARYID
+				                    AND B.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				                    AND B.VALIDSTATE = 'Valid'
+				                  LEFT OUTER JOIN SF_UICONDITEMGROUPMAP C
+				                    ON  A.UIID = C.UIID
+				                    AND A.CONDITIONITEMID = C.CONDITIONITEMID
+				                    AND C.CONDITIONITEMGROUPID = '$!{CONDITIONITEMGROUPID}'
+				          WHERE   A.UIID = '$!{UIID}'
+				        ) D
+				ORDER BY D.CHK DESC, D.DISPLAYSEQUENCE, D.CONDITIONITEMID
+			]]>
+		</statement>
+	</query>
+	
+	<query id="SYSTEM_CONDITION_ITEM_MAP_LIST" version="00002">
+		<statement>
+			<![CDATA[
+				SELECT  
+					CASE WHEN C.CONDITIONITEMID IS NULL THEN 'N' ELSE 'Y' END "CHK",
+					CASE 
+						WHEN 
+							B.DICTIONARYNAME IS NULL OR B.DICTIONARYNAME = '' 
+						THEN 
+							CASE 
+								WHEN A.CONDITIONITEMNAME IS NULL OR A.CONDITIONITEMNAME = '' 
+							THEN 
+								A.CONDITIONITEMID
+							ELSE 
+								A.CONDITIONITEMNAME 
+							END
+						ELSE 
+							B.DICTIONARYNAME 
+					END AS "CONDITIONITEMNAME",
+					A.UIID, A.CONDITIONITEMID, A.COLUMNNAME, A.DESCRIPTION, A.ENTERPRISEID, A.PLANTID, A.ITEMTYPE, 
+					A.DATAFORMAT, A.DEFAULTVALUE, A.CONSTANTDATA, A.CHANGEHANDLER,
+					A.ISREQUIRED, A.ISHIDDEN, A.ISALL, A.RELATIONCOLUMNSTACK, A.DICTIONARYID,
+					A.EXECUTETYPE, A.EXECUTEID, A.EXECUTEVERSION, A.DISPLAYMEMBER, A.VALUEMEMBER,
+					A.CREATOR, A.CREATEDTIME,
+					A.ITEMTYPE AS CONDITIONTYPE, C.DISPLAYSEQUENCE
+				FROM
+					SF_UICONDITEM A
+					LEFT JOIN SF_UIMENUCONDITEMMAP C ON
+					 	A.UIID = C.UIID
+						AND C.MENUID = '$!{MENUID}'
+					   	AND A.CONDITIONITEMID = C.CONDITIONITEMID
+					   	--AND A.ITEMTYPE = C.CONDITIONTYPE
+					LEFT JOIN SF_DICTIONARY B ON
+						A.DICTIONARYID = B.DICTIONARYID
+						AND B.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+						AND B.VALIDSTATE = 'Valid'
+				WHERE
+					A.UIID = '$!{_TXNINFO.UIID}'
+					#if ("$!{VALIDSTATE}" != "")				            
+				            AND A.VALIDSTATE = '$!{VALIDSTATE}' 
+					#end
+					#if ("$!{CONDITIONITEMID}" != "")				            
+				            AND A.CONDITIONITEMID like '%$!{CONDITIONITEMID}%' 
+					#end
+					#if ("$!{CONDITIONITEMNAME}" != "")				            
+				            AND A.CONDITIONITEMNAME like '%$!{CONDITIONITEMNAME}%' 
+					#end
+					#if ("$!{COLUMNNAME}" != "")				            
+				            AND A.COLUMNNAME like '%$!{COLUMNNAME}%' 
+					#end
+				ORDER BY CASE WHEN C.CONDITIONITEMID IS NULL THEN 'N' ELSE 'Y' END DESC,
+				 	C.DISPLAYSEQUENCE,
+				 	C.CONDITIONTYPE, A.CONDITIONITEMID
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 시스템관리 - 모니터링 -ERP I/F모니터링(정의)
+	설		명	: I/F목록 조회
+	작	성	자	: 모세찬
+	작	성	일	: 2020-07-09
+	주요 변경 로그	: 
+	-->
+	<query id="GetInterfaceDefinition" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			--id : GetInterfaceDefinition
+			--version : 00001
+			SELECT	CI.INTERFACEID
+					,CI.INTERFACENAME
+					,CI.EXECUTIONCYCLE
+			FROM	CT_INTERFACEDEFINITION CI 
+			WHERE	1=1
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 시스템관리 - 모니터링 -ERP I/F모니터링(상세)
+	설		명	: I/F목록 조회
+	작	성	자	: 모세찬
+	작	성	일	: 2020-07-09
+	주요 변경 로그	: 
+	-->
+	<query id="GetInterfaceDetail" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			--id : GetInterfaceDetail
+			--version : 00001
+			DECLARE @P_INTERFACEID AS NVARCHAR(10)
+			DECLARE @P_DATEPERIOD_PERIODFR AS NVARCHAR(50)
+			DECLARE @P_DATEPERIOD_PERIODTO AS NVARCHAR(50)
+			SET @P_INTERFACEID = '$!{P_INTERFACEID}'
+			SET @P_DATEPERIOD_PERIODFR = '$!{P_DATEPERIOD_PERIODFR}'
+			SET @P_DATEPERIOD_PERIODTO = '$!{P_DATEPERIOD_PERIODTO}'
+			
+			DECLARE @QUERY AS NVARCHAR(MAX)
+			DECLARE @P_TABLENAME AS VARCHAR(250)
+			
+			SELECT	@P_TABLENAME = TARGETTABLENAME
+			FROM	CT_INTERFACEDEFINITION 
+			WHERE	INTERFACEID = @P_INTERFACEID
+			
+			SET @QUERY = '
+			SELECT	ci.INTERFACEID
+					,id.INTERFACENAME
+				    ,id.INTERFACETYPE
+					,ci.TXNHISTKEY
+					,ci.CREATEDTIME
+					,er.RecvYn AS RECVYN
+					,er.RecvDateTime AS RECVDATETIME
+					,er.ProgStatus AS PROGSTATUS
+					,er.ProgResult AS PROGRESULT
+			FROM	CT_INTERFACE ci
+					LEFT OUTER JOIN CT_INTERFACEDEFINITION id ON ci.INTERFACEID = id.INTERFACEID
+					LEFT OUTER JOIN ' + @P_TABLENAME + ' er ON ci.TXNHISTKEY = er.TXNHISTKEY
+			WHERE	1=1
+					AND ci.INTERFACEID = ''' + @P_INTERFACEID + '''
+					AND CONVERT(varchar(10),ci.CREATEDTIME,120) BETWEEN CONVERT(VARCHAR(10), ''' + @P_DATEPERIOD_PERIODFR + ''', 120) AND CONVERT(VARCHAR(10), ''' + @P_DATEPERIOD_PERIODTO + ''', 120)
+					AND id.VALIDSTATE = ''Valid''
+					';
+			
+			EXEC(@QUERY);
+			]]>
+		</statement>
+	</query>
+	
+</list>

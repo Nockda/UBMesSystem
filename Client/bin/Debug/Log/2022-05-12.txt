@@ -1,0 +1,138 @@
+2022-05-12 09:49:28.7661|INFO|Get language list start. 
+2022-05-12 09:49:32.4122|INFO|Get language list complete. 
+2022-05-12 09:49:32.4122|INFO|Get message list start. 
+2022-05-12 09:49:32.9052|INFO|Get message list complete. 
+2022-05-12 09:49:32.9182|INFO|Get service list start. 
+2022-05-12 09:49:32.9182|INFO|Get service list complete. 
+2022-05-12 09:49:33.0543|INFO|Get langauge type list start. 
+2022-05-12 09:49:33.1860|INFO|Get langauge type list complete. 
+2022-05-12 09:49:33.1860|INFO|Get plant list start. 
+2022-05-12 09:49:33.2927|INFO|Get plant list complete. 
+2022-05-12 09:49:33.2977|INFO|Get save id YN start. 
+2022-05-12 09:49:33.2977|INFO|Get save id YN complete. 
+2022-05-12 09:49:33.2977|INFO|Get save id start. 
+2022-05-12 09:49:33.2977|INFO|Get save id complete. 
+2022-05-12 09:50:36.3607|ERROR|'LOTID' 열은  테이블에 속하지 않습니다. 
+2022-05-12 09:57:25.2202|INFO|Get language list start. 
+2022-05-12 09:57:28.5717|INFO|Get language list complete. 
+2022-05-12 09:57:28.5717|INFO|Get message list start. 
+2022-05-12 09:57:29.0417|INFO|Get message list complete. 
+2022-05-12 09:57:29.0507|INFO|Get service list start. 
+2022-05-12 09:57:29.0507|INFO|Get service list complete. 
+2022-05-12 09:57:29.1697|INFO|Get langauge type list start. 
+2022-05-12 09:57:29.2971|INFO|Get langauge type list complete. 
+2022-05-12 09:57:29.2971|INFO|Get plant list start. 
+2022-05-12 09:57:29.4017|INFO|Get plant list complete. 
+2022-05-12 09:57:29.4017|INFO|Get save id YN start. 
+2022-05-12 09:57:29.4017|INFO|Get save id YN complete. 
+2022-05-12 09:57:29.4077|INFO|Get save id start. 
+2022-05-12 09:57:29.4077|INFO|Get save id complete. 
+2022-05-12 10:04:09.3733|INFO|Get language list start. 
+2022-05-12 10:04:12.7408|INFO|Get language list complete. 
+2022-05-12 10:04:12.7408|INFO|Get message list start. 
+2022-05-12 10:04:13.2077|INFO|Get message list complete. 
+2022-05-12 10:04:13.2077|INFO|Get service list start. 
+2022-05-12 10:04:13.2077|INFO|Get service list complete. 
+2022-05-12 10:04:13.3357|INFO|Get langauge type list start. 
+2022-05-12 10:04:13.4737|INFO|Get langauge type list complete. 
+2022-05-12 10:04:13.4737|INFO|Get plant list start. 
+2022-05-12 10:04:13.5723|INFO|Get plant list complete. 
+2022-05-12 10:04:13.5723|INFO|Get save id YN start. 
+2022-05-12 10:04:13.5723|INFO|Get save id YN complete. 
+2022-05-12 10:04:13.5803|INFO|Get save id start. 
+2022-05-12 10:04:13.5803|INFO|Get save id complete. 
+2022-05-12 10:04:49.7481|ERROR|'LOTID' 열은  테이블에 속하지 않습니다. 
+2022-05-12 10:05:50.3663|INFO|Get language list start. 
+2022-05-12 10:05:53.7724|INFO|Get language list complete. 
+2022-05-12 10:05:53.7724|INFO|Get message list start. 
+2022-05-12 10:05:54.2502|INFO|Get message list complete. 
+2022-05-12 10:05:54.2592|INFO|Get service list start. 
+2022-05-12 10:05:54.2592|INFO|Get service list complete. 
+2022-05-12 10:05:54.3762|INFO|Get langauge type list start. 
+2022-05-12 10:05:54.5031|INFO|Get langauge type list complete. 
+2022-05-12 10:05:54.5031|INFO|Get plant list start. 
+2022-05-12 10:05:54.6134|INFO|Get plant list complete. 
+2022-05-12 10:05:54.6134|INFO|Get save id YN start. 
+2022-05-12 10:05:54.6134|INFO|Get save id YN complete. 
+2022-05-12 10:05:54.6134|INFO|Get save id start. 
+2022-05-12 10:05:54.6134|INFO|Get save id complete. 
+2022-05-12 10:08:10.4560|INFO|Get language list start. 
+2022-05-12 10:08:13.9105|INFO|Get language list complete. 
+2022-05-12 10:08:13.9105|INFO|Get message list start. 
+2022-05-12 10:08:14.3864|INFO|Get message list complete. 
+2022-05-12 10:08:14.3954|INFO|Get service list start. 
+2022-05-12 10:08:14.3954|INFO|Get service list complete. 
+2022-05-12 10:08:14.5144|INFO|Get langauge type list start. 
+2022-05-12 10:08:14.6284|INFO|Get langauge type list complete. 
+2022-05-12 10:08:14.6284|INFO|Get plant list start. 
+2022-05-12 10:08:14.7324|INFO|Get plant list complete. 
+2022-05-12 10:08:14.7324|INFO|Get save id YN start. 
+2022-05-12 10:08:14.7324|INFO|Get save id YN complete. 
+2022-05-12 10:08:14.7384|INFO|Get save id start. 
+2022-05-12 10:08:14.7384|INFO|Get save id complete. 
+2022-05-12 10:08:19.3828|ERROR|아이디 또는 비밀번호를 확인하여 주십시요. 
+2022-05-12 10:08:24.8698|ERROR|아이디 또는 비밀번호를 확인하여 주십시요. 
+2022-05-12 10:26:14.8517|INFO|Get language list start. 
+2022-05-12 10:26:18.2857|INFO|Get language list complete. 
+2022-05-12 10:26:18.2857|INFO|Get message list start. 
+2022-05-12 10:26:18.7507|INFO|Get message list complete. 
+2022-05-12 10:26:18.7507|INFO|Get service list start. 
+2022-05-12 10:26:18.7507|INFO|Get service list complete. 
+2022-05-12 10:26:18.8807|INFO|Get langauge type list start. 
+2022-05-12 10:26:19.0067|INFO|Get langauge type list complete. 
+2022-05-12 10:26:19.0067|INFO|Get plant list start. 
+2022-05-12 10:26:19.1017|INFO|Get plant list complete. 
+2022-05-12 10:26:19.1017|INFO|Get save id YN start. 
+2022-05-12 10:26:19.1017|INFO|Get save id YN complete. 
+2022-05-12 10:26:19.1097|INFO|Get save id start. 
+2022-05-12 10:26:19.1097|INFO|Get save id complete. 
+2022-05-12 10:27:30.6239|ERROR|라벨 발행정보를 찾을 수 없습니다. 라벨-품목 맵핑을 확인해주세요. 
+2022-05-12 10:27:56.4485|ERROR|라벨 발행정보를 찾을 수 없습니다. 라벨-품목 맵핑을 확인해주세요. 
+2022-05-12 10:34:54.0751|INFO|Get language list start. 
+2022-05-12 10:34:57.4699|INFO|Get language list complete. 
+2022-05-12 10:34:57.4699|INFO|Get message list start. 
+2022-05-12 10:34:57.9463|INFO|Get message list complete. 
+2022-05-12 10:34:57.9553|INFO|Get service list start. 
+2022-05-12 10:34:57.9553|INFO|Get service list complete. 
+2022-05-12 10:34:58.0823|INFO|Get langauge type list start. 
+2022-05-12 10:34:58.1893|INFO|Get langauge type list complete. 
+2022-05-12 10:34:58.1893|INFO|Get plant list start. 
+2022-05-12 10:34:58.2753|INFO|Get plant list complete. 
+2022-05-12 10:34:58.2753|INFO|Get save id YN start. 
+2022-05-12 10:34:58.2753|INFO|Get save id YN complete. 
+2022-05-12 10:34:58.2753|INFO|Get save id start. 
+2022-05-12 10:34:58.2823|INFO|Get save id complete. 
+2022-05-12 10:35:24.4578|ERROR|라벨 발행정보를 찾을 수 없습니다. 라벨-품목 맵핑을 확인해주세요. 
+2022-05-12 10:36:04.8984|INFO|Get language list start. 
+2022-05-12 10:36:08.3506|INFO|Get language list complete. 
+2022-05-12 10:36:08.3506|INFO|Get message list start. 
+2022-05-12 10:36:08.8190|INFO|Get message list complete. 
+2022-05-12 10:36:08.8190|INFO|Get service list start. 
+2022-05-12 10:36:08.8300|INFO|Get service list complete. 
+2022-05-12 10:36:08.9450|INFO|Get langauge type list start. 
+2022-05-12 10:36:09.0571|INFO|Get langauge type list complete. 
+2022-05-12 10:36:09.0571|INFO|Get plant list start. 
+2022-05-12 10:36:09.1501|INFO|Get plant list complete. 
+2022-05-12 10:36:09.1501|INFO|Get save id YN start. 
+2022-05-12 10:36:09.1501|INFO|Get save id YN complete. 
+2022-05-12 10:36:09.1571|INFO|Get save id start. 
+2022-05-12 10:36:09.1571|INFO|Get save id complete. 
+2022-05-12 10:37:10.7420|ERROR|라벨 발행정보를 찾을 수 없습니다. 라벨-품목 맵핑을 확인해주세요. 
+2022-05-12 10:37:34.4415|ERROR|라벨 발행정보를 찾을 수 없습니다. 라벨-품목 맵핑을 확인해주세요. 
+2022-05-12 10:38:33.1574|ERROR|라벨 발행정보를 찾을 수 없습니다. 라벨-품목 맵핑을 확인해주세요. 
+2022-05-12 10:39:00.1118|INFO|Get language list start. 
+2022-05-12 10:39:03.4790|INFO|Get language list complete. 
+2022-05-12 10:39:03.4790|INFO|Get message list start. 
+2022-05-12 10:39:03.9539|INFO|Get message list complete. 
+2022-05-12 10:39:03.9539|INFO|Get service list start. 
+2022-05-12 10:39:03.9539|INFO|Get service list complete. 
+2022-05-12 10:39:04.0850|INFO|Get langauge type list start. 
+2022-05-12 10:39:04.2041|INFO|Get langauge type list complete. 
+2022-05-12 10:39:04.2041|INFO|Get plant list start. 
+2022-05-12 10:39:04.2981|INFO|Get plant list complete. 
+2022-05-12 10:39:04.2981|INFO|Get save id YN start. 
+2022-05-12 10:39:04.2981|INFO|Get save id YN complete. 
+2022-05-12 10:39:04.2981|INFO|Get save id start. 
+2022-05-12 10:39:04.2981|INFO|Get save id complete. 
+2022-05-12 10:39:10.9048|ERROR|아이디 또는 비밀번호를 확인하여 주십시요. 
+2022-05-12 10:39:15.8090|ERROR|아이디 또는 비밀번호를 확인하여 주십시요. 

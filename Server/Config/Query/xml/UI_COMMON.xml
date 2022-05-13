@@ -1,0 +1,1232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list>
+
+	<query id="GetDesignerFileList" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT  
+					FILEID, FILENAME, FILESIZE, FILEEXT, FILEDATA AS FILEDATA, FILETYPE
+				FROM    
+					SF_FILE
+				WHERE   
+					FILETYPE = :FILETYPE
+				AND
+					VALIDSTATE = 'Valid'
+			]]>
+		</statement>
+	</query>
+	
+	<!-- exec MI_SYSTEM.SYSTEM_CODE_LIST('MENUTYPE', :c_Cursor); -->
+	<query id="GetCodeList" version="90001">
+		<statement>
+			<![CDATA[
+				SELECT  
+					CASE WHEN B.DICTIONARYNAME is Not Null THEN B.DICTIONARYNAME ELSE A.CODENAME END AS TITLE, 
+					A.CODEID AS FIELD
+				FROM    
+					SF_CODE A
+					LEFT JOIN SF_DICTIONARY B ON A.DICTIONARYID = B.DICTIONARYID AND LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				WHERE   
+					A.VALIDSTATE = 'Valid'
+				AND
+					A.CODECLASSID = '$!{CODECLASSID}'
+				ORDER BY 
+					A.DISPLAYSEQUENCE
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetCommonCodeList" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT  
+					CASE WHEN B.DICTIONARYNAME IS NULL OR B.DICTIONARYNAME = '' THEN CASE WHEN A.CODENAME IS NULL OR A.CODENAME = '' THEN A.CODEID
+					                                                                      ELSE A.CODENAME END 
+						 ELSE B.DICTIONARYNAME END CODENAME,
+					A.CODEID AS CODEID,
+					A.DISPLAYSEQUENCE
+				FROM    
+					SF_CODE A
+					LEFT JOIN SF_DICTIONARY B
+						ON A.DICTIONARYID = B.DICTIONARYID
+						AND LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				WHERE   
+					A.VALIDSTATE = 'Valid'
+				AND
+					A.CODECLASSID = '$!{CODECLASSID}'
+				ORDER BY 
+					A.DISPLAYSEQUENCE
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetMenuList" version="00001">
+		<statement>
+			<![CDATA[
+				 WITH TB_MENU (CATEGORYID, PARENTMENUID, MENUID, MENUTYPE, PROGRAMID, MENUNAME, SEQUENCE, DEPTH, OPTIONS, LCODE, DICTIONARYID, USERID)
+     				AS    ( 
+				SELECT M.PARENTMENUID AS CATEGORYID
+					, M.PARENTMENUID AS PARENTMENUID
+					, M.MENUID AS MENUID
+					, M.MENUTYPE AS MENUTYPE
+					, M.PROGRAMID AS PROGRAMID
+					, M.MENUNAME AS MENUNAME
+					, M.DISPLAYSEQUENCE AS SEQUENCE
+					, 0 AS DEPTH 
+					, M.OPTIONS
+					, M.DICTIONARYID AS LCODE
+					, M.DICTIONARYID AS DICTIONARYID
+					, UCU.USERID AS USERID
+				FROM SF_MENU M 
+				INNER JOIN SF_USERCLASSUSER UCU ON UCU.USERID = '$!{_TXNINFO.USER}' AND M.VALIDSTATE = UCU.VALIDSTATE
+				INNER JOIN SF_MENUAUTHORITY MAY ON M.UIID = MAY.UIID AND UCU.USERCLASSID = MAY.USERCLASSID AND M.MENUID = MAY.MENUID AND M.VALIDSTATE = MAY.VALIDSTATE
+				WHERE 1=1
+				AND (M.PARENTMENUID IS NULL OR M.PARENTMENUID = '')
+				AND M.UIID = '$!{_TXNINFO.UIID}'
+				AND M.VALIDSTATE = 'Valid'
+				UNION ALL 
+				SELECT CASE WHEN DEPTH >= 1 THEN TM.CATEGORYID ELSE CM.PARENTMENUID END CATEGORYID
+					, CM.PARENTMENUID AS PARENTMENUID
+					, CM.MENUID AS MENUID
+					, CM.MENUTYPE AS MENUTYPE
+					, CM.PROGRAMID AS PROGRAMID
+					, CM.MENUNAME AS MENUNAME
+					, CM.DISPLAYSEQUENCE AS SEQUENCE
+					, DEPTH + 1 AS DEPTH 
+					, CM.OPTIONS
+					, CM.DICTIONARYID AS LCODE
+					, CM.DICTIONARYID AS DICTIONARYID
+					, UCU.USERID AS USERID
+				FROM SF_MENU CM  
+				INNER JOIN SF_USERCLASSUSER UCU ON UCU.USERID = '$!{_TXNINFO.USER}' AND CM.VALIDSTATE = UCU.VALIDSTATE
+				INNER JOIN SF_MENUAUTHORITY MAY ON UCU.USERCLASSID = MAY.USERCLASSID AND CM.MENUID = MAY.MENUID AND CM.VALIDSTATE = MAY.VALIDSTATE
+				JOIN TB_MENU TM ON CM.PARENTMENUID = TM.MENUID 
+				WHERE CM.UIID = '$!{_TXNINFO.UIID}'
+				AND CM.VALIDSTATE = 'Valid'
+				) 
+				SELECT ISNULL(A.CATEGORYID, '') AS CATEGORYID
+					, ISNULL(A.PARENTMENUID, '') AS PARENTMENUID
+					, A.MENUID AS MENUID
+					, A.MENUTYPE AS MENUTYPE
+					, A.PROGRAMID AS PROGRAMID
+					, CASE WHEN (D.DICTIONARYNAME IS NULL OR D.DICTIONARYNAME = '') THEN 
+			                    CASE WHEN (A.MENUNAME IS NULL OR A.MENUNAME = '') THEN
+			                            A.MENUID
+			                          ELSE  A.MENUNAME  END
+			            ELSE D.DICTIONARYNAME END AS MENUNAME
+					, A.SEQUENCE AS SEQUENCE
+					, A.DEPTH AS DEPTH
+					, A.USERID AS USERID
+  					, A.OPTIONS
+  					, A.LCODE
+  					, A.DICTIONARYID AS DICTIONARYID
+				FROM TB_MENU A
+				--INNER JOIN SF_USERCLASSUSER B ON B.USERID = :USERID AND B.VALIDSTATE = :VALIDSTATE
+				--INNER JOIN SF_MENUAUTHORITY C ON B.USERCLASSID = C.USERCLASSID AND A.MENUID = C.MENUID AND B.VALIDSTATE = C.VALIDSTATE
+				LEFT OUTER JOIN SF_DICTIONARY D ON A.DICTIONARYID = D.DICTIONARYID AND D.VALIDSTATE = 'Valid' AND D.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				GROUP BY A.CATEGORYID, A.PARENTMENUID, A.MENUID, A.MENUTYPE, A.PROGRAMID, D.DICTIONARYNAME, A.MENUNAME, A.SEQUENCE, A.DEPTH, A.USERID, A.OPTIONS, A.LCODE, A.DICTIONARYID
+				ORDER BY A.DEPTH, A.SEQUENCE
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetMenuList" version="00001" dbms="MYSQL">
+		<statement>
+			<![CDATA[
+				SELECT M.PARENTMENUID AS CATEGORYID
+					, M.PARENTMENUID AS PARENTMENUID
+					, M.MENUID AS MENUID
+					, M.MENUTYPE AS MENUTYPE
+					, M.PROGRAMID AS PROGRAMID
+					, CASE WHEN DIC.DICTIONARYNAME is NULL THEN M.MENUNAME ELSE DIC.DICTIONARYNAME END MENUNAME
+					, M.DISPLAYSEQUENCE AS SEQUENCE
+					, 0 AS DEPTH 
+					, M.OPTIONS
+					, M.DICTIONARYID AS LCODE
+					, M.DICTIONARYID AS DICTIONARYID
+					, UCU.USERID AS USERID
+				FROM SF_MENU M 
+				INNER JOIN SF_USERCLASSUSER UCU ON UCU.USERID = '$!{_TXNINFO.USER}' AND M.VALIDSTATE = UCU.VALIDSTATE
+				INNER JOIN SF_MENUAUTHORITY MAY ON M.MENUID = MAY.MENUID AND M.UIID = MAY.UIID AND M.VALIDSTATE = MAY.VALIDSTATE AND UCU.USERCLASSID = MAY.USERCLASSID
+				INNER JOIN SF_DICTIONARY DIC ON M.DICTIONARYID = DIC.DICTIONARYID AND DIC.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				WHERE 1=1
+				AND M.UIID = '$!{_TXNINFO.UIID}'
+				AND M.VALIDSTATE = 'Valid'
+				ORDER BY PARENTMENUID, MENUTYPE, SEQUENCE ASC
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetMenuList" version="00002">
+		<statement>
+			<![CDATA[
+				SELECT  C.MENUID AS MENUID
+				        , CASE WHEN D.DICTIONARYNAME IS NULL or D.DICTIONARYNAME = '' THEN CASE WHEN C.MENUNAME IS NULL THEN C.MENUID
+                                                                       ELSE C.MENUNAME END
+				               ELSE D.DICTIONARYNAME
+				          END MENUNAME
+				        , C.DESCRIPTION AS DESCRIPTION, C.PARENTMENUID AS PARENTMENUID, C.MENUTYPE AS MENUTYPE
+				        , C.PROGRAMID AS PROGRAMID, C.OPTIONS AS OPTIONS
+				        , C.DICTIONARYID AS LCODE
+				FROM    (
+							SELECT  A.MENUID, A.MENUNAME
+				                    , A.DESCRIPTION, A.PARENTMENUID, A.MENUTYPE
+				                    , A.PROGRAMID, A.OPTIONS, A.DICTIONARYID, A.DISPLAYSEQUENCE
+				            FROM    SF_MENU A
+				                    INNER JOIN  (
+				                                    SELECT  A.MENUID
+				                                    FROM    SF_MENUAUTHORITY A
+				                                            INNER JOIN (
+				                                                            SELECT  USERCLASSID
+				                                                            FROM    SF_USERCLASSUSER
+				                                                            WHERE   USERID = '$!{_TXNINFO.USER}'
+				                                                            AND     VALIDSTATE = 'Valid'
+				                                                       ) B
+				                                                ON A.USERCLASSID = B.USERCLASSID 
+				                                    WHERE   A.VALIDSTATE = 'Valid'
+				                                    GROUP BY A.MENUID
+				                                ) B
+				                        ON  A.MENUID = B.MENUID
+				            WHERE   1=1
+				            AND     A.VALIDSTATE = 'Valid'
+				            AND     A.UIID = '$!{_TXNINFO.UIID}'
+				        ) C
+				        LEFT OUTER JOIN SF_DICTIONARY D
+				            ON  C.DICTIONARYID = D.DICTIONARYID
+				            AND	D.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				ORDER BY C.DISPLAYSEQUENCE, C.MENUTYPE, C.PARENTMENUID
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetMenuTreeList" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT  A.UIID, A.MENUTYPE
+				        , A.PARENTMENUID PARENTMENUID
+				        , A.DISPLAYSEQUENCE
+				        , A.MENUID
+				        , A.MENUNAME
+				        , CASE  WHEN (B.DICTIONARYNAME IS NULL OR B.DICTIONARYNAME = '') THEN 
+				                      CASE  WHEN (A.MENUNAME IS NULL OR A.MENUNAME = '') THEN A.MENUID
+						                        ELSE A.MENUNAME END
+						                ELSE B.DICTIONARYNAME
+				          END DICMENUNAME
+				        , A.DESCRIPTION
+				        , A.PROGRAMID
+				        , A.CREATOR, A.CREATEDTIME
+				        , A.MODIFIER, A.MODIFIEDTIME
+				        , A.VALIDSTATE
+				        , A.DICTIONARYID
+				        , A.DICTIONARYID AS LCODE
+				FROM    SF_MENU A
+				        LEFT OUTER JOIN SF_DICTIONARY B
+				            ON  A.DICTIONARYID = B.DICTIONARYID
+				            AND B.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				            AND B.VALIDSTATE = 'Valid'
+				WHERE   1=1
+			#if ("$!{UIID}" != "")	
+				AND     A.UIID = '$!{UIID}'
+			#end
+			#if ("$!{MENUID}" != "")	
+				AND     A.MENUID like '%$!{MENUID}%'
+			#end
+			#if ("$!{MENUNAME}" != "")	
+				AND     A.MENUNAME like '%$!{MENUNAME}%'
+			#end
+			#if ("$!{VALIDSTATE}" != "")
+				AND     A.VALIDSTATE = '$!{VALIDSTATE}'
+			#end
+				ORDER BY DISPLAYSEQUENCE, MENUTYPE, PARENTMENUID, MENUID			
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetMenuTreeList" version="00002">
+		<statement>
+			<![CDATA[
+				SELECT  A.UIID, A.MENUTYPE
+				        , A.PARENTMENUID PARENTMENUID
+				        , A.DISPLAYSEQUENCE
+				        , A.MENUID
+				        , CASE  WHEN (B.DICTIONARYNAME IS NULL OR B.DICTIONARYNAME = '') THEN 
+				                      CASE  WHEN (A.MENUNAME IS NULL OR A.MENUNAME = '') THEN A.MENUID
+						                        ELSE A.MENUNAME END
+						                ELSE B.DICTIONARYNAME
+				          END MENUNAME
+				        , A.DESCRIPTION
+				        , A.PROGRAMID
+				        , A.CREATOR, A.CREATEDTIME
+				        , A.MODIFIER, A.MODIFIEDTIME
+				        , A.VALIDSTATE
+				        , A.DICTIONARYID
+				        , A.DICTIONARYID AS LCODE
+				FROM    SF_MENU A
+				        LEFT OUTER JOIN SF_DICTIONARY B
+				            ON  A.DICTIONARYID = B.DICTIONARYID
+				            AND B.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				            AND B.VALIDSTATE = 'Valid'
+				WHERE   1=1
+			#if ("$!{UIID}" != "")	
+				AND     A.UIID = '$!{UIID}'
+			#end
+			#if ("$!{MENUID}" != "")	
+				AND     A.MENUID like '%$!{MENUID}%'
+			#end
+			#if ("$!{MENUNAME}" != "")	
+				AND     A.MENUNAME like '%$!{MENUNAME}%'
+			#end
+			#if ("$!{VALIDSTATE}" != "")
+				AND     A.VALIDSTATE = '$!{VALIDSTATE}'
+			#end
+				ORDER BY DISPLAYSEQUENCE, MENUTYPE, PARENTMENUID, MENUID			
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetUserFavoriteMenu" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT 'MyMenu' AS CATEGORYID
+  					, NULL PARENTMENUID
+  					, FM.USERID
+  					, FM.MENUID
+  					, FM.REGTYPE
+  					, MN.MENUTYPE
+  					, MN.PROGRAMID
+  					, CASE WHEN DIC.DICTIONARYNAME is null THEN MN.MENUNAME ELSE DIC.DICTIONARYNAME END AS MENUNAME
+  					, FM.DISPLAYSEQUENCE AS SEQUENCE
+  					, 0 DEPTH
+  					, DIC.DICTIONARYID
+				FROM SF_FAVORITEMENUS FM
+				INNER JOIN SF_MENU MN ON FM.MENUID = MN.MENUID AND MN.VALIDSTATE = 'Valid' 
+				LEFT OUTER JOIN SF_DICTIONARY DIC ON MN.DICTIONARYID = DIC.DICTIONARYID AND MN.VALIDSTATE = DIC.VALIDSTATE AND DIC.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				WHERE USERID = '$!{USERID}'
+				AND MN.UIID = '$!{UIID}'
+				ORDER BY FM.DISPLAYSEQUENCE, DEPTH
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetMenuList" version="00003">
+		<statement>
+			<![CDATA[
+				WITH RECURSIVE TB_MENU (CATEGORYID, PARENTMENUID, MENUID, MENUTYPE, PROGRAMID, MENUNAME, SEQUENCE, DEPTH, OPTIONS, LCODE, DICTIONARYID, USERID)
+     				AS    ( 
+				SELECT M.PARENTMENUID AS CATEGORYID
+					, M.PARENTMENUID AS PARENTMENUID
+					, M.MENUID AS MENUID
+					, M.MENUTYPE AS MENUTYPE
+					, M.PROGRAMID AS PROGRAMID
+					, M.MENUNAME AS MENUNAME
+					, M.DISPLAYSEQUENCE AS SEQUENCE
+					, 0 AS DEPTH 
+					, M.OPTIONS
+					, M.DICTIONARYID AS LCODE
+					, M.DICTIONARYID AS DICTIONARYID
+					, UCU.USERID AS USERID
+					, M.VALIDSTATE
+				FROM SF_MENU M 
+				INNER JOIN SF_USERCLASSUSER UCU ON UCU.USERID = '$!{_TXNINFO.USER}' AND M.VALIDSTATE = UCU.VALIDSTATE
+				INNER JOIN SF_MENUAUTHORITY MAY ON M.UIID = MAY.UIID AND UCU.USERCLASSID = MAY.USERCLASSID AND M.MENUID = MAY.MENUID AND M.VALIDSTATE = MAY.VALIDSTATE
+				WHERE 1=1
+				AND (M.PARENTMENUID IS NULL OR M.PARENTMENUID = '')
+				AND M.UIID = '$!{_TXNINFO.UIID}'
+				AND M.VALIDSTATE = 'Valid'
+				UNION ALL 
+				SELECT CASE WHEN DEPTH >= 1 THEN TM.CATEGORYID ELSE CM.PARENTMENUID END CATEGORYID
+					, CM.PARENTMENUID AS PARENTMENUID
+					, CM.MENUID AS MENUID
+					, CM.MENUTYPE AS MENUTYPE
+					, CM.PROGRAMID AS PROGRAMID
+					, CM.MENUNAME AS MENUNAME
+					, CM.DISPLAYSEQUENCE AS SEQUENCE
+					, DEPTH + 1 AS DEPTH 
+					, CM.OPTIONS
+					, CM.DICTIONARYID AS LCODE
+					, CM.DICTIONARYID AS DICTIONARYID
+					, UCU.USERID AS USERID
+					, CM.VALIDSTATE
+				FROM SF_MENU CM  
+				INNER JOIN SF_USERCLASSUSER UCU ON UCU.USERID = '$!{_TXNINFO.USER}' AND CM.VALIDSTATE = UCU.VALIDSTATE
+				INNER JOIN SF_MENUAUTHORITY MAY ON UCU.USERCLASSID = MAY.USERCLASSID AND CM.MENUID = MAY.MENUID AND CM.VALIDSTATE = MAY.VALIDSTATE
+				JOIN TB_MENU TM ON CM.PARENTMENUID = TM.MENUID 
+				WHERE CM.UIID = '$!{_TXNINFO.UIID}'
+				AND CM.VALIDSTATE = 'Valid'
+				) 
+				SELECT A.CATEGORYID AS CATEGORYID
+					, A.PARENTMENUID AS PARENTMENUID
+					, A.MENUID AS MENUID
+					, A.MENUTYPE AS MENUTYPE
+					, A.PROGRAMID AS PROGRAMID
+					, CASE WHEN (D.DICTIONARYNAME IS NULL OR D.DICTIONARYNAME = '') THEN 
+			                    CASE WHEN (A.MENUNAME IS NULL OR A.MENUNAME = '') THEN
+			                            A.MENUID
+			                          ELSE  A.MENUNAME  END
+			            ELSE D.DICTIONARYNAME END AS MENUNAME
+					, A.SEQUENCE AS SEQUENCE
+					, A.DEPTH AS DEPTH
+					, A.USERID AS USERID
+  					, A.OPTIONS
+  					, A.LCODE
+  					, A.DICTIONARYID AS DICTIONARYID
+  					, A.VALIDSTATE
+				FROM TB_MENU A
+				--INNER JOIN SF_USERCLASSUSER B ON B.USERID = :USERID AND B.VALIDSTATE = :VALIDSTATE
+				--INNER JOIN SF_MENUAUTHORITY C ON B.USERCLASSID = C.USERCLASSID AND A.MENUID = C.MENUID AND B.VALIDSTATE = C.VALIDSTATE
+				LEFT OUTER JOIN SF_DICTIONARY D ON A.DICTIONARYID = D.DICTIONARYID AND D.VALIDSTATE = 'Valid' AND D.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				GROUP BY A.CATEGORYID, A.PARENTMENUID, A.MENUID, A.MENUTYPE, A.PROGRAMID, D.DICTIONARYNAME, A.MENUNAME, A.SEQUENCE, A.DEPTH, A.USERID, A.OPTIONS, A.LCODE, A.DICTIONARYID, A.VALIDSTATE
+				ORDER BY A.DEPTH, A.SEQUENCE
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetExceptionList" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT 
+					MESSAGEID, MESSAGENAME, DESCRIPTION, LANGUAGETYPE 
+				FROM 
+					SF_MESSAGE
+#if ( $!MESSAGECLASSID != "") 
+				WHERE 
+					MESSAGECLASSID = '$!{MESSAGECLASSID}'			
+#end
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetMessageList" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT MESSAGEID
+					, MESSAGENAME
+					, MESSAGECLASSID
+					, MESSAGENAME AS TITLE
+					, DESCRIPTION AS MESSAGE
+					, LANGUAGETYPE 
+				FROM SF_MESSAGE
+				WHERE VALIDSTATE = '$!{VALIDSTATE}'	
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 사유코드 조회
+	생	성	자	: 박정훈
+	생	성	일	: 2019-07-08
+	수  정   이  력	: 
+	-->
+	<query id="GetReasonCodeList" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetReasonCodeList
+				-- Version : 10001
+				
+				SELECT 
+						CD.REASONCODEID		
+					,	COALESCE(DC.DICTIONARYNAME, 'REASONCODENAME')	AS REASONCODENAME
+				FROM 	SF_REASONCODE			CD
+				LEFT JOIN SF_DICTIONARY			DC	ON	CD.REASONCODENAME = DC.dictionaryid
+													AND DC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE 	CD.VALIDSTATE = 'Valid'
+				AND 	CD.REASONCODECLASSID = '$!{P_REASONCODECLASSID}'
+				ORDER BY DISPLAYSEQUENCE ASC
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 사유코드 그룹 조회
+	생	성	자	: 박정훈
+	생	성	일	: 2019-07-08
+	수  정   이  력	: 
+	-->
+	<query id="GetReasonCodeClassList" version="10002">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetReasonCodeClassList
+				-- Version : 10001
+				
+				SELECT 
+						CD.REASONCODECLASSID
+					,	COALESCE(DC.DICTIONARYNAME, 'REASONCODECLASSNAME')	AS REASONCODECLASSNAME
+				FROM 	SF_REASONCODECLASS		CD
+				LEFT JOIN SF_DICTIONARY			DC	ON	CD.REASONCODECLASSNAME = DC.dictionaryid
+													AND DC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE 	CD.VALIDSTATE = 'Valid'
+				#if("$!{P_PARENTREASONCODECLASSID}" != "")
+		        AND     CD.PARENTREASONCODECLASSID = '$!{P_PARENTREASONCODECLASSID}'
+		        #else
+				AND 	CD.REASONCODECLASSID = '$!{P_REASONCODECLASSID}'
+				#end
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	설		명	: 단위 조회
+	생	성	자	: 배선용
+	생	성	일	: 2020-06-03
+	수  정   이  력	: 
+	-->
+	<query id="GetUnitList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetUnitList
+				-- Version : 00001
+			
+				SELECT UNITID CODEID
+				    ,  UNIT   CODENAME
+				FROM CT_UNITDEFINITION CU 
+				WHERE 	1=1
+						AND   VALIDSTATE  = 'Valid'
+			]]>
+		</statement>
+	</query>
+	
+	
+	
+	<!--
+	설		명	: 회사코드 조회
+	생	성	자	: yshwang
+	생	성	일	: 2020-05-20
+	수  정   이  력	: 
+	-->
+	<query id="GetEnterpriseList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetEnterpriseList
+				-- Version : 00001
+			
+				SELECT
+						ENTERPRISEID
+					,	ENTERPRISENAME
+				FROM	SF_ENTERPRISE
+				WHERE	VALIDSTATE = 'Valid'
+				ORDER BY ENTERPRISEID
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 품목코드 팝업 조회
+	생	성	자	: yshwang
+	생	성	일	: 2020-05-21
+	수  정   이  력	: 
+	-->
+	<query id="GetProductDefListPopup" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetProductDefListPopup
+				-- Version : 00001
+			
+				SELECT
+								ISNULL(DCD.DICTIONARYNAME, PD.PRODUCTDEFTYPE)	AS PRODUCTDEFTYPE
+							,	ISNULL(TCD.DICTIONARYNAME, PD.TEAMID)			AS TEAM
+							,	PD.PRODUCTDEFID
+							,   PD.PARTNUMBER
+							,	PD.PRODUCTDEFVERSION
+							,	PD.PRODUCTDEFNAME
+							,	ISNULL(MCD.DICTIONARYNAME, PD.MODELID)			AS MODEL 
+				FROM			SF_PRODUCTDEFINITION	PD
+				LEFT OUTER JOIN	SF_CODE					DC	ON	DC.CODECLASSID = 'ProductDefType'
+															and	dc.codeid = pd.productdeftype
+				LEFT OUTER JOIN SF_DICTIONARY			DCD	ON	DCD.DICTIONARYID = DC.DICTIONARYID
+															AND	DCD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT OUTER JOIN	CT_TEAM					TC	ON	TC.TEAMID = PD.TEAMID
+				LEFT OUTER JOIN SF_DICTIONARY			TCD	ON	TCD.DICTIONARYID = TC.DICTIONARYID
+															AND	TCD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT  JOIN SF_CODE						MC	ON  MC.CODECLASSID = 'ModelCode' 
+															AND	MC.CODEID = PD.MODELID
+				LEFT  JOIN SF_DICTIONARY        		MCD ON  MCD.DICTIONARYID = MC.DICTIONARYID 
+				                                    		AND MCD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE			PD.VALIDSTATE = 'Valid'
+				#if ("$!{TEAM}" != "" && "$!{TEAM}" != "*")	
+				AND				PD.TEAMID = '$!{TEAM}'
+				#end
+				#if ("$!{PRODUCTDEFTYPE}" != "" && "$!{PRODUCTDEFTYPE}" != "*")	
+				AND				PD.PRODUCTDEFTYPE = '$!{PRODUCTDEFTYPE}'
+				#end
+				#if ("$!{PRODUCTDEFID}" != "")
+				AND				(   PD.PRODUCTDEFID LIKE N'%$!{PRODUCTDEFID}%' 
+				                 OR PD.PARTNUMBER   LIKE N'%$!{PRODUCTDEFID}%'
+				                )
+				#end
+				#if ("$!{PRODUCTDEFNAME}" != "")
+				AND				PD.PRODUCTDEFNAME LIKE N'%$!{PRODUCTDEFNAME}%'
+				#end
+				#if ("$!{PARTNUMBER}" != "")
+				AND				PD.PARTNUMBER LIKE N'%$!{PARTNUMBER}%'
+				#end
+				ORDER BY PRODUCTDEFID, PRODUCTDEFVERSION
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	설		명	: 라벨 팝업 조회
+	생	성	자	: yshwang
+	생	성	일	: 2020-05-21
+	수  정   이  력	: 
+	-->
+	<query id="GetLabelListPopup" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetLabelListPopup
+				-- Version : 00001
+			
+				SELECT
+								LBL.LABELID
+							,	LBL.LABELNAME
+							,	ISNULL(LTD.DICTIONARYNAME, LBL.LABELTYPE)	AS LABELTYPE
+							,	LBL.DESCRIPTION
+				FROM			SF_LABELDEFINITION	LBL
+				LEFT OUTER JOIN SF_CODE				LT	ON	LT.CODECLASSID = 'LabelType'
+														AND	LT.CODEID = LBL.LABELTYPE
+				LEFT OUTER JOIN SF_DICTIONARY		LTD	ON	LTD.DICTIONARYID = LT.DICTIONARYID
+														AND	LTD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE			1 = 1
+				AND				LBL.VALIDSTATE = 'Valid'
+				#if ("$!{LABELID}" != "")
+				AND				LBL.LABELID LIKE '%$!{LABELID}%'
+				#end
+				#if ("$!{LABELNAME}" != "")
+				AND				LBL.LABELNAME LIKE '%$!{LABELNAME}%'
+				#end
+				#if ("$!{LABELTYPE}" != "" && "$!{LABELTYPE}" != "*")	
+				AND				LBL.LABELTYPE = '$!{LABELTYPE}'
+				#end
+				ORDER BY LBL.LABELID
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	설		명	: 무지시 작업공정 목록 조회
+	생	성	자	: yshwang
+	생	성	일	: 2020-06-02
+	수  정   이  력	: 
+	-->
+	<query id="GetNonOrderSegmentList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetNonOrderSegmentList
+				-- Version : 00001
+
+				SELECT		P.PROCESSSEGMENTID
+						,	ISNULL(PD.DICTIONARYNAME, P.PROCESSSEGMENTID) AS PROCESSSEGMENTNAME 
+				FROM		SF_PROCESSSEGMENT	P
+				LEFT JOIN	SF_DICTIONARY		PD	ON	PD.DICTIONARYID = P.DICTIONARYID
+													AND	PD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE	PROCESSSEGMENTCLASSID  = 'SGC00004'		-- 무지시 작업공정
+				AND		PROCESSSEGMENTTYPE  = 'MAIN'
+				AND		PROCESSSEGMENTID  <> 'SGM029'			-- 디스플레이서건조가 아님
+				ORDER BY P.PROCESSSEGMENTID
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 무지시 작업 자재목록 조회
+	생	성	자	: yshwang
+	생	성	일	: 2020-06-02
+	수  정   이  력	: 2020-07-16 | JYLEE | CONSUMABLEDEFID => PARTNUMBER
+	-->
+	<query id="GetNonOrderConsumableDefList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetNonOrderConsumableDefList
+				-- Version : 00001
+
+				SELECT
+							CD.PARTNUMBER
+						,	ISNULL(CTD.DICTIONARYNAME, CD.CONSUMABLETYPE)	AS CONSUMABLETYPE
+						,	CD.CONSUMABLEDEFNAME
+						,	CD.STANDARD
+				FROM		SF_CONSUMABLEDEFINITION		CD
+				JOIN		SF_PROCESSSEGMENT 			PS	ON	CD.NOTORDERSEGMENTID  = PS.PROCESSSEGMENTID 
+				LEFT JOIN	SF_CODE						CT	ON	CT.CODECLASSID = 'ConsumableType'
+															AND	CT.CODEID = CD.CONSUMABLETYPE
+				LEFT JOIN	SF_DICTIONARY				CTD	ON	CTD.DICTIONARYID = CT.DICTIONARYID
+															AND	CTD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE		1 = 1
+				AND			CD.ISNOTORDERRESULT = 'Y'				-- 무지시 작업대상 여부
+				AND			PS.PROCESSSEGMENTCLASSID  = 'SGC00004'	-- 무지시 작업공정
+				AND			PS.PROCESSSEGMENTTYPE  = 'MAIN'
+				AND			PS.PROCESSSEGMENTID <> 'SGM029'		-- 디스플레이서 건조 아님
+				-- 자재코드/명
+				#if ("$!{P_CONSUMABLEDEFTXT}" != "" && "$!{P_CONSUMABLEDEFTXT}" != "*")
+					AND	(CD.PARTNUMBER LIKE N'%$!{P_CONSUMABLEDEFTXT}%'
+					OR	CD.CONSUMABLEDEFNAME LIKE '%$!{P_CONSUMABLEDEFTXT}%')
+				#end
+				-- 자재 유형											
+				#if ("$!{CONSUMABLETYPE}" != "" && "$!{CONSUMABLETYPE}" != "*")	
+				AND			CD.CONSUMABLETYPE = '$!{CONSUMABLETYPE}'
+				#end
+				ORDER BY CD.CONSUMABLEDEFID
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 마지막 자재 LOT 분할 ID 조회
+				부모LOTID-00 형식의 자재 LOT 분할 ID 를 채번하기 위해 마지막 번호를 조회한다. 
+	생	성	자	: yshwang
+	생	성	일	: 2020-06-03
+	수  정   이  력	: 2020-08-12 | scmo | 더블대쉬있는 경우에 대한 예외처리 강화
+	-->
+	<query id="GetLastSplitIdOfConsumableLot" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetLastSplitIdOfConsumableLot
+				-- Version : 00001
+				
+				SELECT	MAX(CONSUMABLELOTID) AS LASTSPLITID
+				FROM	SF_CONSUMABLELOT
+				WHERE	1=1
+						AND CONSUMABLELOTID LIKE '$!{CONSUMABLELOTID}-%'
+						AND DATALENGTH(CONSUMABLELOTID) = DATALENGTH('$!{CONSUMABLELOTID}') + 3
+			]]>
+		</statement>
+	</query>
+	<!--
+	설		명	: 검색조건에서 사용하기 위해 작업장 목록을 조회 
+	생	성	자	: yshwang
+	생	성	일	: 2020-06-03
+	수  정   이  력	: 
+	-->
+	<query id="GetAreaList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- id : GetAreaList
+				-- version : 00001
+				
+				SELECT	
+							AR.AREAID
+						,	ISNULL(ARD.DICTIONARYNAME, AR.AREANAME)		AS	AREANAME
+				FROM 		SF_AREA			AR
+				LEFT JOIN	SF_DICTIONARY	ARD	ON	ARD.DICTIONARYID = AR.DICTIONARYID
+												AND	ARD.LANGUAGETYPE = '$!{LANGUAGETYPE}'	
+				WHERE		AR.VALIDSTATE = 'Valid'
+				--ORDER BY	AREAID
+				ORDER BY 	ISNULL(ARD.DICTIONARYNAME, AR.AREANAME) ASC
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	설		명	: 검색조건에서 사용하기 위해 작업장 목록을 조회 (가공 작업장)
+	생	성	자	: yshwang
+	생	성	일	: 2020-06-03
+	수  정   이  력	: 
+	-->
+	<query id="GetMachiningAreaList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- id : GetMachiningAreaList
+				-- version : 00001
+				
+					SELECT AR.AREAID
+					   ,   ISNULL(ARD.DICTIONARYNAME, AR.AREANAME)		AS	AREANAME
+					FROM SF_AREA AR 
+				    LEFT JOIN	SF_DICTIONARY	ARD	ON	ARD.DICTIONARYID = AR.DICTIONARYID
+												    AND	ARD.LANGUAGETYPE = '$!{LANGUAGETYPE}'						
+					WHERE 1=1
+					AND   AR.VALIDSTATE = 'Valid'
+					AND   EXISTS (
+					                 SELECT 1
+					                 FROM SF_PRODUCTDEFINITION    SP 
+					                 INNER JOIN SF_PROCESSPATH    PP ON  SP.PROCESSDEFID  = PP.PROCESSDEFID 
+					                                                 AND PP.PATHTYPE  LIKE 'Start%'
+					                 INNER JOIN SF_PROCESSSEGMENT PS ON  PP.PROCESSSEGMENTID  = PS.PROCESSSEGMENTID 
+					                                                 AND PS.PROCESSSEGMENTCLASSID  = 'SGC00001'
+					                 WHERE 1=1
+					                 AND AR.AREAID  = SP.AREAID 
+								 )
+			]]>
+		</statement>
+	</query>	
+	<!--
+	설		명	: 검색조건에서 사용하기 위해 공정 목록을 조회 
+	생	성	자	: yshwang
+	생	성	일	: 2020-06-03
+	수  정   이  력	: 
+	-->
+	<query id="GetProcessSegmentListForCondition" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				--	id : GetProcessSegmentListForCondition
+				--	version : 00001
+	
+				SELECT
+							PS.PROCESSSEGMENTID
+						,	ISNULL(PSD.DICTIONARYNAME, PS.PROCESSSEGMENTNAME)	AS PROCESSSEGMENTNAME
+				FROM		SF_PROCESSSEGMENT	PS
+				LEFT JOIN	SF_DICTIONARY		PSD	ON	PSD.DICTIONARYID = PS.DICTIONARYID
+													AND	PSD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE		1=1
+				#if ("$!{PROCESSSEGMENTCLASSID}" != "" && "$!{PROCESSSEGMENTCLASSID}" != "*")
+					AND	PS.PROCESSSEGMENTCLASSID = '$!{PROCESSSEGMENTCLASSID}'
+				#end					
+				AND			PS.PROCESSSEGMENTTYPE = '$!{PROCESSSEGMENTTYPE}'
+				AND			PS.VALIDSTATE = 'Valid'
+				ORDER BY PROCESSSEGMENTID
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 건조기(조회조건) 
+	생	성	자	: yshwang
+	생	성	일	: 2020-06-10
+	수  정   이  력	: 
+	-->
+	<query id="GetDryerListForCondition" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetDryerListForCondition
+				-- Version : 00001
+	
+				SELECT
+							EQ.EQUIPMENTID														-- 설비 ID
+						,	ISNULL(EQD.DICTIONARYNAME, EQ.EQUIPMENTNAME)	AS EQUIPMENTNAME	-- 설비명
+						,	ISNULL(ARD.DICTIONARYNAME, AR.AREANAME)			AS AREANAME			-- 작업장명
+						,	EQ.LOCATIONID														-- 위치
+				FROM		SF_EQUIPMENT					EQ
+				LEFT JOIN	SF_DICTIONARY					EQD	ON	EQD.DICTIONARYID = EQ.DICTIONARYID
+																AND	EQD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN	SF_AREA							AR	ON	AR.AREAID = EQ.AREAID
+				LEFT JOIN	SF_DICTIONARY					ARD	ON	ARD.DICTIONARYID = AR.DICTIONARYID
+																AND	ARD.LANGUAGETYPE = '$!{LANGUAGETYPE}'																
+				WHERE		EQ.EQUIPMENTCLASSID = 'MG05'	-- 건조기
+				AND			EQ.VALIDSTATE = 'Valid'
+				#if ("$!{P_DRYERTYPE}" == "First")
+				AND			EQ.AREAID = 'AR-05'				-- 디스플레이 가공 작업장
+				#else
+				AND			EQ.AREAID <> 'AR-05'			-- 디스플레이 가공 작업장
+				#end
+				#if ("$!{EQUIPMENTID}" != "")
+				AND			EQ.EQUIPMENTID LIKE '%$!{EQUIPMENTID}%'
+				#end
+				#if ("$!{EQUIPMENTNAME}" != "")
+				AND			EQ.EQUIPMENTNAME LIKE '%$!{EQUIPMENTNAME}%'
+				#end
+				ORDER BY 	EQ.EQUIPMENTID
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: LOT 공통 팝업-  LOT리스트 조회 
+	생	성	자	: 정승원
+	생	성	일	: 2020-06-12
+	수  정   이  력	: 
+	-->
+	<query id="GetLotIdList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetLotIdList
+				-- Version : 00001
+				SELECT 
+						L.LOTID
+					,	ISNULL(D.DICTIONARYNAME, PD.PRODUCTDEFTYPE) PRODUCTDEFTYPE
+					,	L.PRODUCTDEFID
+					,	PD.PRODUCTDEFNAME
+					,	ISNULL(D2.DICTIONARYNAME, PS.PROCESSSEGMENTNAME) PROCESSSEGMENTNAME
+					,	L.QTY
+				FROM 	SF_LOT					L
+				INNER JOIN SF_PRODUCTDEFINITION PD	ON	L.PRODUCTDEFID = PD.PRODUCTDEFID
+													AND L.PRODUCTDEFVERSION = PD.PRODUCTDEFVERSION
+				INNER JOIN SF_PROCESSSEGMENT 	PS 	ON 	L.PROCESSSEGMENTID = PS.PROCESSSEGMENTID
+													AND L.PROCESSSEGMENTVERSION = PS.PROCESSSEGMENTVERSION
+				LEFT JOIN SF_CODE 				C	ON 	PD.PRODUCTDEFTYPE = C.CODEID 
+													AND C.CODECLASSID = 'ProductDefType'
+				LEFT JOIN SF_DICTIONARY 		D	ON 	C.DICTIONARYID = D.DICTIONARYID 
+													AND D.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN SF_DICTIONARY 		D2 	ON	PS.DICTIONARYID = D2.DICTIONARYID
+													AND D2.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE 1 = 1
+				AND ISNULL(ISHOLD, 'N') = 'N'
+				AND	L.LOTSTATE IN ('InProduction', 'InTransit')
+				--품목코드
+				#if("$!{TXTPRODUCTDEFNAME2}" != "")
+				AND L.PRODUCTDEFID = '$!{TXTPRODUCTDEFNAME2}'
+				#end
+				--품목코드 / 명
+				#if("$!{TXTPRODUCTDEFIDNAME}" != "")
+				AND (L.PRODUCTDEFID LIKE '%$!{TXTPRODUCTDEFIDNAME}%'
+				OR	 PD.PRODUCTDEFNAME LIKE '%$!{TXTPRODUCTDEFIDNAME}%')
+				#end
+				--LOT ID
+				#if("$!{TXTLOTID}" != "")
+				AND L.LOTID LIKE '%$!{TXTLOTID}%'
+				#end
+				--공정
+				#if("$!{TXTPROCESSSEGMENT}" != "")
+				AND L.PROCESSSEGMENTID = '$!{TXTPROCESSSEGMENT}'
+				#end
+				ORDER BY L.LOTID
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 건조기 자재목록 조회
+	생	성	자	: yshwang
+	생	성	일	: 2020-06-18
+	수  정   이  력	: 
+	-->
+	<query id="GetDryConsumableDefList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetNonOrderConsumableDefList
+				-- Version : 00001
+
+				SELECT
+							CD.CONSUMABLEDEFID
+						,	CD.PARTNUMBER
+						,	ISNULL(CTD.DICTIONARYNAME, CD.CONSUMABLETYPE)	AS CONSUMABLETYPE
+						,	CD.CONSUMABLEDEFNAME
+						,	CD.STANDARD
+				FROM		SF_CONSUMABLEDEFINITION		CD
+				JOIN		SF_PROCESSSEGMENT 			PS	ON	CD.NOTORDERSEGMENTID  = PS.PROCESSSEGMENTID 
+				LEFT JOIN	SF_CODE						CT	ON	CT.CODECLASSID = 'ConsumableType'
+															AND	CT.CODEID = CD.CONSUMABLETYPE
+				LEFT JOIN	SF_DICTIONARY				CTD	ON	CTD.DICTIONARYID = CT.DICTIONARYID
+															AND	CTD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE		1 = 1
+				AND			CD.ISNOTORDERRESULT = 'Y'				-- 무지시 작업대상 여부
+				AND			PS.PROCESSSEGMENTCLASSID  = 'SGC00004'	-- 무지시 작업공정
+				AND			PS.PROCESSSEGMENTTYPE  = 'MAIN'
+				AND			PS.PROCESSSEGMENTID = 'SGM029'			-- 디스플레이서 건조
+				-- 자재코드/명
+				#if ("$!{P_CONSUMABLEDEFTXT}" != "" && "$!{P_CONSUMABLEDEFTXT}" != "*")
+					AND	(CD.CONSUMABLEDEFNAME LIKE N'%$!{P_CONSUMABLEDEFTXT}%'
+						OR	CD.PARTNUMBER LIKE N'%$!{P_CONSUMABLEDEFTXT}%')
+				#end
+				ORDER BY CD.CONSUMABLEDEFID
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	프 로 그 램 명	: 공정관리 > 실적등록 > 건조기 실적 등록
+	설		명	: 건조실적 조회 검색조건용 품목코드 조회 
+	작	성	자	: 황유성
+	작	성	일	: 2020-06-18
+	주요 변경 로그	:
+	-->
+	<query id="GetDryProductDefList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id = "GetDryProductDefList"	
+				-- Version = "00001"
+
+				SELECT 
+							PD.PRODUCTDEFID
+						,	PD.PARTNUMBER
+						,	ISNULL(TCD.DICTIONARYNAME, PD.PRODUCTDEFTYPE)	AS PRODUCTDEFTYPE
+						,	PD.PRODUCTDEFNAME
+						,	ISNULL(MCD.DICTIONARYNAME, PD.MODELID)		AS MODEL
+						,	ISNULL(TMD.DICTIONARYNAME, TM.DESCRIPTION)	AS TEAM
+				FROM		SF_PRODUCTDEFINITION	PD
+				INNER JOIN	CT_SUBSEGMENTSPEC		SP	ON	SP.SPECDEFID = PD.SPECDEFID
+														AND	SP.SUBPROCESSSEGMENTID = 'SGS011'	-- 건조작업 
+				LEFT  JOIN 	SF_CODE 				TC  ON	TC.CODECLASSID = 'ProductDefType'  
+														AND	TC.CODEID = PD.PRODUCTDEFTYPE 	
+				LEFT  JOIN 	SF_DICTIONARY		 	TCD ON  TC.DICTIONARYID = TCD.DICTIONARYID
+														AND TCD.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				LEFT  JOIN	CT_TEAM					TM	ON	TM.TEAMID = PD.TEAMID
+				LEFT  JOIN	SF_DICTIONARY			TMD	ON	TMD.DICTIONARYID = TM.DICTIONARYID
+														AND	TMD.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				LEFT  JOIN  SF_CODE              	MC	ON  MC.CODECLASSID = 'ModelCode' 
+														AND	MC.CODEID = PD.MODELID
+				LEFT  JOIN  SF_DICTIONARY       	MCD ON  MCD.DICTIONARYID = MC.DICTIONARYID 
+				                                    	AND MCD.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				WHERE	PD.VALIDSTATE = 'Valid'
+				-- 품목타입 조회조건
+				#if ("$!{P_PRODUCTDEFTYPE}" != "" && "$!{P_PRODUCTDEFTYPE}" != "*")
+				AND		PD.PRODUCTDEFTYPE = '$!{P_PRODUCTDEFTYPE}'
+				#end	
+				-- 품목아이디/ 명 조회조건
+				#if ("$!{P_PRODUCTDEFTXT}" != "" && "$!{P_PRODUCTDEFTXT}" != "*")
+				AND		(PD.PRODUCTDEFNAME LIKE N'%$!{P_PRODUCTDEFTXT}%'
+						OR	PD.PARTNUMBER LIKE N'%$!{P_PRODUCTDEFTXT}%')
+				#end											
+				ORDER BY PD.PRODUCTDEFID
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	설		명	: 자재LOT검색
+	생	성	자	: jylee
+	생	성	일	: 2020-06-17
+	수  정   이  력	: 
+	-->
+	<query id="GetConsumableLotList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetConsumableLotList
+				-- Version : 00001
+
+						SELECT
+						COL.CONSUMABLELOTID 		AS CONSUMABLELOTID
+						,	COL.CONSUMABLEDEFID 	AS CONSUMABLEDEFID
+						,	COD.CONSUMABLEDEFNAME 	AS CONSUMABLEDEFNAME
+						,	COD.STANDARD 			AS STANDARD
+						,	COL.CONSUMABLELOTQTY 	AS QTY
+						FROM SF_CONSUMABLELOT COL
+							LEFT JOIN SF_CONSUMABLEDEFINITION COD ON COD.CONSUMABLEDEFID = COL.CONSUMABLEDEFID
+						WHERE 1=1 
+							AND	COD.CONSUMABLETYPE = 'Material'
+							AND COL.CONSUMABLESTATE = 'Available'
+						#if("$!{CONSUMABLEDEFID}" != "")
+							AND COL.CONSUMABLEDEFID LIKE '%$!{CONSUMABLEDEFID}%'
+						#end
+						#if("$!{CONSUMABLEDEFNAME}" != "")
+							AND COD.CONSUMABLEDEFNAME LIKE '%$!{CONSUMABLEDEFNAME}%'
+						#end
+						#if("$!{CONSUMABLELOTID}" != "")
+							AND COL.CONSUMABLELOTID LIKE '%$!{CONSUMABLELOTID}%'
+						#end
+						ORDER BY COL.CONSUMABLELOTID
+			]]>
+		</statement>
+	</query>
+	<!--
+	설		명	: 자재코드검색(원자재)
+	생	성	자	: jylee
+	생	성	일	: 2020-06-18
+	수  정   이  력	: 2020-07-20 | JYLEE | ERP품번
+	-->
+	<query id="GetConsumableDefList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetConsumableDefList
+				-- Version : 00001
+
+						SELECT
+								  COD.PARTNUMBER 		AS CONSUMABLEDEFID
+								, COD.CONSUMABLEDEFNAME 	AS CONSUMABLEDEFNAME
+								, COD.STANDARD 				AS STANDARD
+						FROM SF_CONSUMABLEDEFINITION COD
+						WHERE 1=1 
+							AND COD.CONSUMABLETYPE = 'Material'
+							AND COD.VALIDSTATE = 'Valid'
+						#if("$!{CONSUMABLEDEFID}" != "")
+							AND COD.PARTNUMBER LIKE '%$!{CONSUMABLEDEFID}%'
+						#end
+						#if("$!{CONSUMABLEDEFNAME}" != "")
+							AND COD.CONSUMABLEDEFNAME LIKE '%$!{CONSUMABLEDEFNAME}%'
+						#end
+						ORDER BY COD.CONSUMABLEDEFID
+			]]>
+		</statement>
+	</query>		
+
+	<!--
+	설		명	: LOT상태  
+	생	성	자	: JYLEE
+	생	성	일	: 2020-06-29
+	수  정   이  력	: 
+	-->
+	<query id="GetLotStateList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetLotStateList
+				-- Version : 00001
+						
+					SELECT 
+						  DISTINCT(LOTSTATE) AS CODEID
+						, DIC.DICTIONARYNAME AS CODENAME  
+					FROM SF_LOT LOT
+						LEFT JOIN SF_DICTIONARY DIC  ON DIC.DICTIONARYID = LOT.LOTSTATE
+						AND DIC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+			]]>
+		</statement>
+	</query>
+	<!--
+	설		명	: 부서정보 가져오기 
+	생	성	자	: JYLEE
+	생	성	일	: 2020-07-02
+	수  정   이  력	: 
+	-->
+	<query id="GetDeptInfo" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : "GetDeptInfo"
+				-- Version : 00001
+						
+				SELECT
+					DEPT.DEPARTMENTNAME   AS DEPARTMENTNAME
+					,	US.USERID	AS USERID
+					,	US.USERNAME AS USERNAME
+					,	DEPT.DEPARTMENTNAME AS DEPARTMENTNAME
+				FROM SF_USER US
+					LEFT JOIN CT_DEPARTMENT DEPT ON CAST(DEPT.DEPARTMENTID AS INT) = US.DEPARTMENT AND DEPT.VALIDSTATE = 'Valid'
+					LEFT JOIN SF_DICTIONARY DIC ON DIC.DICTIONARYID = DEPT.DICTIONARYID AND DIC.VALIDSTATE = 'Valid'
+				WHERE US.VALIDSTATE = 'Valid'
+				#if ("$!{P_USERID}" != "" && "$!{P_USERID}" != "*")	
+					AND US.USERID = '$!{P_USERID}';
+				#end
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GetNotOrderSegmentList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetNotOrderSegmentList
+				-- Version : 00001
+
+				SELECT		PS.PROCESSSEGMENTID
+						,	ISNULL(PSD.DICTIONARYNAME, PS.PROCESSSEGMENTNAME)	AS PROCESSSEGMENTNAME
+				FROM		SF_PROCESSSEGMENT 			PS
+				LEFT JOIN	SF_DICTIONARY				PSD	ON	PSD.DICTIONARYID = PS.DICTIONARYID
+															AND	PSD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE		1 = 1
+				AND			PS.PROCESSSEGMENTCLASSID  = 'SGC00004'	-- 무지시 작업공정
+				AND			PS.PROCESSSEGMENTTYPE  = 'MAIN'
+				ORDER BY	PS.PROCESSSEGMENTID
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 자재&반제품LOT검색
+	생	성	자	: jylee
+	생	성	일	: 2020-07-06
+	수  정   이  력	: 
+	-->
+	<query id="GetConsumableLotList" version="00003">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetConsumableLotList
+				-- Version : 00003
+
+						SELECT
+						COL.CONSUMABLELOTID 		AS CONSUMABLELOTID
+						,	COL.CONSUMABLEDEFID 	AS CONSUMABLEDEFID
+						,	COD.CONSUMABLEDEFNAME 	AS CONSUMABLEDEFNAME
+						,	COD.STANDARD 			AS STANDARD
+						,	COL.CONSUMABLELOTQTY 	AS QTY
+						,	COL.WAREHOUSEID			AS WAREHOUSEID
+						FROM SF_CONSUMABLELOT COL
+							LEFT JOIN SF_CONSUMABLEDEFINITION COD ON COD.CONSUMABLEDEFID = COL.CONSUMABLEDEFID
+						WHERE 1=1 
+							AND COL.CONSUMABLESTATE = 'Available'
+						#if("$!{CONSUMABLELOTID}" != "")
+							AND COL.CONSUMABLELOTID = '$!{CONSUMABLELOTID}'
+						#end
+						ORDER BY COL.CONSUMABLELOTID
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	설		명	: 자재코드 목록 검색
+	생	성	자	: 
+	생	성	일	: 2020-07-09
+	수  정   이  력	: 
+	-->
+	<query id="GetConsumableDefListPopupWithStock" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetConsumableDefListPopupWithStock
+				-- Version : 00001
+				
+				WITH USED AS 
+				(
+					SELECT
+								CD.CONSUMABLEDEFID							    -- 자재코드
+							,	ISNULL(SUM(CML.CONSUMEDQTY), 0)	AS	USEDQTY		-- 가투입수량
+					FROM		SF_CONSUMABLEDEFINITION		CD
+					JOIN		SF_CONSUMEMATERIALLOTTEMP	CML	ON	CML.MATERIALDEFID = CD.CONSUMABLEDEFID
+																AND	CML.MATERIALLOTID = '*'
+					JOIN		SF_LOT						L2	ON	L2.LOTID = CML.LOTID
+					JOIN		SF_AREA						AR2	ON	AR2.AREAID = L2.AREAID
+					JOIN		SF_LOT						L	ON	L.LOTID = '$!{LOTID}'
+					JOIN		SF_AREA						AR	ON	AR.AREAID = L.AREAID
+					WHERE 		CD.VALIDSTATE = 'Valid'	
+					AND			(ISNULL(CD.ISTRACKING, 'N') <> 'Y' 
+									AND CD.CONSUMABLETYPE = 'Material')			-- 추적대상이 아닌 원자재
+					AND			AR2.WAREHOUSEID = AR.WAREHOUSEID
+					#if ("$!{CONSUMABLEDEFIDNAME}" != "")
+					AND			(CD.CONSUMABLEDEFID LIKE '%$!{CONSUMABLEDEFIDNAME}%'
+								OR CD.CONSUMABLEDEFNAME LIKE '%$!{CONSUMABLEDEFIDNAME}%')
+					#end
+					GROUP BY	CD.CONSUMABLEDEFID
+				)
+				, MAT AS
+				(
+					SELECT
+								MAX(CD.CONSUMABLETYPE)				AS CONSUMABLETYPE
+							,	CD.CONSUMABLEDEFID
+							,	MAX(CD.PARTNUMBER)					AS PARTNUMBER
+							,	MAX(CD.CONSUMABLEDEFNAME)			AS CONSUMABLEDEFNAME
+							,	MAX(CD.UNIT)						AS UNIT
+							,	ISNULL(SUM(CL.CONSUMABLELOTQTY), 0)	AS CONSUMABLELOTQTY
+					FROM		SF_CONSUMABLEDEFINITION	CD
+					LEFT JOIN	SF_LOT					L	ON	L.LOTID = '$!{LOTID}'
+					LEFT JOIN	SF_AREA					AR	ON	AR.AREAID = L.AREAID
+					LEFT JOIN	SF_CONSUMABLELOT		CL	ON	CL.CONSUMABLEDEFID = CD.CONSUMABLEDEFID
+															AND	CL.WAREHOUSEID = AR.WAREHOUSEID
+															AND	CL.CONSUMABLESTATE = 'Available'
+															AND	CASE WHEN CD.ISNOTORDERRESULT = 'Y' AND ISNULL(CL.ISNOTORDERRESULT, 'N') <> 'Y' THEN 'FAIL'
+																	ELSE 'PASS'
+																END = 'PASS'
+															AND	ISNULL(CL.ISHOLD, 'N') <> 'Y'
+					WHERE	CD.VALIDSTATE = 'Valid'
+					AND		(ISNULL(CD.ISTRACKING, 'N') <> 'Y' 
+							AND CD.CONSUMABLETYPE = 'Material')			-- 추적대상이 아닌 원자재
+				
+					#if ("$!{CONSUMABLEDEFIDNAME}" != "")
+					AND		(CD.PARTNUMBER LIKE '%$!{CONSUMABLEDEFIDNAME}%'
+							OR CD.CONSUMABLEDEFNAME LIKE '%$!{CONSUMABLEDEFIDNAME}%')
+					#end
+					GROUP BY CD.CONSUMABLEDEFID
+				)
+				SELECT
+							ISNULL(CTD.DICTIONARYNAME, MAT.CONSUMABLETYPE) AS CONSUMABLETYPE 
+						,	MAT.CONSUMABLEDEFID
+						,	MAT.PARTNUMBER
+						,	MAT.CONSUMABLEDEFNAME
+						,	MAT.UNIT
+						,	MAT.CONSUMABLELOTQTY - ISNULL(USED.USEDQTY, 0) AS STOCKQTY
+				FROM		MAT
+				LEFT JOIN	USED				ON	USED.CONSUMABLEDEFID = MAT.CONSUMABLEDEFID
+				LEFT JOIN	SF_CODE			CT	ON	CT.CODECLASSID = 'ConsumableType'
+												AND	CT.CODEID = MAT.CONSUMABLETYPE
+				LEFT JOIN	SF_DICTIONARY	CTD	ON	CTD.DICTIONARYID = CT.DICTIONARYID
+												AND	CTD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				ORDER BY MAT.CONSUMABLEDEFID
+			]]>
+		</statement>
+	</query>
+	
+</list>

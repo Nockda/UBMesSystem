@@ -1,0 +1,405 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{909B9F14-78CC-47F4-9529-87CB3463B88C}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>SmartMES</RootNamespace>
+    <AssemblyName>SmartMES</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <IsWebBootstrapper>true</IsWebBootstrapper>
+    <PublishUrl>D:\MES\ULBAC\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Web</InstallFrom>
+    <UpdateEnabled>true</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <InstallUrl>http://192.168.25.232:7011/</InstallUrl>
+    <ProductName>ULBAC_MES</ProductName>
+    <PublisherName>Micube</PublisherName>
+    <SuiteName>ULBAC_MES</SuiteName>
+    <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
+    <WebPage>publish.htm</WebPage>
+    <ApplicationRevision>14</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <CreateDesktopShortcut>true</CreateDesktopShortcut>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <BootstrapperComponentsUrl>D:\MES\ULBAC</BootstrapperComponentsUrl>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\..\bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\..\bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Icon.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignManifests>true</SignManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestCertificateThumbprint>B1731119A24CB0CAF8EEDFE6DC5E4C206E100375</ManifestCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>true</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>SmartMES.Program</StartupObject>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="DevExpress.Data.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Data.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Images.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Images.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Utils.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Utils.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraBars.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraBars.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraDiagram.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraDiagram.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraEditors.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraEditors.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraGrid.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraGrid.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="Micube.Framework, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\Micube.Framework.dll</HintPath>
+    </Reference>
+    <Reference Include="Micube.Framework.Net, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\Micube.Framework.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="Micube.Framework.Net.Wcf, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\Micube.Framework.Net.Wcf.dll</HintPath>
+    </Reference>
+    <Reference Include="Micube.Framework.SmartControls, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\Micube.Framework.SmartControls.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Ninject">
+      <HintPath>..\..\..\lib\Ninject.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="TimeZoneConverter">
+      <HintPath>..\..\..\lib\TimeZoneConverter.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ChangePasswordOnLogin.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ChangePasswordOnLogin.Designer.cs">
+      <DependentUpon>ChangePasswordOnLogin.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ChangePassword.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ChangePassword.Designer.cs">
+      <DependentUpon>ChangePassword.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FavoriteSetting.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FavoriteSetting.Designer.cs">
+      <DependentUpon>FavoriteSetting.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormCreator.cs" />
+    <Compile Include="Helpers\DebugHelper.cs" />
+    <Compile Include="MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrameworkSettings.cs" />
+    <Compile Include="LoginForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="LoginForm.designer.cs">
+      <DependentUpon>LoginForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MainForm.SiteMap.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Modules\InjectModule.cs" />
+    <Compile Include="PrinterIPPortSetting.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PrinterIPPortSetting.Designer.cs">
+      <DependentUpon>PrinterIPPortSetting.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Settings\FavoriteSettingRepository.cs" />
+    <Compile Include="Settings\LoginSettingRepository.cs" />
+    <Compile Include="Settings\ISettingRepository.cs" />
+    <Compile Include="Settings\MenuInfo.cs" />
+    <Compile Include="MenuNavigator.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MenuNavigator.Designer.cs">
+      <DependentUpon>MenuNavigator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MenuNavigatorContainer.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MenuNavigatorContainer.Designer.cs">
+      <DependentUpon>MenuNavigatorContainer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ChangeUserInfomation.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ChangeUserInfomation.Designer.cs">
+      <DependentUpon>ChangeUserInfomation.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Settings\ConditionSettingRepository.cs" />
+    <Compile Include="Repositories\IMenuRepository.cs" />
+    <Compile Include="Repositories\MenuRepository.cs" />
+    <Compile Include="Settings\RecentMenuSettingRepository.cs" />
+    <Compile Include="Settings\SettingConfig.cs" />
+    <Compile Include="SettingForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SettingForm.Designer.cs">
+      <DependentUpon>SettingForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="RegisterUser.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RegisterUser.Designer.cs">
+      <DependentUpon>RegisterUser.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ForgotPassword.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ForgotPassword.Designer.cs">
+      <DependentUpon>ForgotPassword.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="ChangePasswordOnLogin.resx">
+      <DependentUpon>ChangePasswordOnLogin.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ChangePassword.resx">
+      <DependentUpon>ChangePassword.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FavoriteSetting.resx">
+      <DependentUpon>FavoriteSetting.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ForgotPassword.resx">
+      <DependentUpon>ForgotPassword.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LoginForm.resx">
+      <DependentUpon>LoginForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MenuNavigator.resx">
+      <DependentUpon>MenuNavigator.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MenuNavigatorContainer.resx">
+      <DependentUpon>MenuNavigatorContainer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\licenses.licx" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <EmbeddedResource Include="ChangeUserInfomation.resx">
+      <DependentUpon>ChangeUserInfomation.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SettingForm.resx">
+      <DependentUpon>SettingForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RegisterUser.resx">
+      <DependentUpon>RegisterUser.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="App.yml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Doc\Readme.txt" />
+    <Content Include="Icon.ico" />
+    <Content Include="Resources\ChangePassword\changePassword.png" />
+    <Content Include="Resources\Login\LoginForm.png" />
+    <Content Include="Resources\Login\LoginForm_Modify.png" />
+    <Content Include="Resources\Login\LoginForm_SF.png" />
+    <None Include="Resources\ULVAC_main_logo.png" />
+    <None Include="Resources\Login\LoginForm_SF_ULVAC.png" />
+    <Content Include="Resources\MainForm\BackGround.png" />
+    <Content Include="Resources\MainForm\bi_ees.png" />
+    <Content Include="Resources\MainForm\factory.png" />
+    <Content Include="Resources\MainForm\Menu.png" />
+    <Content Include="Resources\ToolBarIcon\Toolbar_Delete.png" />
+    <Content Include="Resources\ToolBarIcon\ToolBar_ExcelExport.png" />
+    <Content Include="Resources\ToolBarIcon\ToolBar_ExcelImport.png" />
+    <Content Include="Resources\ToolBarIcon\ToolBar_Save.png" />
+    <None Include="Resources\Toolbar\ToolbarSave.png" />
+    <None Include="Resources\ToolBarIcon\ToolBar_Search.png" />
+    <None Include="Resources\ToolBarIcon\ToolBar_Print.png" />
+    <None Include="Resources\MenuNavigator\star.png" />
+    <None Include="Resources\Login\pwBack.png" />
+    <None Include="Resources\Login\loginPassword.jpg" />
+    <None Include="Resources\Login\loginLogoW200.png" />
+    <None Include="Resources\Login\loginId.jpg" />
+    <None Include="Resources\Login\loginClose.png" />
+    <None Include="Resources\Login\loginButton.png" />
+    <None Include="Resources\Login\background.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.5.2%28x86 및 x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\02.Common\Micube.SmartMES.Commons.Controls\Micube.SmartMES.Commons.Controls.csproj">
+      <Project>{6c8616d8-4620-477e-a1ac-2a02a94d4984}</Project>
+      <Name>Micube.SmartMES.Commons.Controls</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\02.Common\Micube.SmartMES.Commons\Micube.SmartMES.Commons.csproj">
+      <Project>{1b6a2eb9-f134-49fc-80fa-982418d6490f}</Project>
+      <Name>Micube.SmartMES.Commons</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\03.SmartMES\Micube.SmartMES.DashBoard\Micube.SmartMES.DashBoard.csproj">
+      <Project>{b5f381be-2c84-4391-a445-b6342bc62b40}</Project>
+      <Name>Micube.SmartMES.DashBoard</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\03.SmartMES\Micube.SmartMES.Equipment\Micube.SmartMES.Equipment.csproj">
+      <Project>{30eb57ff-c264-4256-b53f-425d2d5cbe5b}</Project>
+      <Name>Micube.SmartMES.Equipment</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\03.SmartMES\Micube.SmartMES.Lot\Micube.SmartMES.Lot.csproj">
+      <Project>{3769f2d5-5189-412d-9b37-11cfe25aa5a7}</Project>
+      <Name>Micube.SmartMES.Lot</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\03.SmartMES\Micube.SmartMES.Material\Micube.SmartMES.Material.csproj">
+      <Project>{038ce6d1-ef79-4eb8-85b3-2773a0e6ee18}</Project>
+      <Name>Micube.SmartMES.Material</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\03.SmartMES\Micube.SmartMES.Process\Micube.SmartMES.Process.csproj">
+      <Project>{ac71c943-8e9b-44ec-a792-2e674643adce}</Project>
+      <Name>Micube.SmartMES.Process</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\03.SmartMES\Micube.SmartMES.Production\Micube.SmartMES.Production.csproj">
+      <Project>{05b7cfd4-99f7-461d-9d93-62cb45a55fc5}</Project>
+      <Name>Micube.SmartMES.Production</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\03.SmartMES\Micube.SmartMES.Quality\Micube.SmartMES.Quality.csproj">
+      <Project>{9e13bd22-48d9-44ad-b1b9-6240f1ad1a2f}</Project>
+      <Name>Micube.SmartMES.Quality</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\03.SmartMES\Micube.SmartMES.StandardInfo\Micube.SmartMES.StandardInfo.csproj">
+      <Project>{dbe1b4ba-8c0e-46cf-a801-ac3657ceb6d3}</Project>
+      <Name>Micube.SmartMES.StandardInfo</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\03.SmartMES\Micube.SmartMES.Status\Micube.SmartMES.Status.csproj">
+      <Project>{9956a51c-0812-40ff-827c-76afead44a75}</Project>
+      <Name>Micube.SmartMES.Status</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\03.SmartMES\Micube.SmartMES.SystemManagement\Micube.SmartMES.SystemManagement.csproj">
+      <Project>{63600380-3d55-4340-9ce7-65787449247c}</Project>
+      <Name>Micube.SmartMES.SystemManagement</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\99.Template\Micube.SmartMES.Template\Micube.SmartMES.Template.csproj">
+      <Project>{4bb59218-9cb1-428b-8486-88ae5fc7d9d4}</Project>
+      <Name>Micube.SmartMES.Template</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <PublishFile Include="Micube.SmartMES.Lot">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
+    </PublishFile>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

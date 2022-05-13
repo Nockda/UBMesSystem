@@ -1,0 +1,16 @@
+C:\Users\user\Documents\sources\UlbacNew\Client\bin\Debug\Report\LotCardProduction.repx
+C:\Users\user\Documents\sources\UlbacNew\Client\bin\Debug\Micube.SmartMES.SystemManagement.dll.config
+C:\Users\user\Documents\sources\UlbacNew\Client\bin\Debug\Micube.SmartMES.SystemManagement.dll
+C:\Users\user\Documents\sources\UlbacNew\Client\bin\Debug\Micube.SmartMES.SystemManagement.pdb
+C:\Users\user\Documents\sources\UlbacNew\Client\src\03.SmartMES\Micube.SmartMES.SystemManagement\obj\Debug\Micube.SmartMES.SystemManagement.csprojAssemblyReference.cache
+C:\Users\user\Documents\sources\UlbacNew\Client\src\03.SmartMES\Micube.SmartMES.SystemManagement\obj\Debug\Micube.SmartMES.SystemManagement.ConnectionHistory.resources
+C:\Users\user\Documents\sources\UlbacNew\Client\src\03.SmartMES\Micube.SmartMES.SystemManagement\obj\Debug\Micube.SmartMES.SystemManagement.TableRawDataSearch.resources
+C:\Users\user\Documents\sources\UlbacNew\Client\src\03.SmartMES\Micube.SmartMES.SystemManagement\obj\Debug\Micube.SmartMES.SystemManagement.DeployFileUpload.resources
+C:\Users\user\Documents\sources\UlbacNew\Client\src\03.SmartMES\Micube.SmartMES.SystemManagement\obj\Debug\Micube.SmartMES.SystemManagement.ErpInterfaceLog.resources
+C:\Users\user\Documents\sources\UlbacNew\Client\src\03.SmartMES\Micube.SmartMES.SystemManagement\obj\Debug\Micube.SmartMES.SystemManagement.MenuConditionItemMapping.resources
+C:\Users\user\Documents\sources\UlbacNew\Client\src\03.SmartMES\Micube.SmartMES.SystemManagement\obj\Debug\Micube.SmartMES.SystemManagement.ToolbarAuthority.resources
+C:\Users\user\Documents\sources\UlbacNew\Client\src\03.SmartMES\Micube.SmartMES.SystemManagement\obj\Debug\Micube.SmartMES.SystemManagement.csproj.GenerateResource.cache
+C:\Users\user\Documents\sources\UlbacNew\Client\src\03.SmartMES\Micube.SmartMES.SystemManagement\obj\Debug\Micube.SmartMES.SystemManagement.csproj.CoreCompileInputs.cache
+C:\Users\user\Documents\sources\UlbacNew\Client\src\03.SmartMES\Micube.SmartMES.SystemManagement\obj\Debug\Micube.SmartMES.SystemManagement.csproj.CopyComplete
+C:\Users\user\Documents\sources\UlbacNew\Client\src\03.SmartMES\Micube.SmartMES.SystemManagement\obj\Debug\Micube.SmartMES.SystemManagement.dll
+C:\Users\user\Documents\sources\UlbacNew\Client\src\03.SmartMES\Micube.SmartMES.SystemManagement\obj\Debug\Micube.SmartMES.SystemManagement.pdb

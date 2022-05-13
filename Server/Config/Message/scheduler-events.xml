@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<message>
+	<SMDefaultInitHandler />
+	<MessageProxy>
+		<trigger>
+			<exception>
+				<SMDefaultErrorHandler />
+				<SMDefaultReplyHandler />
+			</exception>
+		</trigger>	
+	</MessageProxy>
+	<SMDefaultSuccessHandler />
+	<SMDefaultReplyHandler />
+	<!-- <MessageProxy>
+		<trigger>
+			<exception>
+				<DefaultErrorHandler />
+				<DefaultReplyHandler />
+			</exception>
+		</trigger>	
+	</MessageProxy>
+	<DefaultSuccessHandler />
+	<DefaultReplyHandler /> -->
+</message>

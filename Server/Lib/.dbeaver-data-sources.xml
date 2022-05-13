@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data-sources>
+	<data-source id="sqlite_jdbc-150a157ea99-504d4b5ab2f4f8a3" provider="generic" driver="sqlite_jdbc" name="SQLite - Test.db" create-date="1445815945796" save-password="true" show-system-objects="true" read-only="false">
+		<connection server="" database="/home/jwham/Workspace/Micube.Product/SmartFrame/Src/Metadata/S/SQLLite/Test.db" url="jdbc:sqlite:/home/jwham/Workspace/Micube.Product/SmartFrame/Src/Metadata/S/SQLLite/Test.db" user="" type="dev">
+			<bootstrap/>
+		</connection>
+	</data-source>
+	<data-source id="mariaDB-150a2ac2fce-401a0d350934c5ed" provider="mysql" driver="mariaDB" name="MariaDB - smartees" create-date="1445838234323" save-password="true" show-system-objects="true" read-only="false">
+		<connection host="192.168.0.31" port="6612" server="" database="smartees" url="jdbc:mysql://192.168.0.31:6612/smartees" user="root" password="Hg0FNUNGFkdSQ2bf" type="dev">
+			<property name="@dbeaver-ssl@" value="false"/>
+			<network-handler type="TUNNEL" id="ssh_tunnel" enabled="false" user="" save-password="false">
+				<property name="port" value="22"/>
+				<property name="keyPath" value=""/>
+				<property name="host" value=""/>
+				<property name="authType" value="PASSWORD"/>
+			</network-handler>
+			<network-handler type="PROXY" id="socks_proxy" enabled="false" user="" save-password="false">
+				<property name="socks-host" value=""/>
+				<property name="socks-port" value="1080"/>
+			</network-handler>
+			<bootstrap/>
+		</connection>
+	</data-source>
+	<data-source id="mssql_ms-150b1778912-3ddc7ab93b47f4f" provider="generic" driver="mssql_ms" name="MS SQL Server - 192.168.0.31" create-date="1446086437083" save-password="true" show-system-objects="true" read-only="false">
+		<connection host="192.168.0.31" port="1433" server="" database="" url="jdbc:sqlserver://192.168.0.31:1433" user="sa" password="Hg0FNUNGFkdSQ2bf" type="dev">
+			<network-handler type="TUNNEL" id="ssh_tunnel" enabled="false" user="" save-password="false">
+				<property name="port" value="22"/>
+				<property name="keyPath" value=""/>
+				<property name="host" value=""/>
+				<property name="authType" value="PASSWORD"/>
+			</network-handler>
+			<network-handler type="PROXY" id="socks_proxy" enabled="false" user="" save-password="false">
+				<property name="socks-host" value=""/>
+				<property name="socks-port" value="1080"/>
+			</network-handler>
+			<bootstrap/>
+		</connection>
+	</data-source>
+</data-sources>

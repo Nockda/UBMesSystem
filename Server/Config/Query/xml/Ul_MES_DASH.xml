@@ -1,0 +1,423 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list>
+
+	<!--
+	프 로 그 램 명	: 대시보드 > 종합현황판
+	설		명	: 종합현황판 작업효율 및 회수율
+	작	성	자	: 이준용
+	작	성	일	: 2020-11-22
+	주요 변경 로그	: 
+	-->
+	<query id="SelectTeamCodeList" version="00001">
+		<statement>
+		<![CDATA[
+				--
+				-- Id : SelectTeamCodeList
+				-- Version : 00001	
+				SELECT 
+					* 
+				FROM CT_TEAM 
+				WHERE TEAMID <> 'T06' 
+					AND VALIDSTATE = 'Valid'
+			]]>
+		</statement>
+	</query>
+	<!--
+	프 로 그 램 명	: 대시보드 > 종합현황판
+	설		명	: 종합현황판 작업효율 및 회수율
+	작	성	자	: 이준용
+	작	성	일	: 2020-11-22
+	주요 변경 로그	: 
+	-->
+	<query id="SelectKPIState" version="00003">
+		<statement>
+		<![CDATA[
+				--
+				-- Id : SelectKPIState
+				-- Version : 00003	
+				WITH WORK_TIME AS
+				(
+					SELECT WORKMONTH
+						,  SUM(WORKDAY)            WORKDAY  
+						,  SUM(STANDWORKERCNT)     WORKMANCOUNT
+						,  SUM(EXTENDHOUR)         DELAYWORKHOUR
+						,  SUM(ETCHOUR)            ETCWORKHOUR
+						,  SUM(TOTALWORKHOUR)      TOTALWORKHOUR
+						,  SUM(TOTALAVAILABLEHOUR) TOTALAVALIABLEWOKHOUR
+					FROM
+					(
+						SELECT  LEFT(RIGHT(WORKDATE,5),2) AS WORKMONTH
+							,  CASE WHEN TOTALWORKHOUR = 0 THEN 0 ELSE 1 END WORKDAY -- 작업일
+							,  STANDWORKERCNT                                        -- 근무인원수
+							,  EXTENDHOUR                                            -- 연장근무 
+							,  HOLIDAYHOUR + EDUCATIONHOUR +TRAININGHOUR ETCHOUR  -- 휴가/교육/훈련 
+							,  TOTALWORKHOUR
+							,  TOTALAVAILABLEHOUR
+						FROM UL_PRODEFFICIENCY
+						WHERE 1=1
+						AND WORKDATE BETWEEN DATEADD(month, -5, GETDATE())  -- 당월 기준 5개월 전
+						AND dateadd(d,-day(dateadd(m,1,GETDATE())), dateadd(m,1,GETDATE()))  -- 당월 마지막 날
+						AND   TEAMID = '$!{TEAMID}'						
+					)X
+					GROUP BY WORKMONTH
+				),
+				WORK_RESULT AS
+				(
+					SELECT WORKMONTH
+						,  SUM(WORKTIME) WORKTIME
+					FROM
+					(
+						SELECT (COALESCE(WR.STANDARDTIME, PD.STANDARDTIME, 0) * L.QTY) / 60.0 WORKTIME
+							,  CONVERT(varchar(2), TRACKOUTTIME, 100) WORKMONTH
+						FROM SF_LOT L
+						INNER JOIN SF_PRODUCTDEFINITION PD ON L.PRODUCTDEFID = PD.PRODUCTDEFID
+						INNER JOIN UL_PROCESSWORKRESULT WR ON WR.LOTID = L.LOTID
+						WHERE 1=1
+						AND TRACKOUTTIME BETWEEN DATEADD(month, -5, GETDATE())  -- 당월 기준 5개월 전
+						AND dateadd(d,-day(dateadd(m,1,GETDATE())), dateadd(m,1,GETDATE()))  -- 당월 마지막 날
+						AND   PD.TEAMID = '$!{TEAMID}'
+						AND	  L.LOTSTATE = 'Finished'
+					)X
+					GROUP BY WORKMONTH
+				),
+				PVT_DATA AS
+				(
+					SELECT PVT.*
+					FROM
+					(
+						SELECT WORKMONTH
+							,  DIVISION
+							,  CONVERT(DECIMAL(18,1),VALUE) VALUE
+						FROM
+						(
+						SELECT 'MONTH' + CONVERT(VARCHAR,WT.WORKMONTH)                              WORKMONTH   
+							,  CONVERT(DECIMAL(18,1),WT.WORKDAY)                                    WORKDAY 
+							,  CONVERT(DECIMAL(18,1),WT.WORKMANCOUNT)                               WORKMANCOUNT
+							,  CONVERT(DECIMAL(18,1),WT.DELAYWORKHOUR)                              DELAYWORKHOUR
+							,  CONVERT(DECIMAL(18,1),WT.ETCWORKHOUR)                                ETCWORKHOUR
+							,  CONVERT(DECIMAL(18,1),WT.TOTALWORKHOUR)                              TOTALWORKHOUR
+							,  CONVERT(DECIMAL(18,1),WT.TOTALAVALIABLEWOKHOUR)                      TOTALAVALIABLEWOKHOUR
+							,  CONVERT(DECIMAL(18,1),WR.WORKTIME)                                   RETRIEVEHOUR
+							,  CASE WHEN WT.TOTALAVALIABLEWOKHOUR = 0 THEN 0 ELSE CONVERT(DECIMAL(18,1), FLOOR(ROUND(WR.WORKTIME/WT.TOTALAVALIABLEWOKHOUR*100,1))) END AS WORKAFFECT 
+							,  CASE WHEN TOTALWORKHOUR = 0 THEN 0 ELSE CONVERT(DECIMAL(18,1), FLOOR(ROUND(WR.WORKTIME/TOTALWORKHOUR*100,1))) END AS             RETRIEVERATE
+						FROM WORK_TIME WT
+						LEFT JOIN WORK_RESULT WR ON WT.WORKMONTH = WR.WORKMONTH
+						)X
+						UNPIVOT
+						(
+							VALUE FOR DIVISION IN (X.WORKDAY,X.WORKMANCOUNT,X.DELAYWORKHOUR,X.ETCWORKHOUR,X.TOTALWORKHOUR,X.TOTALAVALIABLEWOKHOUR,X.RETRIEVEHOUR,WORKAFFECT,RETRIEVERATE)
+						)AS UNPVT
+					)Y
+					PIVOT
+					(
+						MAX(VALUE) 
+						FOR Y.WORKMONTH IN (MONTH01, MONTH02,MONTH03, MONTH04, MONTH05, MONTH06,MONTH07, MONTH08, MONTH09, MONTH10,MONTH11, MONTH12)								
+					)AS PVT
+				)
+				SELECT SC.CODEID TYPE
+				    ,  ISNULL(SD.DICTIONARYNAME,SC.CODENAME) TYPENAME
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH01,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH01,0) , '0.#')
+						END AS MONTH01
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH02,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH02,0) , '0.#')
+						END AS MONTH02
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH03,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH03,0) , '0.#')
+						END AS MONTH03
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH04,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH04,0) , '0.#')
+						END AS MONTH04
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH05,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH05,0) , '0.#')
+						END AS MONTH05
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH06,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH06,0) , '0.#')
+						END AS MONTH06
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH07,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH07,0) , '0.#')
+						END AS MONTH07
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH08,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH08,0) , '0.#')
+						END AS MONTH08
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH09,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH09,0) , '0.#')
+						END AS MONTH09
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH10,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH10,0) , '0.#')
+						END AS MONTH10
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH11,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH11,0) , '0.#')
+						END AS MONTH11
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH12,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH12,0) , '0.#')
+						END AS MONTH12
+
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH01,0) + ISNULL(MONTH02,0) + ISNULL(MONTH03,0) + ISNULL(MONTH04,0) + ISNULL(MONTH05,0) + ISNULL(MONTH06,0)   
+											+ ISNULL(MONTH07,0) + ISNULL(MONTH08,0) + ISNULL(MONTH09,0) + ISNULL(MONTH10,0) + ISNULL(MONTH11,0) + ISNULL(MONTH12,0)
+									, '0.0')
+							ELSE FORMAT(ISNULL(MONTH01,0) + ISNULL(MONTH02,0) + ISNULL(MONTH03,0) + ISNULL(MONTH04,0) + ISNULL(MONTH05,0) + ISNULL(MONTH06,0)   
+											+ ISNULL(MONTH07,0) + ISNULL(MONTH08,0) + ISNULL(MONTH09,0) + ISNULL(MONTH10,0) + ISNULL(MONTH11,0) + ISNULL(MONTH12,0)
+									, '0.#')
+						END AS SUM
+				FROM SF_CODE SC
+				LEFT JOIN PVT_DATA PD ON SC.CODEID = PD.DIVISION
+				LEFT JOIN SF_DICTIONARY SD ON  SC.DICTIONARYID = SD.DICTIONARYID
+				                           AND SD.LANGUAGETYPE = 'ko-KR'   
+				WHERE 1=1
+				AND   SC.CODECLASSID = 'WorkAffectDiv'
+				ORDER BY SC.DISPLAYSEQUENCE			
+			]]>
+		</statement>
+	</query>
+	
+		<!--
+	프 로 그 램 명	: 대시보드 > 종합현황판
+	설		명	: 종합현황판 작업효율 및 회수율
+	작	성	자	: 이준용
+	작	성	일	: 2020-11-22
+	주요 변경 로그	: 
+	-->
+	<query id="SelectTeamCodeList" version="00001">
+		<statement>
+		<![CDATA[
+				--
+				-- Id : SelectTeamCodeList
+				-- Version : 00001	
+				SELECT 
+					* 
+				FROM CT_TEAM 
+				WHERE TEAMID <> 'T06' 
+					AND VALIDSTATE = 'Valid'
+			]]>
+		</statement>
+	</query>
+	<!--
+	프 로 그 램 명	: 대시보드 > 종합현황판
+	설		명	: 종합현황판 작업효율 및 회수율 -전체
+	작	성	자	: 이준용
+	작	성	일	: 2020-11-24
+	주요 변경 로그	: 
+	-->
+	<query id="SelectKPIState" version="00004">
+		<statement>
+		<![CDATA[
+				--
+				-- Id : SelectKPIState
+				-- Version : 00004	
+				WITH WORK_TIME AS
+				(
+					SELECT WORKMONTH
+						,  SUM(WORKDAY)            WORKDAY  
+						,  SUM(STANDWORKERCNT)     WORKMANCOUNT
+						,  SUM(EXTENDHOUR)         DELAYWORKHOUR
+						,  SUM(ETCHOUR)            ETCWORKHOUR
+						,  SUM(TOTALWORKHOUR)      TOTALWORKHOUR
+						,  SUM(TOTALAVAILABLEHOUR) TOTALAVALIABLEWOKHOUR
+					FROM
+					(
+						SELECT 
+							  LEFT(RIGHT(WORKDATE,5),2) AS WORKMONTH
+							,  CASE WHEN TOTALWORKHOUR = 0 THEN 0 ELSE 1 END WORKDAY -- 작업일
+							,  STANDWORKERCNT                                        -- 근무인원수
+							,  EXTENDHOUR                                            -- 연장근무 
+							,  HOLIDAYHOUR + EDUCATIONHOUR +TRAININGHOUR ETCHOUR  -- 휴가/교육/훈련 
+							,  TOTALWORKHOUR
+							,  TOTALAVAILABLEHOUR
+						FROM UL_PRODEFFICIENCY
+						WHERE 1=1
+						AND WORKDATE BETWEEN DATEADD(month, -5, GETDATE())  -- 당월 기준 5개월 전
+						AND dateadd(d,-day(dateadd(m,1,GETDATE())), dateadd(m,1,GETDATE()))  -- 당월 마지막 날
+						AND   TEAMID IN ('T01', 'T02', 'T03', 'T04', 'T05')						
+					)X
+					GROUP BY WORKMONTH
+				),
+				WORK_RESULT AS
+				(
+					SELECT WORKMONTH
+						,  SUM(WORKTIME) WORKTIME
+					FROM
+					(
+						SELECT (COALESCE(WR.STANDARDTIME, PD.STANDARDTIME, 0) * L.QTY) / 60.0 WORKTIME
+							,  CONVERT(varchar(2), TRACKOUTTIME, 100) WORKMONTH
+						FROM SF_LOT L
+						INNER JOIN SF_PRODUCTDEFINITION PD ON L.PRODUCTDEFID = PD.PRODUCTDEFID
+						INNER JOIN UL_PROCESSWORKRESULT WR ON WR.LOTID = L.LOTID
+						WHERE 1=1
+						AND TRACKOUTTIME BETWEEN DATEADD(month, -5, GETDATE())  -- 당월 기준 5개월 전
+						AND dateadd(d,-day(dateadd(m,1,GETDATE())), dateadd(m,1,GETDATE()))  -- 당월 마지막 날
+						AND   PD.TEAMID IN ('T01', 'T02', 'T03', 'T04', 'T05')	
+						AND	  L.LOTSTATE = 'Finished'
+					)X
+					GROUP BY WORKMONTH
+				),
+				PVT_DATA AS
+				(
+					SELECT PVT.*
+					FROM
+					(
+						SELECT WORKMONTH
+							,  DIVISION
+							,  CONVERT(DECIMAL(18,1),VALUE) VALUE
+						FROM
+						(
+						SELECT 'MONTH' + CONVERT(VARCHAR,WT.WORKMONTH)                              WORKMONTH   
+							,  CONVERT(DECIMAL(18,1),WT.WORKDAY)                                    WORKDAY 
+							,  CONVERT(DECIMAL(18,1),WT.WORKMANCOUNT)                               WORKMANCOUNT
+							,  CONVERT(DECIMAL(18,1),WT.DELAYWORKHOUR)                              DELAYWORKHOUR
+							,  CONVERT(DECIMAL(18,1),WT.ETCWORKHOUR)                                ETCWORKHOUR
+							,  CONVERT(DECIMAL(18,1),WT.TOTALWORKHOUR)                              TOTALWORKHOUR
+							,  CONVERT(DECIMAL(18,1),WT.TOTALAVALIABLEWOKHOUR)                      TOTALAVALIABLEWOKHOUR
+							,  CONVERT(DECIMAL(18,1),WR.WORKTIME)                                   RETRIEVEHOUR
+							,  CASE WHEN WT.TOTALAVALIABLEWOKHOUR = 0 THEN 0 ELSE CONVERT(DECIMAL(18,1), FLOOR(ROUND(WR.WORKTIME/WT.TOTALAVALIABLEWOKHOUR*100,1))) END AS WORKAFFECT 
+							,  CASE WHEN TOTALWORKHOUR = 0 THEN 0 ELSE CONVERT(DECIMAL(18,1), FLOOR(ROUND(WR.WORKTIME/TOTALWORKHOUR*100,1))) END AS             RETRIEVERATE
+						FROM WORK_TIME WT
+						LEFT JOIN WORK_RESULT WR ON WT.WORKMONTH = WR.WORKMONTH
+						)X
+						UNPIVOT
+						(
+							VALUE FOR DIVISION IN (X.WORKDAY,X.WORKMANCOUNT,X.DELAYWORKHOUR,X.ETCWORKHOUR,X.TOTALWORKHOUR,X.TOTALAVALIABLEWOKHOUR,X.RETRIEVEHOUR,WORKAFFECT,RETRIEVERATE)
+						)AS UNPVT
+					)Y
+					PIVOT
+					(
+						MAX(VALUE) 
+						FOR Y.WORKMONTH IN (MONTH01, MONTH02,MONTH03, MONTH04, MONTH05, MONTH06,MONTH07, MONTH08, MONTH09, MONTH10,MONTH11, MONTH12)								
+					)AS PVT
+				)
+				SELECT SC.CODEID TYPE
+				    ,  ISNULL(SD.DICTIONARYNAME,SC.CODENAME) TYPENAME
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH01,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH01,0) , '0.#')
+						END AS MONTH01
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH02,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH02,0) , '0.#')
+						END AS MONTH02
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH03,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH03,0) , '0.#')
+						END AS MONTH03
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH04,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH04,0) , '0.#')
+						END AS MONTH04
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH05,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH05,0) , '0.#')
+						END AS MONTH05
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH06,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH06,0) , '0.#')
+						END AS MONTH06
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH07,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH07,0) , '0.#')
+						END AS MONTH07
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH08,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH08,0) , '0.#')
+						END AS MONTH08
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH09,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH09,0) , '0.#')
+						END AS MONTH09
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH10,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH10,0) , '0.#')
+						END AS MONTH10
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH11,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH11,0) , '0.#')
+						END AS MONTH11
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH12,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH12,0) , '0.#')
+						END AS MONTH12
+
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH01,0) + ISNULL(MONTH02,0) + ISNULL(MONTH03,0) + ISNULL(MONTH04,0) + ISNULL(MONTH05,0) + ISNULL(MONTH06,0)   
+											+ ISNULL(MONTH07,0) + ISNULL(MONTH08,0) + ISNULL(MONTH09,0) + ISNULL(MONTH10,0) + ISNULL(MONTH11,0) + ISNULL(MONTH12,0)
+									, '0.0')
+							ELSE FORMAT(ISNULL(MONTH01,0) + ISNULL(MONTH02,0) + ISNULL(MONTH03,0) + ISNULL(MONTH04,0) + ISNULL(MONTH05,0) + ISNULL(MONTH06,0)   
+											+ ISNULL(MONTH07,0) + ISNULL(MONTH08,0) + ISNULL(MONTH09,0) + ISNULL(MONTH10,0) + ISNULL(MONTH11,0) + ISNULL(MONTH12,0)
+									, '0.#')
+						END AS SUM
+				FROM SF_CODE SC
+				LEFT JOIN PVT_DATA PD ON SC.CODEID = PD.DIVISION
+				LEFT JOIN SF_DICTIONARY SD ON  SC.DICTIONARYID = SD.DICTIONARYID
+				                           AND SD.LANGUAGETYPE = 'ko-KR'   
+				WHERE 1=1
+				AND   SC.CODECLASSID = 'WorkAffectDiv'
+				ORDER BY SC.DISPLAYSEQUENCE			
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 대시보드 > 종합현황판
+	설		명	: 설비 알람상태 확인
+	작	성	자	: 이준용
+	작	성	일	: 2020-11-29
+	주요 변경 로그	: 
+	-->
+	<query id="SelectEquipmentAlarm" version="00002">
+		<statement>
+		<![CDATA[
+				--
+				-- Id : SelectEquipmentAlarm
+				-- Version : 00002	
+			SELECT 
+					* 
+			FROM  CT_EQUIPMENTALARM
+			WHERE 1=1
+				AND OCCURETIME < GETDATE()
+				AND EQUIPMENTID  = '$!{P_EQUIPCODE}'
+				AND    STATE  = 'Occure'
+			ORDER BY OCCURETIME DESC
+			]]>
+		</statement>
+	</query>
+	<!--
+	프 로 그 램 명	: 대시보드 > 종합현황판
+	설		명	: 설비 가동/비가동 체크
+	작	성	자	: 이준용
+	작	성	일	: 2020-11-29
+	주요 변경 로그	: 
+	-->
+	<query id="SelectEquipmentRunOrIdle" version="00001">
+		<statement>
+		<![CDATA[
+				--
+				-- Id : SelectEquipmentRunOrIdle
+				-- Version : 00001	
+			SELECT
+			TOP 1
+				EQUIPMENTID
+				,   CONVERT(VARCHAR, SE.TXNTIME, 120) 	OCCURRDATETIME
+			    ,	SE.STATE	STATE 
+			FROM 	SF_EQUIPMENTHISTORY SE
+			LEFT JOIN SF_CODE			C	ON	SE.STATE = C.CODEID
+											AND C.CODECLASSID = 'EquipmentState2'
+			WHERE 	SE.TXNID  = 'UpdateEquipmetStateTC'
+			AND   	CONVERT(VARCHAR, SE.TXNTIME , 23) = CONVERT(VARCHAR, GETDATE(), 23)
+			AND   	SE.EQUIPMENTID = '$!{P_EQUIPCODE}'
+			ORDER BY OCCURRDATETIME DESC
+			]]>
+		</statement>
+	</query>
+</list>

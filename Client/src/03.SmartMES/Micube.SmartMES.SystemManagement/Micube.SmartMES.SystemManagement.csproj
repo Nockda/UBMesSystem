@@ -1,0 +1,360 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{63600380-3D55-4340-9CE7-65787449247C}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Micube.SmartMES.SystemManagement</RootNamespace>
+    <AssemblyName>Micube.SmartMES.SystemManagement</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\..\bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\..\bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="DevExpress.Data.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Data.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.PivotGrid.v18.1.Core, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.PivotGrid.v18.1.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Printing.v18.1.Core, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Printing.v18.1.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Utils.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Utils.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Utils.v18.1.UI, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Utils.v18.1.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraBars.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraBars.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraCharts.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraCharts.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraCharts.v18.1.UI, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraCharts.v18.1.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraEditors.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraEditors.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraGrid.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraGrid.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraLayout.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraLayout.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraPivotGrid.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraPivotGrid.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraPrinting.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraPrinting.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraReports.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraReports.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraTreeList.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraTreeList.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraVerticalGrid.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraVerticalGrid.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="Micube.Framework">
+      <HintPath>..\..\..\lib\Micube.Framework.dll</HintPath>
+    </Reference>
+    <Reference Include="Micube.Framework.Log">
+      <HintPath>..\..\..\lib\Micube.Framework.Log.dll</HintPath>
+    </Reference>
+    <Reference Include="Micube.Framework.Net">
+      <HintPath>..\..\..\lib\Micube.Framework.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="Micube.Framework.Net.Wcf">
+      <HintPath>..\..\..\lib\Micube.Framework.Net.Wcf.dll</HintPath>
+    </Reference>
+    <Reference Include="Micube.Framework.SmartControls">
+      <HintPath>..\..\..\lib\Micube.Framework.SmartControls.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="SmartDeploy.Common, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\SmartDeploy.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.EnterpriseServices" />
+    <Reference Include="System.ValueTuple, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\System.ValueTuple.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Code.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Code.Designer.cs">
+      <DependentUpon>Code.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CodeClass.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CodeClass.Designer.cs">
+      <DependentUpon>CodeClass.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ConditionItem.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ConditionItem.Designer.cs">
+      <DependentUpon>ConditionItem.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ConnectionHistory.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ConnectionHistory.Designer.cs">
+      <DependentUpon>ConnectionHistory.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TableRawDataSearch.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TableRawDataSearch.designer.cs">
+      <DependentUpon>TableRawDataSearch.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DeployFileUpload.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DeployFileUpload.Designer.cs">
+      <DependentUpon>DeployFileUpload.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Dictionary.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dictionary.Designer.cs">
+      <DependentUpon>Dictionary.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DictionaryClass.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DictionaryClass.Designer.cs">
+      <DependentUpon>DictionaryClass.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ErpInterfaceLog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ErpInterfaceLog.Designer.cs">
+      <DependentUpon>ErpInterfaceLog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Menu.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Menu.Designer.cs">
+      <DependentUpon>Menu.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MenuAuthority.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MenuAuthority.Designer.cs">
+      <DependentUpon>MenuAuthority.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MenuConditionItemMapping.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MenuConditionItemMapping.Designer.cs">
+      <DependentUpon>MenuConditionItemMapping.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MenuToolbarMapping.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MenuToolbarMapping.Designer.cs">
+      <DependentUpon>MenuToolbarMapping.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Message.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Message.Designer.cs">
+      <DependentUpon>Message.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MessageClass.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MessageClass.Designer.cs">
+      <DependentUpon>MessageClass.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Popup\ConditionInput_Popup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Popup\ConditionInput_Popup.Designer.cs">
+      <DependentUpon>ConditionInput_Popup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Popup\DeployFileListPopup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Popup\DeployFileListPopup.Designer.cs">
+      <DependentUpon>DeployFileListPopup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Popup\DeployHistoryListPopup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Popup\DeployHistoryListPopup.Designer.cs">
+      <DependentUpon>DeployHistoryListPopup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="Toolbar.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Toolbar.Designer.cs">
+      <DependentUpon>Toolbar.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ToolbarAuthority.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ToolbarAuthority.Designer.cs">
+      <DependentUpon>ToolbarAuthority.cs</DependentUpon>
+    </Compile>
+    <Compile Include="User.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="User.Designer.cs">
+      <DependentUpon>User.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserClass.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UserClass.Designer.cs">
+      <DependentUpon>UserClass.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserClassUser.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UserClassUser.Designer.cs">
+      <DependentUpon>UserClassUser.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserRequestApproval.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UserRequestApproval.Designer.cs">
+      <DependentUpon>UserRequestApproval.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Web References\SmartDeployService\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ConnectionHistory.resx">
+      <DependentUpon>ConnectionHistory.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TableRawDataSearch.resx">
+      <DependentUpon>TableRawDataSearch.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DeployFileUpload.resx">
+      <DependentUpon>DeployFileUpload.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ErpInterfaceLog.resx">
+      <DependentUpon>ErpInterfaceLog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MenuConditionItemMapping.resx">
+      <DependentUpon>MenuConditionItemMapping.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ToolbarAuthority.resx">
+      <DependentUpon>ToolbarAuthority.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\02.Common\Micube.SmartMES.Commons.Controls\Micube.SmartMES.Commons.Controls.csproj">
+      <Project>{6c8616d8-4620-477e-a1ac-2a02a94d4984}</Project>
+      <Name>Micube.SmartMES.Commons.Controls</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\02.Common\Micube.SmartMES.Commons\Micube.SmartMES.Commons.csproj">
+      <Project>{1b6a2eb9-f134-49fc-80fa-982418d6490f}</Project>
+      <Name>Micube.SmartMES.Commons</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WebReferences Include="Web References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WebReferenceUrl Include="http://localhost:8080/WebService.asmx">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\SmartDeployService\</RelPath>
+      <UpdateFromURL>http://localhost:8080/WebService.asmx</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>Micube_SmartMES_SystemManagement_SmartDeployService_WebService</CachedSettingsPropName>
+    </WebReferenceUrl>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="Web References\SmartDeployService\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+    <None Include="Web References\SmartDeployService\WebService.wsdl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Web References\SmartDeployService\WebService.disco" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

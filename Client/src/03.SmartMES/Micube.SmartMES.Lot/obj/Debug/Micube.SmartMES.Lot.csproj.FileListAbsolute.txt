@@ -1,0 +1,12 @@
+C:\Users\user\Documents\sources\UlbacNew\Client\bin\Debug\Report\LotCardProduction.repx
+C:\Users\user\Documents\sources\UlbacNew\Client\bin\Debug\Micube.SmartMES.Lot.dll
+C:\Users\user\Documents\sources\UlbacNew\Client\bin\Debug\Micube.SmartMES.Lot.pdb
+C:\Users\user\Documents\sources\UlbacNew\Client\src\03.SmartMES\Micube.SmartMES.Lot\obj\Debug\Micube.SmartMES.Lot.LotTrace.resources
+C:\Users\user\Documents\sources\UlbacNew\Client\src\03.SmartMES\Micube.SmartMES.Lot\obj\Debug\Micube.SmartMES.Lot.LotLabelReissue.resources
+C:\Users\user\Documents\sources\UlbacNew\Client\src\03.SmartMES\Micube.SmartMES.Lot\obj\Debug\Micube.SmartMES.Lot.Properties.Resources.resources
+C:\Users\user\Documents\sources\UlbacNew\Client\src\03.SmartMES\Micube.SmartMES.Lot\obj\Debug\Micube.SmartMES.Lot.csproj.GenerateResource.cache
+C:\Users\user\Documents\sources\UlbacNew\Client\src\03.SmartMES\Micube.SmartMES.Lot\obj\Debug\Micube.SmartMES.Lot.csproj.CoreCompileInputs.cache
+C:\Users\user\Documents\sources\UlbacNew\Client\src\03.SmartMES\Micube.SmartMES.Lot\obj\Debug\Micube.SmartMES.Lot.csproj.CopyComplete
+C:\Users\user\Documents\sources\UlbacNew\Client\src\03.SmartMES\Micube.SmartMES.Lot\obj\Debug\Micube.SmartMES.Lot.dll
+C:\Users\user\Documents\sources\UlbacNew\Client\src\03.SmartMES\Micube.SmartMES.Lot\obj\Debug\Micube.SmartMES.Lot.pdb
+C:\Users\user\Documents\sources\UlbacNew\Client\src\03.SmartMES\Micube.SmartMES.Lot\obj\Debug\Micube.SmartMES.Lot.csprojAssemblyReference.cache

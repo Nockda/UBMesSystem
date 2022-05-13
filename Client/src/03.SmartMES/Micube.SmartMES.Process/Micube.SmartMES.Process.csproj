@@ -1,0 +1,575 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{AC71C943-8E9B-44EC-A792-2E674643ADCE}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Micube.SmartMES.Process</RootNamespace>
+    <AssemblyName>Micube.SmartMES.Process</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\..\bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\..\bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="DevExpress.Charts.v18.1.Core, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Charts.v18.1.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.CodeParser.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.CodeParser.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Data.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Data.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Diagram.v18.1.Core, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Diagram.v18.1.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Office.v18.1.Core, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Office.v18.1.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.PivotGrid.v18.1.Core, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.PivotGrid.v18.1.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Printing.v18.1.Core, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Printing.v18.1.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.RichEdit.v18.1.Core, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.RichEdit.v18.1.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Sparkline.v18.1.Core, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Sparkline.v18.1.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Spreadsheet.v18.1.Core, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Spreadsheet.v18.1.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Utils.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Utils.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Utils.v18.1.UI, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Utils.v18.1.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraBars.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraBars.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraCharts.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraCharts.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraDiagram.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraDiagram.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraEditors.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraEditors.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraGrid.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraGrid.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraLayout.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraLayout.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraNavBar.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraNavBar.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraPivotGrid.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraPivotGrid.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraPrinting.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraPrinting.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraReports.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraReports.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraReports.v18.1.Extensions, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.XtraRichEdit.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraRichEdit.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraTreeList.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraTreeList.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraVerticalGrid.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraVerticalGrid.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Office.Interop.Excel, Version=12.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c">
+      <SpecificVersion>False</SpecificVersion>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <HintPath>..\..\..\lib\Microsoft.Office.Interop.Excel.dll</HintPath>
+    </Reference>
+    <Reference Include="Micube.Framework, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\Micube.Framework.dll</HintPath>
+    </Reference>
+    <Reference Include="Micube.Framework.Net, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\Micube.Framework.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="Micube.Framework.SmartControls, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\Micube.Framework.SmartControls.dll</HintPath>
+    </Reference>
+    <Reference Include="Micube.SmartMES.Quality, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\bin\Debug\Micube.SmartMES.Quality.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyPop.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AssemblyPop.Designer.cs">
+      <DependentUpon>AssemblyPop.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AssyDetailEditResult.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AssyDetailEditResult.Designer.cs">
+      <DependentUpon>AssyDetailEditResult.cs</DependentUpon>
+    </Compile>
+    <Compile Include="LeadTime.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="LeadTime.Designer.cs">
+      <DependentUpon>LeadTime.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DryerResult.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DryerResult.Designer.cs">
+      <DependentUpon>DryerResult.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DryerResult_Popup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DryerResult_Popup.designer.cs">
+      <DependentUpon>DryerResult_Popup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EquipCheck\EquipCheckManage.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EquipCheck\EquipCheckManage.Designer.cs">
+      <DependentUpon>EquipCheckManage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EquipCheck\EquipCheckRegPopup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EquipCheck\EquipCheckRegPopup.Designer.cs">
+      <DependentUpon>EquipCheckRegPopup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AssemblyResult.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AssemblyResult.Designer.cs">
+      <DependentUpon>AssemblyResult.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CheckMeasureNPopup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CheckMeasureNPopup.Designer.cs">
+      <DependentUpon>CheckMeasureNPopup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CheckMeasureYPopup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CheckMeasureYPopup.Designer.cs">
+      <DependentUpon>CheckMeasureYPopup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MachiningStatus.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MachiningStatus.Designer.cs">
+      <DependentUpon>MachiningStatus.cs</DependentUpon>
+    </Compile>
+    <Compile Include="InsertMaterialPopup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="InsertMaterialPopup.designer.cs">
+      <DependentUpon>InsertMaterialPopup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Popup\AssemblyProgressDetailPopup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Popup\AssemblyProgressDetailPopup.designer.cs">
+      <DependentUpon>AssemblyProgressDetailPopup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AssyDetailResult.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AssyDetailResult.Designer.cs">
+      <DependentUpon>AssyDetailResult.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PrintShippingLabel.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PrintShippingLabel.Designer.cs">
+      <DependentUpon>PrintShippingLabel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ProcessedResult.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ProcessedResult.designer.cs">
+      <DependentUpon>ProcessedResult.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ProductEfficiency.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ProductEfficiency.Designer.cs">
+      <DependentUpon>ProductEfficiency.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Repair\Repair.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Repair\Repair.Designer.cs">
+      <DependentUpon>Repair.cs</DependentUpon>
+    </Compile>
+    <Compile Include="NonWorkOrder.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="NonWorkOrder.Designer.cs">
+      <DependentUpon>NonWorkOrder.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Repair\popup_inputmaterial.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Repair\popup_inputmaterial.Designer.cs">
+      <DependentUpon>popup_inputmaterial.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Repair\Repair_CreateLot_Popup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Repair\Repair_CreateLot_Popup.designer.cs">
+      <DependentUpon>Repair_CreateLot_Popup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ResultReference\CylinderInner.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ResultReference\CylinderInner.Designer.cs">
+      <DependentUpon>CylinderInner.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ResultReference\CylinderIlluminance.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ResultReference\CylinderIlluminance.Designer.cs">
+      <DependentUpon>CylinderIlluminance.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ResultReference\CylinderHyunhap.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ResultReference\CylinderHyunhap.Designer.cs">
+      <DependentUpon>CylinderHyunhap.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ResultReference\CylinderDeep.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ResultReference\CylinderDeep.Designer.cs">
+      <DependentUpon>CylinderDeep.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ResultReference\DisplacerSize.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ResultReference\DisplacerSize.Designer.cs">
+      <DependentUpon>DisplacerSize.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ResultReference\CompUnitTest.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ResultReference\CompUnitTest.Designer.cs">
+      <DependentUpon>CompUnitTest.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ResultReference\AdsorberLeak.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ResultReference\AdsorberLeak.Designer.cs">
+      <DependentUpon>AdsorberLeak.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ResultReference\PumpCheck.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ResultReference\PumpCheck.Designer.cs">
+      <DependentUpon>PumpCheck.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ResultReference\Mbsc.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ResultReference\Mbsc.Designer.cs">
+      <DependentUpon>Mbsc.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ResultReference\RefUnit.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ResultReference\RefUnit.Designer.cs">
+      <DependentUpon>RefUnit.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ResultReference\RefProductionTest.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ResultReference\RefProductionTest.Designer.cs">
+      <DependentUpon>RefProductionTest.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ResultReference\XheadMoter.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ResultReference\XheadMoter.Designer.cs">
+      <DependentUpon>XheadMoter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PcmView.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PcmView.Designer.cs">
+      <DependentUpon>PcmView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PcmAssy\InputMaterialPopup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PcmAssy\InputMaterialPopup.Designer.cs">
+      <DependentUpon>InputMaterialPopup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PcmAssy\InspectionRegPopup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PcmAssy\InspectionRegPopup.Designer.cs">
+      <DependentUpon>InspectionRegPopup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PcmAssy\PcmAssyReg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PcmAssy\PcmAssyReg.Designer.cs">
+      <DependentUpon>PcmAssyReg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PcmAssy\WorkerRegPopup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PcmAssy\WorkerRegPopup.Designer.cs">
+      <DependentUpon>WorkerRegPopup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PcmDry\PcmDryReg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PcmDry\PcmDryReg.Designer.cs">
+      <DependentUpon>PcmDryReg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="AssemblyProgress.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AssemblyProgress.Designer.cs">
+      <DependentUpon>AssemblyProgress.cs</DependentUpon>
+    </Compile>
+    <Compile Include="StartProcessPopup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="StartProcessPopup.designer.cs">
+      <DependentUpon>StartProcessPopup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WorkManual\InputLaborMgt.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkManual\InputLaborMgt.Designer.cs">
+      <DependentUpon>InputLaborMgt.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WorkManual\WorkManual.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkManual\WorkManual.Designer.cs">
+      <DependentUpon>WorkManual.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="AssemblyPop.resx">
+      <DependentUpon>AssemblyPop.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AssemblyProgress.resx">
+      <DependentUpon>AssemblyProgress.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AssemblyResult.resx">
+      <DependentUpon>AssemblyResult.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AssyDetailEditResult.resx">
+      <DependentUpon>AssyDetailEditResult.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CheckMeasureNPopup.resx">
+      <DependentUpon>CheckMeasureNPopup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CheckMeasureYPopup.resx">
+      <DependentUpon>CheckMeasureYPopup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LeadTime.resx">
+      <DependentUpon>LeadTime.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DryerResult.resx">
+      <DependentUpon>DryerResult.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DryerResult_Popup.resx">
+      <DependentUpon>DryerResult_Popup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="InsertMaterialPopup.resx">
+      <DependentUpon>InsertMaterialPopup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MachiningStatus.resx">
+      <DependentUpon>MachiningStatus.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="NonWorkOrder.resx">
+      <DependentUpon>NonWorkOrder.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Popup\AssemblyProgressDetailPopup.resx">
+      <DependentUpon>AssemblyProgressDetailPopup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AssyDetailResult.resx">
+      <DependentUpon>AssyDetailResult.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PrintShippingLabel.resx">
+      <DependentUpon>PrintShippingLabel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ProcessedResult.resx">
+      <DependentUpon>ProcessedResult.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ProductEfficiency.resx">
+      <DependentUpon>ProductEfficiency.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Repair\popup_inputmaterial.resx">
+      <DependentUpon>popup_inputmaterial.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Repair\Repair.resx">
+      <DependentUpon>Repair.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Repair\Repair_CreateLot_Popup.resx">
+      <DependentUpon>Repair_CreateLot_Popup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ResultReference\AdsorberLeak.resx">
+      <DependentUpon>AdsorberLeak.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ResultReference\CompUnitTest.resx">
+      <DependentUpon>CompUnitTest.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ResultReference\CylinderDeep.resx">
+      <DependentUpon>CylinderDeep.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ResultReference\CylinderHyunhap.resx">
+      <DependentUpon>CylinderHyunhap.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ResultReference\CylinderIlluminance.resx">
+      <DependentUpon>CylinderIlluminance.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ResultReference\CylinderInner.resx">
+      <DependentUpon>CylinderInner.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ResultReference\DisplacerSize.resx">
+      <DependentUpon>DisplacerSize.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EquipCheck\EquipCheckManage.resx">
+      <DependentUpon>EquipCheckManage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EquipCheck\EquipCheckRegPopup.resx">
+      <DependentUpon>EquipCheckRegPopup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ResultReference\Mbsc.resx">
+      <DependentUpon>Mbsc.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PcmAssy\InputMaterialPopup.resx">
+      <DependentUpon>InputMaterialPopup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PcmAssy\InspectionRegPopup.resx">
+      <DependentUpon>InspectionRegPopup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PcmAssy\PcmAssyReg.resx">
+      <DependentUpon>PcmAssyReg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PcmAssy\WorkerRegPopup.resx">
+      <DependentUpon>WorkerRegPopup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PcmDry\PcmDryReg.resx">
+      <DependentUpon>PcmDryReg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PcmView.resx">
+      <DependentUpon>PcmView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ResultReference\PumpCheck.resx">
+      <DependentUpon>PumpCheck.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ResultReference\RefProductionTest.resx">
+      <DependentUpon>RefProductionTest.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ResultReference\RefUnit.resx">
+      <DependentUpon>RefUnit.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="StartProcessPopup.resx">
+      <DependentUpon>StartProcessPopup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkManual\InputLaborMgt.resx">
+      <DependentUpon>InputLaborMgt.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkManual\WorkManual.resx">
+      <DependentUpon>WorkManual.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ResultReference\XheadMoter.resx">
+      <DependentUpon>XheadMoter.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\02.Common\Micube.SmartMES.Commons.Controls\Micube.SmartMES.Commons.Controls.csproj">
+      <Project>{6c8616d8-4620-477e-a1ac-2a02a94d4984}</Project>
+      <Name>Micube.SmartMES.Commons.Controls</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\02.Common\Micube.SmartMES.Commons\Micube.SmartMES.Commons.csproj">
+      <Project>{1b6a2eb9-f134-49fc-80fa-982418d6490f}</Project>
+      <Name>Micube.SmartMES.Commons</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Micube.SmartMES.Material\Micube.SmartMES.Material.csproj">
+      <Project>{038CE6D1-EF79-4EB8-85B3-2773A0E6EE18}</Project>
+      <Name>Micube.SmartMES.Material</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list>
+	<query id="GETUX_DEMO_ROWDATA" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT
+					D.ID,
+					(
+						SELECT
+							SUM(VALUE) AS MV
+						FROM
+							TB_DEMO_DATA
+						WHERE
+							ID = D.ID AND
+							SUBSTR(DATE, 1, 6) = SUBSTR(REPLACE(date(), '-', ''), 1, 6)
+						GROUP BY
+							ID,
+							SUBSTR(DATE, 1, 6)
+					) MV,
+					(
+						SELECT
+							SUM(VALUE) AS WV
+						FROM
+							TB_DEMO_DATA
+						WHERE
+							ID = D.ID AND
+							DATE BETWEEN REPLACE(DATE('now', '-7 day'), '-', '') AND REPLACE(date(), '-', '')
+						GROUP BY
+							ID
+					) WV,
+					(
+						SELECT
+							SUM(VALUE) AS DV
+						FROM
+							TB_DEMO_DATA
+						WHERE
+							ID = D.ID AND
+							DATE = REPLACE(date(), '-', '')
+						GROUP BY
+							ID,
+							DATE
+					) DV
+				FROM
+					TB_DEMO_DATA D
+				GROUP BY
+					ID
+				ORDER BY
+					ID
+				;
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETUX_DEMO_CHART1" version="00002">
+		<statement>
+			<![CDATA[
+				SELECT
+					*
+				FROM
+					TB_DEMO_DATA
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETUX_DEMO_CHART2" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT
+					*
+				FROM
+					TB_DEMO_DATA
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETUX_DEMO_MONTH_SUM" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT
+					ID,
+					SUBSTR(DATE, 1, 6) AS DATE,
+					SUM(VALUE) AS "VALUE"
+				FROM
+					TB_DEMO_DATA
+				WHERE
+					SUBSTR(DATE, 1, 6) = SUBSTR(REPLACE(date(), '-', ''), 1, 6)
+				GROUP BY
+					ID,
+					SUBSTR(DATE, 1, 6)
+				ORDER BY
+					ID
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETUX_DEMO_WEEK_SUM" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT
+					ID,
+					SUBSTR(DATE, 1, 6),
+					SUM(VALUE)
+				FROM
+					TB_DEMO_DATA
+				WHERE
+					DATE BETWEEN REPLACE(DATE('now', '-7 day'), '-', '') AND REPLACE(date(), '-', '')
+				ORDER BY
+					DATE
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETUX_DEMO_DAY_SUM" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT
+					ID,
+					DATE,
+					VALUE
+				FROM
+					TB_DEMO_DATA
+				ORDER BY
+					DATE
+			]]>
+		</statement>
+	</query>
+</list>

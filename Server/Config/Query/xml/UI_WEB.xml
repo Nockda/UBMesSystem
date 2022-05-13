@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list>
+	<query id="GETUX_COMMON_CODECLASS" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT CODECLASSNAME AS "TEXT",
+				       CODECLASSID AS "VALUE"
+				FROM SF_CODECLASS
+				WHERE 1=1
+				      AND VALIDSTATE IN ('Valid')
+			]]>
+		</statement>
+	</query>
+
+	<query id="GETUX_COMMON_MENUCODE" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT CODENAME AS "TEXT",
+				       CODEID AS "VALUE"
+				FROM SF_CODE
+				WHERE 1=1
+				      AND CODECLASSID = 'MENUTYPE'
+				      AND VALIDSTATE IN ('Valid')
+				ORDER BY DISPLAYSEQUENCE ASC
+			]]>
+		</statement>
+	</query>
+
+	<query id="GETUX_COMMON_POSITION" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT CODEID AS "VALUE",
+				       CODENAME AS "TEXT"
+				FROM SF_CODE
+				WHERE 1=1
+				      AND CODECLASSID = 'POSITION'
+				      AND VALIDSTATE IN ('Valid')
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETUX_COMMON_QUERYTYPE" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT CODEID AS "VALUE",
+				       CODENAME AS "TEXT"
+				FROM SF_CODE
+				WHERE 1=1
+				      AND CODECLASSID = 'QUERYTYPE'
+				      AND VALIDSTATE IN ('Valid')
+				ORDER BY DISPLAYSEQUENCE ASC
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETUX_COMMON_UIID" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT UIID AS "VALUE", UINAME AS "TEXT" FROM SF_UI WHERE VALIDSTATE = 'Valid'
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETUX_COMMON_USABLE" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT CODENAME AS "TEXT",
+				       CODEID AS "VALUE"
+				FROM SF_CODE
+				WHERE 1=1
+				      AND CODECLASSID = 'VALIDSTATE'
+				      AND VALIDSTATE IN ('Valid')
+				ORDER BY DISPLAYSEQUENCE ASC
+			]]>
+		</statement>
+	</query>
+
+	<query id="GETUX_DEMOTEST_CHECK" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT 'Valid' AS "TEST"
+				FROM DUAL
+				UNION ALL
+				SELECT 'Invalid' AS "TEST"
+				FROM DUAL
+				UNION ALL
+				SELECT 'YES' AS "TEST"
+				FROM DUAL
+				UNION ALL
+				SELECT 'NO' AS "TEST"
+				FROM DUAL
+				UNION ALL
+				SELECT 'TRUE' AS "TEST"
+				FROM DUAL
+				UNION ALL
+				SELECT 'FALSE' AS "TEST"
+				FROM DUAL
+				UNION ALL
+				SELECT 'true' AS "TEST"
+				FROM DUAL
+				UNION ALL
+				SELECT 'false' AS "TEST"
+				FROM DUAL
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GET_VALID_STATE" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT CODEID AS "TEXT", CODEID AS "VALUE" FROM SF_CODE WHERE CODECLASSID = 'VALIDSTATE' ORDER BY DISPLAYSEQUENCE ASC
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETUX_COMMON_CONDITIONCLASS" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT  A.*
+				FROM    SF_CONDITIONCLASS A
+				        INNER JOIN SF_CONDITIONCLASSMAP B
+				            ON  A.CONDITIONCLASSID = B.CONDITIONCLASSID
+				            AND B.MENUID = '$!{MENUID}'
+				            AND B.VALIDSTATE = 'Valid'
+				WHERE   A.VALIDSTATE = 'Valid'
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETUX_COMMON_CONDITIONCLASS" version="00002">
+		<statement>
+			<![CDATA[
+				SELECT UA.CONDITIONACTIONID AS CONDITIONCLASSID					
+					, UA.CONDITIONACTIONNAME AS ACTIONNAME
+					, UA.DESCRIPTION
+					, 'init' AS BIND
+					, UA.HANDLER
+					, UA.TARGET
+					, UA.EXECUTETYPE
+					, UA.EXECUTEID
+					, UA.EXECUTEVERSION
+					, UA.CREATOR
+					, UA.CREATEDTIME
+					, UA.MODIFIER
+					, UA.MODIFIEDTIME
+					, UA.LASTTXNHISTKEY
+					, UA.LASTTXNID
+					, UA.LASTTXNUSER
+					, UA.LASTTXNTIME
+					, UA.LASTTXNCOMMENT
+					, UA.VALIDSTATE
+				FROM SF_UICONDACTION UA
+				INNER JOIN SF_UIMENUCONDACTIONMAP AM ON UA.UIID = AM.UIID AND UA.CONDITIONACTIONID = AM.CONDITIONACTIONID AND AM.VALIDSTATE = UA.VALIDSTATE	
+				WHERE AM.MENUID = '$!{MENUID}'
+				  #if ("$!{_TXNINFO.UIID}" != "")	
+						AND     UA.UIID = '$!{_TXNINFO.UIID}'
+					#end
+					#if ("$!{VALIDSTATE}" != "")
+						AND     UA.VALIDSTATE = '$!{VALIDSTATE}'
+					#end
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETUX_COMMON_CONDITION" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT A.CONDITIONID
+					   , CASE WHEN (D.DICTIONARYNAME IS NULL OR D.DICTIONARYNAME = '') THEN CASE WHEN (A.CONDITIONNAME IS NULL OR A.CONDITIONNAME = '') THEN A.CONDITIONID
+		                                                                   						 ELSE A.CONDITIONNAME END
+			  				  ELSE D.DICTIONARYNAME END CONDITIONNAME
+					   , A.WIDGETTYPE, A.CONSTANTDATA, A.DATAFORMAT
+					   , A.ISNULLABLE
+				       , A.ISREQUIRE, A.RELATIONTARGETCOLUMN, A.CLEARTARGETCOLUMN, A.DEFAULTVALUE, A.EXECUTETYPE
+				       , A.ISLIKE, A.ISHIDE, A.LABELWIDTH, A.WIDGETWIDTH, A.LABELALIGN
+				       , A.MAXLENGTH, A.BIND, A.SERVICE, A.HANDLER, A.EXECUTEID
+				       , A.EXECUTEVERSION, D.DICTIONARYID AS LCODE, A.VALIDSTATE, A.MENUID
+				       , A.CONDITIONCLASSID, A.DICTIONARYID, A.COLUMNNAME, A.DISPLAYSEQUENCE
+				FROM   SF_CONDITION A
+				       INNER JOIN  (
+				                       SELECT  C.CONDITIONCLASSID
+				                       FROM    SF_CONDITIONCLASS C
+				                               INNER JOIN  (
+				                                               SELECT  CONDITIONCLASSID
+				                                               FROM    SF_CONDITIONCLASSMAP
+				                                               WHERE   MENUID = '$!{MENUID}'
+				                                               AND     VALIDSTATE = 'Valid'                        
+				                                           ) D
+				                                   ON  C.CONDITIONCLASSID = D.CONDITIONCLASSID  
+				                       WHERE   C.VALIDSTATE = 'Valid'
+				                   ) B
+				           ON  A.CONDITIONCLASSID = B.CONDITIONCLASSID
+				       LEFT OUTER JOIN SF_DICTIONARY D
+				           ON  A.DICTIONARYID = D.DICTIONARYID
+				           AND D.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				WHERE   A.VALIDSTATE = 'Valid'
+				ORDER BY A.DISPLAYSEQUENCE, A.CONDITIONID
+
+			]]>
+		</statement>
+	</query>
+	
+	<!-- <query id="GETUX_COMMON_CONDITION" version="00002">
+		<statement>
+			<![CDATA[
+				SELECT CI.CONDITIONITEMID 
+					, CI.CONDITIONITEMNAME 
+					, CI.ITEMTYPE
+					, CI.CONSTANTDATA
+					, CI.DATAFORMAT
+					, CI.ISREQUIRED
+					, CI.RELATIONCOLUMNSTACK
+					, CI.DEFAULTVALUE
+					, CI.EXECUTETYPE
+					, CI.ISHIDDEN
+					, CI.COLUMNNAME
+					, 'init' AS BIND 
+					, CI.EXECUTEID
+					, CI.EXECUTEVERSION
+					, CI.DICTIONARYID AS LCODE
+					, CI.VALIDSTATE
+					, IM.MENUID
+					, CI.DISPLAYMEMBER
+					, CI.VALUEMEMBER
+					, IM.DISPLAYSEQUENCE
+				FROM SF_UIMENUCONDITEMMAP IM
+				INNER JOIN SF_UICONDITEM CI ON IM.CONDITIONITEMID = CI.CONDITIONITEMID AND IM.UIID = CI.UIID AND IM.VALIDSTATE = CI.VALIDSTATE
+				WHERE IM.CONDITIONTYPE  = 'ITEM'
+				  AND IM.MENUID = '$!{MENUID}'
+				  AND IM.UIID = '$!{_TXNINFO.UIID}'
+				  AND IM.VALIDSTATE = 'Valid'
+				  
+				 UNION ALL
+				 
+				 SELECT CI.CONDITIONITEMID 
+					, CI.CONDITIONITEMNAME 
+					, CI.ITEMTYPE
+					, CI.CONSTANTDATA
+					, CI.DATAFORMAT
+					, CI.ISREQUIRED
+					, CI.RELATIONCOLUMNSTACK
+					, CI.DEFAULTVALUE
+					, CI.EXECUTETYPE
+					, CI.ISHIDDEN
+					, CI.COLUMNNAME
+					, 'init' AS BIND 
+					, CI.EXECUTEID
+					, CI.EXECUTEVERSION
+					, CI.DICTIONARYID AS LCODE
+					, CI.VALIDSTATE
+					, IM.MENUID
+					, CI.DISPLAYMEMBER
+					, CI.VALUEMEMBER 
+					, IM.DISPLAYSEQUENCE
+				FROM SF_UIMENUCONDITEMMAP IM
+				INNER JOIN SF_UICONDITEMGROUPMAP GM ON IM.CONDITIONITEMID = GM.CONDITIONITEMGROUPID AND IM.UIID = GM.UIID AND IM.VALIDSTATE = GM.VALIDSTATE
+				INNER JOIN SF_UICONDITEM CI ON GM.CONDITIONITEMID = CI.CONDITIONITEMID AND GM.UIID = CI.UIID AND GM.VALIDSTATE = CI.VALIDSTATE
+				WHERE IM.CONDITIONTYPE  = 'GROUP'
+				  AND IM.MENUID = '$!{MENUID}'
+				  AND IM.UIID = '$!{_TXNINFO.UIID}'
+				  AND IM.VALIDSTATE = 'Valid'
+				  
+				  ORDER BY DISPLAYSEQUENCE
+
+			]]>
+		</statement>
+	</query> -->
+	
+	<query id="GETUX_COMMON_CONDITION" version="00002">
+		<statement>
+			<![CDATA[
+				SELECT 
+					CI.CONDITIONITEMID
+					, CASE 
+						WHEN 
+							DI.DICTIONARYNAME IS NULL OR DI.DICTIONARYNAME = '' 
+						THEN 
+							CASE 
+								WHEN CI.CONDITIONITEMNAME IS NULL OR CI.CONDITIONITEMNAME = '' 
+							THEN 
+								CI.CONDITIONITEMID
+							ELSE 
+								CI.CONDITIONITEMNAME 
+							END
+						ELSE 
+							DI.DICTIONARYNAME
+					END AS "CONDITIONITEMNAME"
+					, CI.ITEMTYPE
+					, CI.CONSTANTDATA
+					, CI.DATAFORMAT
+					, CI.ISREQUIRED
+					, CI.RELATIONCOLUMNSTACK
+					, CI.DEFAULTVALUE
+					, CI.EXECUTETYPE
+					, CI.ISHIDDEN
+					, CI.COLUMNNAME
+					, 'init' AS BIND 
+					, CI.EXECUTEID
+					, CI.EXECUTEVERSION
+					, CI.DICTIONARYID AS LCODE
+					, CI.VALIDSTATE
+					, IM.MENUID
+					, CI.DISPLAYMEMBER
+					, CI.VALUEMEMBER
+					, CI.OPTIONS
+					, CI.ISALL
+					, CI.CHANGEHANDLER
+					, IM.DISPLAYSEQUENCE
+				FROM SF_UIMENUCONDITEMMAP IM
+				INNER JOIN SF_UICONDITEM CI ON IM.CONDITIONITEMID = CI.CONDITIONITEMID AND IM.UIID = CI.UIID AND CI.VALIDSTATE = IM.VALIDSTATE
+				LEFT JOIN SF_DICTIONARY DI ON
+					CI.DICTIONARYID = DI.DICTIONARYID
+					AND DI.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+					AND DI.VALIDSTATE = 'Valid'
+				WHERE 
+				  IM.MENUID = '$!{MENUID}'
+				  #if ("$!{_TXNINFO.UIID}" != "")	
+						AND     IM.UIID = '$!{_TXNINFO.UIID}'
+					#end
+					#if ("$!{VALIDSTATE}" != "")
+						AND     IM.VALIDSTATE = '$!{VALIDSTATE}'
+					#end
+				  
+				  ORDER BY DISPLAYSEQUENCE
+			]]>
+		</statement>
+	</query>
+	
+</list>

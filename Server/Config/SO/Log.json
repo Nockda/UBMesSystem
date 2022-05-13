@@ -1,0 +1,30 @@
+{
+	"Name": "COM_H_LOG",
+	"Keys": [
+		"LogID",
+		"SessionID",
+		"RequestStartedTime"
+	],
+	"Attributes": {
+		"LogID" : "LOGID",
+		"SessionID" : "SESSIONID",
+		"RequestIPAddress" : "REQUESTIPADDRESS",
+		"RequestStartedTime" : "REQUESTSTARTEDTIME",
+		"RequestRuleName" : "REQUESTRULENAME",
+		"RequestClassName" : "REQUESTCLASSNAME",
+		"RequestMessageSet" : "REQUESTMESSAGESET",
+		"DatabaseName" : "DATABASENAME",
+		"Status" : "STATUS",
+		"QueryId" : "QUERYID",
+		"QueryVersion" : "QUERYVERSION",
+		"QueryParameter" : "QUERYPARAMETER",
+		"QueryRecordCount" : "QUERYRECORDCOUNT",
+		"Result" : "RESULT",
+		"ResultCompleteTime" : "RESULTCOMPLETETIME",
+		"ResultMessage" : "RESULTMESSAGE",
+		"ReturnMessageSet" : "RETURNMESSAGESET",
+		"ElapsedTime" : "ELAPSEDTIME",
+		"CreatedTime" : "CREATEDTIME",
+		"Creator" : "CREATOR"
+	}
+}

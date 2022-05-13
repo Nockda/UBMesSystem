@@ -1,0 +1,15 @@
+C:\Users\user\Documents\sources\UlbacNew\Client\bin\Debug\Report\LotCardProduction.repx
+C:\Users\user\Documents\sources\UlbacNew\Client\bin\Debug\Micube.SmartMES.Commons.dll
+C:\Users\user\Documents\sources\UlbacNew\Client\bin\Debug\Micube.SmartMES.Commons.pdb
+C:\Users\user\Documents\sources\UlbacNew\Client\src\02.Common\Micube.SmartMES.Commons\obj\Debug\Micube.SmartMES.Commons.csprojAssemblyReference.cache
+C:\Users\user\Documents\sources\UlbacNew\Client\src\02.Common\Micube.SmartMES.Commons\obj\Debug\Micube.SmartMES.Commons.csproj.ResolveComReference.cache
+C:\Users\user\Documents\sources\UlbacNew\Client\src\02.Common\Micube.SmartMES.Commons\obj\Debug\Micube.SmartMES.Commons.LotCancelPopUp.resources
+C:\Users\user\Documents\sources\UlbacNew\Client\src\02.Common\Micube.SmartMES.Commons\obj\Debug\Micube.SmartMES.Commons.ProductRevisionInputPopup.resources
+C:\Users\user\Documents\sources\UlbacNew\Client\src\02.Common\Micube.SmartMES.Commons\obj\Debug\Micube.SmartMES.Commons.Popup.SelectedGridPopup.resources
+C:\Users\user\Documents\sources\UlbacNew\Client\src\02.Common\Micube.SmartMES.Commons\obj\Debug\Micube.SmartMES.Commons.SendInspectionMailPopup.resources
+C:\Users\user\Documents\sources\UlbacNew\Client\src\02.Common\Micube.SmartMES.Commons\obj\Debug\Micube.SmartMES.Commons.Properties.Resources.resources
+C:\Users\user\Documents\sources\UlbacNew\Client\src\02.Common\Micube.SmartMES.Commons\obj\Debug\Micube.SmartMES.Commons.csproj.GenerateResource.cache
+C:\Users\user\Documents\sources\UlbacNew\Client\src\02.Common\Micube.SmartMES.Commons\obj\Debug\Micube.SmartMES.Commons.csproj.CoreCompileInputs.cache
+C:\Users\user\Documents\sources\UlbacNew\Client\src\02.Common\Micube.SmartMES.Commons\obj\Debug\Micube.SmartMES.Commons.csproj.CopyComplete
+C:\Users\user\Documents\sources\UlbacNew\Client\src\02.Common\Micube.SmartMES.Commons\obj\Debug\Micube.SmartMES.Commons.dll
+C:\Users\user\Documents\sources\UlbacNew\Client\src\02.Common\Micube.SmartMES.Commons\obj\Debug\Micube.SmartMES.Commons.pdb

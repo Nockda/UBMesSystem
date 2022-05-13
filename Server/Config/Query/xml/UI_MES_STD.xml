@@ -1,0 +1,4203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list>
+	<!--
+	프 로 그 램 명	: 기준정보 > 조회 > BOM조회 
+	설		명	: 품목 리스트를 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-05-01
+	주요 변경 로그	:
+	-->
+	<query id="GetBom" version="00001">
+		<statement>
+			<![CDATA[
+	            SELECT	bom.PRODUCTDEFID AS PARENTITEMID
+						,prod.ITEMNAME AS PARENTITEMNAME
+					    ,bom.MATERIALDEFID AS CHILDITEMID
+						,mate.ITEMNAME AS CHILDITEMNAME
+					    ,bom.QTY
+				FROM 	SF_BILLOFMATERIAL bom
+						LEFT JOIN 
+						(
+							SELECT  CONSUMABLEDEFID AS ITEMID
+									,CONSUMABLEDEFNAME AS ITEMNAME
+							FROM	SF_CONSUMABLEDEFINITION
+							UNION
+							SELECT	PRODUCTDEFID AS ITEMID
+									,PRODUCTDEFNAME AS ITEMNAME
+							FROM	SF_PRODUCTDEFINITION
+						) prod ON bom.PRODUCTDEFID = prod.ITEMID 
+						LEFT JOIN 
+						(
+							SELECT  CONSUMABLEDEFID AS ITEMID
+									,CONSUMABLEDEFNAME AS ITEMNAME
+							FROM	SF_CONSUMABLEDEFINITION
+							UNION
+							SELECT	PRODUCTDEFID AS ITEMID
+									,PRODUCTDEFNAME AS ITEMNAME
+							FROM	SF_PRODUCTDEFINITION
+						) mate ON bom.MATERIALDEFID = mate.ITEMID 
+				WHERE	1=1
+						AND bom.VALIDSTATE = 'Valid'
+			]]>
+		</statement>
+	</query>
+
+
+	<!--
+	프 로 그 램 명	: 기준정보 > 조회 > 품목관리
+	설		명	: 품목 리스트를 조회한다.
+	작	성	자	: jylee
+	작	성	일	: 2020-04-06
+	주요 변경 로그	:
+	-->
+	<query id="GetItem" version="00001">
+		<statement>
+			<![CDATA[
+	            SELECT 
+	               I.ITEMNAME,
+	               I.ITEMID,
+	               I.ITEMSTANDARD,
+	               I.ITEMASSETCATEGORY,
+	               I.UNIT,
+	               I.ITEMSTATUS,
+	               I.DOMESTICFOREIGN,
+	               I.DEPARTMENT,
+	               I.USERID,
+	               I.LARGECATEGORY,
+	               I.MEDIUMCATEGORY,
+	               I.SMALLCATEGORY
+	            FROM UL_ITEM I
+	               LEFT JOIN SF_USER U ON I.USERID = U.USERID
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 > 코드관리 > 코드자동채번규칙
+	설		명	: 코드자동채번규칙을 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-04-10
+	주요 변경 로그	:
+	-->
+	<query id="GetSeqIdRule" version="00001">
+		<statement>
+			<![CDATA[
+				
+            	SELECT  us.SEQID
+            			,us.SEQNAMEKOR
+            			,us.SEQNAMEENG
+            			,us.SEQNAMEJPN
+            			,us.SEQRULE
+            			,us.SEQCOUNT
+            			,us.LASTSEQID
+            			,us.DESCRIPTION
+            			,UC.USERNAME AS CREATOR
+						,us.CREATEDTIME
+						,UM.USERNAME AS MODIFIER
+						,us.MODIFIEDTIME
+	            FROM	UL_SEQIDRULE us
+	            		LEFT OUTER JOIN	SF_USER UC ON us.CREATOR = UC.USERID
+						LEFT OUTER JOIN SF_USER UM ON us.MODIFIER = UM.USERID
+                WHERE	1=1
+                		#if ("$!{P_CONDITIONVALUE}" != "")
+							AND	us.SEQID LIKE '%$!{P_CONDITIONVALUE}%'
+							OR	us.SEQNAMEKOR LIKE '%$!{P_CONDITIONVALUE}%'
+							OR	us.SEQNAMEENG LIKE '%$!{P_CONDITIONVALUE}%'
+							OR	us.SEQNAMEJPN LIKE '%$!{P_CONDITIONVALUE}%'
+							OR	us.SEQRULE LIKE '%$!{P_CONDITIONVALUE}%'
+							OR	us.DESCRIPTION LIKE '%$!{P_CONDITIONVALUE}%'
+						#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 > 코드 관리 > 회사코드관리
+	설		명	: 회사코드관리 리스트를 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-03-24
+	주요 변경 로그	:
+	-->
+	<query id="GetEnterprise" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	SE.ENTERPRISEID
+						,SE.ENTERPRISENAME
+						,SE.DESCRIPTION
+						,SE.ADDRESS
+						,SE.PHONE
+						,SE.FAXNO
+						,UC.USERNAME AS CREATOR
+						,SE.CREATEDTIME
+						,UM.USERNAME AS MODIFIER
+						,SE.MODIFIEDTIME
+						,SE.LASTTXNHISTKEY
+						,SE.LASTTXNID
+						,SE.LASTTXNUSER
+						,SE.LASTTXNTIME
+						,SE.LASTTXNCOMMENT
+						,SE.VALIDSTATE
+				FROM	SF_ENTERPRISE SE
+						LEFT OUTER JOIN	SF_USER UC ON SE.CREATOR = UC.USERID
+						LEFT OUTER JOIN SF_USER UM ON SE.MODIFIER = UM.USERID
+				WHERE	1=1
+						#if ("$!{P_CONDITIONVALUE}" != "")
+						AND	SE.ENTERPRISEID LIKE '%$!{P_CONDITIONVALUE}%'
+						OR	SE.ENTERPRISENAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR	SE.DESCRIPTION LIKE '%$!{P_CONDITIONVALUE}%'
+						OR	SE.ADDRESS LIKE '%$!{P_CONDITIONVALUE}%'
+						OR  SE.PHONE LIKE '%$!{P_CONDITIONVALUE}%'
+						#end
+						#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+							AND	SE.VALIDSTATE = '$!{P_VALIDSTATE}'
+						#end
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	프 로 그 램 명	: 기준정보 > 항목 관리 > 검사항목관리
+	설		명	: 검사 항목리스트 조회
+	작	성	자	: 배선용
+	작	성	일	: 2020-05-15
+	주요 변경 로그	: 2020-06-09 정승원 PARAMETERTYPE 추가
+				  2020-06-30 황유성 CREATEDTIME, MODIFIEDTIME VARCHAR 캐스팅 제거
+	-->
+	<query id="SelectInspItemList" version="00001">
+		<statement>
+			<![CDATA[
+			
+			-- SelectInspItemList
+			-- 00001
+			SELECT UI.PARAMETERID 
+			    ,  UI.PARAMETERNAME
+			    ,  UI.PARAMETERTYPE 
+			    ,  UI.INPUTTYPE 
+			    ,  UI.UNIT 
+			    ,  UI.DECIMALPLACE
+				,  UI.CODECLASSID
+			    ,  UI.VALIDSTATE 
+			    ,  ISNULL(US1.USERNAME, UI.CREATOR)   AS CREATOR
+			    ,  UI.CREATEDTIME
+			    ,  ISNULL(US2.USERNAME, UI.MODIFIER)  AS MODIFIER
+			    ,  UI.MODIFIEDTIME
+				,  SD1.DICTIONARYNAME			      AS "PARAMETERNAME$$KO-KR"
+				,  SD2.DICTIONARYNAME			      AS "PARAMETERNAME$$EN-US"
+				,  SD3.DICTIONARYNAME			      AS "PARAMETERNAME$$ja-JP"
+				,  UI.ISNOTREQUIRED    
+			FROM CT_PARAMETERDEFINITION UI 
+			LEFT JOIN SF_USER       US1 ON  UI.CREATOR  = US1.USERID
+			LEFT JOIN SF_USER       US2 ON  UI.MODIFIER  = US2.USERID 
+			LEFT JOIN SF_DICTIONARY SD1 ON  UI.DICTIONARYID  = SD1.DICTIONARYID 
+			                            AND SD1.LANGUAGETYPE  = 'ko-KR'
+			LEFT JOIN SF_DICTIONARY SD2 ON  UI.DICTIONARYID  = SD2.DICTIONARYID 
+			                            AND SD2.LANGUAGETYPE  = 'en-US'
+			LEFT JOIN SF_DICTIONARY SD3 ON  UI.DICTIONARYID  = SD3.DICTIONARYID 
+			                            AND SD3.LANGUAGETYPE  = 'ja-JP'    
+            WHERE 1=1
+			#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+				AND	UI.VALIDSTATE = '$!{P_VALIDSTATE}'
+			#end
+			#if ("$!{P_ITEMID}" != "" && "$!{P_ITEMID}" != "*")
+				AND	UI.ITEMID = '$!{P_ITEMID}'
+			#end
+			#if("$!{P_PARAMETERTYPE}" != "*" && "$!{P_PARAMETERTYPE}" != "")
+				AND UI.PARAMETERTYPE = '$!{P_PARAMETERTYPE}'	
+			#end            			            
+			]]>
+		</statement>
+	</query>
+	<!--
+		설		명	: 품목 팝업 그리드 데이터를 조회 한다. 
+		생	성	자	: 
+		생	성	일	: 
+	-->
+	<query id="GetProductDefinitionList" version="10001" >
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetProductDefinitionList
+				-- Version : 10001
+				SELECT
+						PD.PRODUCTDEFID
+					,   PD.PARTNUMBER	
+					,	PD.PRODUCTDEFNAME
+					,	PD.PRODUCTDEFTYPE
+					,	PD.ERP_UNITID 			AS UNIT
+					,	PD.PARTNUMBER 			AS PRODUCTDEF
+					,	PD.PRODUCTDEFID 		AS PRODUCTDEFSEQ
+				FROM	SF_PRODUCTDEFINITION	PD
+				WHERE	1 = 1
+				--AND		PD.PLANTID = '$!{PLANTID}'
+				
+				#if ("$!{TXTPRODUCTDEFNAME}" != "")
+					AND		(UPPER(PD.PRODUCTDEFID) LIKE UPPER('%$!{TXTPRODUCTDEFNAME}%')
+					OR		 UPPER(PD.PRODUCTDEFNAME) LIKE UPPER(N'%$!{TXTPRODUCTDEFNAME}%')
+					OR		 UPPER(PD.PARTNUMBER) LIKE UPPER(N'%$!{TXTPRODUCTDEFNAME}%')
+					)
+				#end
+				#if ("$!{P_PRODUCTDEFTYPE}" != "" && "$!{P_PRODUCTDEFTYPE}" != "*")
+					AND		PD.PRODUCTDEFTYPE = '$!{P_PRODUCTDEFTYPE}'
+				#end
+				#if ("$!{PRODUCTDEFTYPE}" != "" && "$!{PRODUCTDEFTYPE}" != "*")
+					AND		PD.PRODUCTDEFTYPE = '$!{PRODUCTDEFTYPE}'
+				#end
+				#if("$!{P_PRODUCTDEFID}" != "" && "$!{P_PRODUCTDEFID}" != "*")
+					AND		EXISTS
+							(
+								SELECT	1
+								FROM	ufn_selectStringToSplit('$!{P_PRODUCTDEFID}', ',')		PMP
+								WHERE	PD.PRODUCTDEFID = PMP.VALUE
+							)
+				#end
+				ORDER BY PD.PARTNUMBER
+				;				
+			]]>
+		</statement>
+	</query>	
+	
+	<!--
+		설		명	: 모든품목 팝업 그리드 데이터를 조회 한다. 
+		생	성	자	: scmo
+		생	성	일	: 2020-06-11
+	-->
+	<query id="GetAllItemDefinitionList" version="00001" >
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetAllItemDefinitionList
+				-- Version : 00001
+				SELECT
+						PD.PARTNUMBER AS PRODUCTDEFID
+					,	PD.CONSUMABLEDEFNAME AS PRODUCTDEFNAME
+					,	PD.CONSUMABLETYPE AS PRODUCTDEFTYPE
+					,	(SELECT UNITID FROM CT_UNITDEFINITION WHERE ERP_UNITID = PD.ERP_UNITID) AS UNIT
+					,	PD.CONSUMABLEDEFID 	AS PRODUCTDEF
+				FROM	SF_CONSUMABLEDEFINITION	PD
+				WHERE	1 = 1	
+				#if ("$!{TXTPRODUCTDEFNAME}" != "")
+					AND		(UPPER(PD.PARTNUMBER) LIKE UPPER('%$!{TXTPRODUCTDEFNAME}%')
+					OR		 UPPER(PD.CONSUMABLEDEFNAME) LIKE UPPER('%$!{TXTPRODUCTDEFNAME}%'))
+				#end
+				#if ("$!{P_PRODUCTDEFTYPE}" != "" && "$!{P_PRODUCTDEFTYPE}" != "*")
+					AND		PD.CONSUMABLETYPE = '$!{P_PRODUCTDEFTYPE}'
+				#end
+				#if("$!{P_PRODUCTDEFID}" != "" && "$!{P_PRODUCTDEFID}" != "*")
+					AND		EXISTS
+							(
+								SELECT	1
+								FROM	ufn_selectStringToSplit('$!{P_PRODUCTDEFID}', ',')		PMP
+								WHERE	PD.CONSUMABLEDEFID = PMP.VALUE
+							)
+				#end
+				ORDER BY PD.CONSUMABLEDEFID
+				;				
+			]]>
+		</statement>
+	</query>
+
+	<!--
+		설		명	: 설비별 점검 항목 
+		생	성	자	: 
+		생	성	일	: 
+	-->
+	<query id="SelectEquipmentCheckItem" version="00001" >
+		<statement>
+			<![CDATA[
+				-- SelectEquipmentCheckItem
+				-- 00001
+				SELECT SM.MAINTITEMID
+				    ,  SM.MAINTITEMNAME 
+				    ,  SM.VALIDSTATE 
+				    ,  ISNULL(US1.USERNAME, SM.CREATOR)   AS CREATOR
+				    ,  SM.CREATEDTIME
+				    ,  ISNULL(US2.USERNAME, SM.MODIFIER)  AS MODIFIER
+				    ,  SM.MODIFIEDTIME
+					,  SD1.DICTIONARYNAME			      AS "MAINTITEMNAME$$KO-KR"
+					,  SD2.DICTIONARYNAME			      AS "MAINTITEMNAME$$EN-US"
+					,  SD3.DICTIONARYNAME			      AS "MAINTITEMNAME$$ja-JP"    
+				FROM SF_MAINTITEM SM  
+				LEFT JOIN SF_USER       US1 ON  SM.CREATOR  = US1.USERID
+				LEFT JOIN SF_USER       US2 ON  SM.MODIFIER  = US2.USERID 
+				LEFT JOIN SF_DICTIONARY SD1 ON  SM.DICTIONARYID  = SD1.DICTIONARYID 
+				                            AND SD1.LANGUAGETYPE  = 'ko-KR'
+				LEFT JOIN SF_DICTIONARY SD2 ON  SM.DICTIONARYID  = SD2.DICTIONARYID 
+				                            AND SD2.LANGUAGETYPE  = 'en-US'
+				LEFT JOIN SF_DICTIONARY SD3 ON  SM.DICTIONARYID  = SD3.DICTIONARYID 
+				                            AND SD3.LANGUAGETYPE  = 'ja-JP'    
+	            WHERE 1=1
+            	ORDER BY MAINTITEMID
+				;				
+			]]>
+		</statement>
+	</query>	
+	<!--
+		설		명	: 기타입고용 모든품목 팝업 그리드 데이터를 조회 한다. 
+		생	성	자	: scmo
+		생	성	일	: 2020-06-12
+	-->
+	<query id="GetAllItemDefinitionListForEtc" version="00001" >
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetAllItemDefinitionListForEtc
+				-- Version : 00001
+				SELECT	temp.*
+				FROM
+				(
+					SELECT	cd.PARTNUMBER AS PRODUCTDEFID
+							,cd.CONSUMABLEDEFNAME AS PRODUCTDEFNAME
+							,cd.CONSUMABLETYPE AS PRODUCTDEFTYPE
+							,(SELECT UNITID FROM CT_UNITDEFINITION WHERE ERP_UNITID = cd.ERP_UNITID) AS UNIT
+							,cd.CONSUMABLEDEFID 	AS PRODUCTDEF
+					FROM	SF_CONSUMABLEDEFINITION	cd
+							--LEFT JOIN SF_PRODUCTDEFINITION pd ON pd.PRODUCTDEFID = cd.CONSUMABLEDEFID
+					WHERE	1=1	
+							AND cd.CONSUMABLETYPE = 'Material'	
+					UNION
+					SELECT	pd.PARTNUMBER AS PRODUCTDEFID
+							,pd.PRODUCTDEFNAME AS PRODUCTDEFNAME
+							,pd.PRODUCTDEFTYPE AS PRODUCTDEFTYPE
+							,(SELECT UNITID FROM CT_UNITDEFINITION WHERE ERP_UNITID = pd.ERP_UNITID) AS UNIT
+							,pd.PRODUCTDEFID AS PRODUCTDEF
+					FROM	SF_PRODUCTDEFINITION pd
+							LEFT JOIN SF_PROCESSPATH pp ON pd.PROCESSDEFID = pp.PROCESSDEFID AND PATHTYPE LIKE 'Start%'	
+							LEFT JOIN SF_PROCESSSEGMENT ps ON pp.PROCESSSEGMENTID = ps.PROCESSSEGMENTID
+					WHERE	1=1
+							AND pd.PRODUCTDEFTYPE = 'HalfProduct'
+							AND ps.LOTCREATERULEID IS NULL OR ps.LOTCREATERULEID = '' OR ps.LOTCREATERULEID = 'PLotNo'
+				) temp
+				WHERE	1 = 1	
+				#if ("$!{TXTPRODUCTDEFNAME}" != "")
+					AND		(UPPER(temp.PRODUCTDEFID) LIKE UPPER(N'%$!{TXTPRODUCTDEFNAME}%')
+					OR		 UPPER(temp.PRODUCTDEFNAME) LIKE UPPER(N'%$!{TXTPRODUCTDEFNAME}%'))
+				#end
+				#if ("$!{P_PRODUCTDEFTYPE}" != "" && "$!{P_PRODUCTDEFTYPE}" != "*")
+					AND		temp.PRODUCTDEFTYPE = '$!{P_PRODUCTDEFTYPE}'
+				#end
+				#if("$!{P_PRODUCTDEFID}" != "" && "$!{P_PRODUCTDEFID}" != "*")
+					AND		EXISTS
+							(
+								SELECT	1
+								FROM	ufn_selectStringToSplit('$!{P_PRODUCTDEFID}', ',')		PMP
+								WHERE	temp.PRODUCTDEFID = PMP.VALUE
+							)
+				#end
+				ORDER BY temp.PRODUCTDEFID asc
+				;				
+			]]>
+		</statement>
+	</query>		
+		
+	<!--
+	프 로 그 램 명	: 기준정보 > 코드 관리 > 업체코드관리
+	설		명	: 업체코드관리 리스트를 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-03-25
+	주요 변경 로그	:
+	-->
+	<query id="GetCompany" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	CP.COMPANYID
+						,CP.COMPANYNAMEKOR
+						,CP.COMPANYNAMEENG
+						,CP.COMPANYNAMEJPN
+						,CP.DESCRIPTION
+						,CP.COMPANYTYPE
+						,CP.LAWREGNO
+						,CP.BUSINESSNO
+						,CP.CEONAME
+						,CP.PHONE
+						,CP.FAXNO
+						,CP.ADDRESS
+						,CP.HOMEPAGE
+						,CP.CATEGORY
+						,CP.ITEM
+						,CP.VALIDSTATE
+						,UC.USERNAME AS CREATOR
+						,CP.CREATEDTIME
+						,UM.USERNAME AS MODIFIER
+						,CP.MODIFIEDTIME
+				FROM	UL_COMPANY CP
+						LEFT OUTER JOIN	SF_USER UC ON CP.CREATOR = UC.USERID
+						LEFT OUTER JOIN SF_USER UM ON CP.MODIFIER = UM.USERID
+				WHERE	1=1
+						#if ("$!{P_CONDITIONVALUE}" != "")
+							AND	CP.COMPANYID LIKE '%$!{P_CONDITIONVALUE}%'
+							OR	CP.COMPANYNAMEKOR LIKE '%$!{P_CONDITIONVALUE}%'
+							OR	CP.COMPANYNAMEENG LIKE '%$!{P_CONDITIONVALUE}%'
+							OR	CP.COMPANYNAMEJPN LIKE '%$!{P_CONDITIONVALUE}%'
+							OR	CP.DESCRIPTION LIKE '%$!{P_CONDITIONVALUE}%'
+							OR	CP.ADDRESS LIKE '%$!{P_CONDITIONVALUE}%'
+							OR  CP.PHONE LIKE '%$!{P_CONDITIONVALUE}%'
+							OR  CP.CATEGORY LIKE '%$!{P_CONDITIONVALUE}%'
+							OR  CP.ITEM LIKE '%$!{P_CONDITIONVALUE}%'
+							OR  CP.CEONAME LIKE '%$!{P_CONDITIONVALUE}%'
+						#end
+						#if ("$!{P_COMPANYTYPE}" != "" && "$!{P_COMPANYTYPE}" != "*")
+							AND	CP.COMPANYTYPE = '$!{P_COMPANYTYPE}'
+						#end
+						#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+							AND	CP.VALIDSTATE = '$!{P_VALIDSTATE}'
+						#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 > 바코드 관리 > 바코드디자이너
+	설		명	: 바코드 리스트를 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-03-25
+	주요 변경 로그	:
+	-->
+	<query id="GetLabelForm" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	UL.LABELID
+						,UL.ENTERPRISEID
+						,UL.LABELNAME
+						,UL.LABELTYPE
+						,UL.DESCRIPTION
+						,UL.PAGEHEIGHT
+						,UL.PAGEWIDTH
+						,UL.LABELDATA
+						,UL.FILENAME
+						,UL.FILEEXT
+						,UL.VALIDSTATE
+						,UC.USERNAME AS CREATOR
+						,UL.CREATEDTIME
+						,UM.USERNAME AS MODIFIER
+						,UL.MODIFIEDTIME
+				FROM	UL_LABELFORM UL
+						LEFT OUTER JOIN	SF_USER UC ON UL.CREATOR = UC.USERID
+						LEFT OUTER JOIN SF_USER UM ON UL.MODIFIER = UM.USERID
+				WHERE	1=1
+						#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+							AND	UL.VALIDSTATE = '$!{P_VALIDSTATE}'
+						#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 > 코드 관리 > 설비코드관리
+	설		명	: 설비코드관리 리스트를 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-03-03
+	주요 변경 로그	: 2020-06-05 유태근 / 다국어조회및 기타필드 조회 수정
+				  2021-04-19 정송은 0000371 맨티스 이슈 요청 건으로 설비코드 화면 에서만 생성,수정된 데이터 생성자, 수정자 보여지도록 수정
+	-->
+	<query id="GetEquipCode" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			--id : GetEquipCode
+			--version : 00001
+					SELECT 
+							SE.ENTERPRISEID
+						,	SE.PLANTID	
+						,	SE.EQUIPMENTID
+						,	ISNULL(KD.DICTIONARYNAME, SE.EQUIPMENTNAME)					AS	"EQUIPMENTNAME$$KO-KR"
+						,	ISNULL(ED.DICTIONARYNAME, SE.EQUIPMENTNAME)					AS	"EQUIPMENTNAME$$EN-US"
+						,	ISNULL(JD.DICTIONARYNAME, SE.EQUIPMENTNAME)					AS	"EQUIPMENTNAME$$JA-JP"
+						,	ISNULL(DC.DICTIONARYNAME, SE.EQUIPMENTNAME)					AS	EQUIPMENTNAME
+						,	SE.EQUIPMENTTYPE
+						,	SE.EQUIPMENTCLASSID
+						,	ISNULL(DC2.DICTIONARYNAME, AR.AREANAME)						AS	AREANAME
+						,	SE.AREAID
+						,	SE.PROCESSDEFID
+						,	SE.DEPARTMENT
+						,	SE.ASSETNO
+						,	SE.STATE
+						,	SE.IFSTATE
+						,	SE.ISDAILYCHECK
+						,	SE.VALIDSTATE
+						,	SE.DESCRIPTION
+						, 	UC.USERNAME AS CREATOR
+						, 	SE.CREATEDTIME
+						,	(
+								SELECT TOP 1 SU.USERNAME
+								FROM SF_EQUIPMENTHISTORY ES
+								LEFT JOIN SF_USER SU
+									ON ES.MODIFIER = SU.USERID
+								WHERE ES.EQUIPMENTID = SE.EQUIPMENTID
+								AND ES.TXNID = 'Modify'
+							) AS MODIFIER
+						,   (
+								SELECT MAX(MODIFIEDTIME)
+								FROM SF_EQUIPMENTHISTORY
+								WHERE EQUIPMENTID = SE.EQUIPMENTID
+								AND TXNID = 'Modify'
+						    ) AS MODIFIEDTIME	
+					FROM	SF_EQUIPMENT 						SE
+					LEFT OUTER JOIN SF_AREA						AR	ON  SE.AREAID	= AR.AREAID
+					LEFT OUTER JOIN SF_DICTIONARY				DC2	ON	AR.DICTIONARYID = DC2.DICTIONARYID
+																	AND DC2.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+					LEFT OUTER JOIN SF_DICTIONARY				KD	ON	KD.DICTIONARYID = SE.DICTIONARYID
+																	AND KD.LANGUAGETYPE = 'ko-KR'
+					LEFT OUTER JOIN SF_DICTIONARY				ED	ON	ED.DICTIONARYID = SE.DICTIONARYID
+																	AND ED.LANGUAGETYPE = 'en-US'
+					LEFT OUTER JOIN SF_DICTIONARY				JD	ON	JD.DICTIONARYID = SE.DICTIONARYID
+																	AND JD.LANGUAGETYPE = 'ja-JP'
+					LEFT OUTER JOIN SF_DICTIONARY				DC	ON	SE.DICTIONARYID = DC.DICTIONARYID
+																	AND DC.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+					LEFT OUTER JOIN	SF_USER 					UC 	ON 	SE.CREATOR = UC.USERID
+					WHERE	1 = 1
+					
+					#if ("$!{P_AREACODE}" != "" && "$!{P_AREACODE}" != "*")
+						AND		SE.AREAID = '$!{P_AREACODE}'
+					#end
+					
+					#if ("$!{P_EQUIPMENTTYPE}" != "" && "$!{P_EQUIPMENTTYPE}" != "*")
+						AND		SE.EQUIPMENTTYPE = '$!{P_EQUIPMENTTYPE}'
+					#end
+					
+					#if ("$!{P_EQUIPMENTGROUP}" != "" && "$!{P_EQUIPMENTGROUP}" != "*")
+						AND		SE.EQUIPMENTCLASSID = '$!{P_EQUIPMENTGROUP}'
+					#end
+					
+					#if ("$!{P_EQUIPNAME}" != "")
+						AND		KD.DICTIONARYNAME LIKE '%$!{P_EQUIPNAME}%'
+						OR		ED.DICTIONARYNAME LIKE '%$!{P_EQUIPNAME}%'
+						OR		JD.DICTIONARYNAME LIKE '%$!{P_EQUIPNAME}%'
+					#end
+					
+					#if ("$!{P_TEAM}" != "" && "$!{P_TEAM}" != "*")
+						AND		SE.DEPARTMENT = '$!{P_TEAM}'
+					#end
+					
+					#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+						AND		SE.VALIDSTATE = '$!{P_VALIDSTATE}'
+					#end
+					
+					ORDER BY SE.CREATEDTIME
+					
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 설비관리 - 항목 - Parameter모니터링
+	설		명	: 설비 리스트 조회
+	작	성	자	: 유형하
+	작	성	일	: 2020-06-11
+	주요 변경 로그	: 
+	-->
+	<query id="GetEquipCode" version="00002">
+		<statement>
+			<![CDATA[
+			--
+			--id : GetEquipCode
+			--version : 00002
+			SELECT 	SE.EQUIPMENTID
+			,		ISNULL(D.DICTIONARYNAME, SE.EQUIPMENTNAME)					AS	EQUIPMENTNAME
+			FROM SF_EQUIPMENT	SE	
+			INNER JOIN SF_EQUIPMENTCLASS    EC ON SE.EQUIPMENTCLASSID = EC.EQUIPMENTCLASSID
+			                                      AND SE.EQUIPMENTCLASSID = '$!{P_EQUIPMENTGROUP}'
+			LEFT OUTER JOIN SF_DICTIONARY	D  ON D.DICTIONARYID = SE.DICTIONARYID
+											      AND D.LANGUAGETYPE = '${P_LANGUAGETYPE}' 
+			WHERE 1=1
+			AND   IFSTATE = 'Y'
+			]]>
+		</statement>
+	</query>
+	
+	
+	
+	<!--
+	프 로 그 램 명	: 기준정보 > 코드 관리 > 공정코드관리
+	설		명	: 공정코드관리 리스트를 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-04-02
+	주요 변경 로그	:
+				UP.PARENTPROCESSID 삭제 수정자 : jylee
+	-->
+	<query id="GetProcessCode" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	UP.PROCESSID
+						,UP.PROCESSNAMEKOR
+						,UP.PROCESSNAMEENG
+						,UP.PROCESSNAMEJPN
+						,UP.ORDERTYPE
+						,UP.LOTUNIT
+						,UP.WORKGROUPID
+						,UP.DESCRIPTION
+						,UP.VALIDSTATE
+						,UC.USERNAME AS CREATOR
+						,UP.CREATEDTIME
+						,UM.USERNAME AS MODIFIER
+						,UP.MODIFIEDTIME
+				FROM	UL_PROCESS UP
+						LEFT OUTER JOIN	SF_USER UC ON UP.CREATOR = UC.USERID
+						LEFT OUTER JOIN SF_USER UM ON UP.MODIFIER = UM.USERID
+				WHERE	1=1
+						#if ("$!{P_CONDITIONVALUE}" != "")
+							AND	UP.PROCESSNAMEKOR LIKE '%$!{P_CONDITIONVALUE}%'
+							OR	UP.PROCESSNAMEENG LIKE '%$!{P_CONDITIONVALUE}%'
+							OR	UP.PROCESSNAMEJPN LIKE '%$!{P_CONDITIONVALUE}%'
+						#end
+						#if ("$!{P_WORKGROUPCODE}" != "" && "$!{P_WORKGROUPCODE}" != "*")
+							AND	UP.WORKGROUPID = '$!{P_WORKGROUPCODE}'
+						#end
+						#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+							AND	UP.VALIDSTATE = '$!{P_VALIDSTATE}'
+						#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 > 코드 관리 > 세부공정코드관리
+	설		명	: 세부공정코드관리 리스트를 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-04-06
+	주요 변경 로그	:
+	-->
+	<query id="GetProcessdCode" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	UP.PROCESSDID
+						,UP.PROCESSDNAMEKOR
+						,UP.PROCESSDNAMEENG
+						,UP.PROCESSDNAMEJPN
+						,UP.DESCRIPTION
+						,UP.VALIDSTATE
+						,UC.USERNAME AS CREATOR
+						,UP.CREATEDTIME
+						,UM.USERNAME AS MODIFIER
+						,UP.MODIFIEDTIME
+				FROM	UL_PROCESSD UP
+						LEFT OUTER JOIN	SF_USER UC ON UP.CREATOR = UC.USERID
+						LEFT OUTER JOIN SF_USER UM ON UP.MODIFIER = UM.USERID
+				WHERE	1=1
+						#if ("$!{P_CONDITIONVALUE}" != "")
+							AND	UP.PROCESSDNAMEKOR LIKE '%$!{P_CONDITIONVALUE}%'
+							OR	UP.PROCESSDNAMEENG LIKE '%$!{P_CONDITIONVALUE}%'
+							OR	UP.PROCESSDNAMEJPN LIKE '%$!{P_CONDITIONVALUE}%'
+						#end
+						#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+							AND	UP.VALIDSTATE = '$!{P_VALIDSTATE}'
+						#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 > 코드관리 > 창고코드 관리
+	설		명	: 창고코드 정보를 관리한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-03-05
+	주요 변경 로그	:
+	-->
+	<query id="GetListWarehouseCode" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	SW.WAREHOUSEID
+						,ISNULL(DK.DICTIONARYNAME, SW.WAREHOUSENAME)	AS "WAREHOUSENAME$$KO-KR"
+						,ISNULL(DE.DICTIONARYNAME, SW.WAREHOUSENAME)	AS "WAREHOUSENAME$$EN-US"
+						,ISNULL(DJ.DICTIONARYNAME, SW.WAREHOUSENAME)	AS "WAREHOUSENAME$$JA-JP"
+						,SW.WAREHOUSETYPE
+						,SW.DEPARTMENTID
+						,SW.DESCRIPTION
+						,SW.WAREHOUSESEQ
+						,SW.VALIDSTATE
+						,UC.USERNAME AS CREATOR
+						,SW.CREATEDTIME
+						,UM.USERNAME AS MODIFIER
+						,SW.MODIFIEDTIME
+				FROM	SF_WAREHOUSE SW
+						LEFT OUTER JOIN	SF_USER UC ON SW.CREATOR = UC.USERID
+						LEFT OUTER JOIN SF_USER UM ON SW.MODIFIER = UM.USERID
+						LEFT OUTER JOIN SF_DICTIONARY						DK	ON	SW.DICTIONARYID = DK.DICTIONARYID
+																				AND	DK.LANGUAGETYPE = 'ko-KR'
+					    LEFT OUTER JOIN SF_DICTIONARY						DE	ON	SW.DICTIONARYID = DE.DICTIONARYID
+																				AND	DE.LANGUAGETYPE = 'en-US'
+					    LEFT OUTER JOIN SF_DICTIONARY						DJ	ON	SW.DICTIONARYID = DJ.DICTIONARYID		
+																				AND	DJ.LANGUAGETYPE = 'ja-JP'	
+				WHERE	1=1
+						#if ("$!{P_WAREHOUSENAME}" != "")
+							AND(SW.WAREHOUSENAME LIKE '%$!{P_WAREHOUSENAME}%'
+							OR DK.DICTIONARYNAME LIKE '%$!{P_WAREHOUSENAME}%'
+							OR DE.DICTIONARYNAME LIKE '%$!{P_WAREHOUSENAME}%'
+							OR DJ.DICTIONARYNAME LIKE '%$!{P_WAREHOUSENAME}%')
+						#end
+						#if ("$!{P_WAREHOUSETYPE}" != "" && "$!{P_WAREHOUSETYPE}" != "*")
+							AND	SW.WAREHOUSETYPE = '$!{P_WAREHOUSETYPE}'
+						#end
+						#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+							AND	SW.VALIDSTATE = '$!{P_VALIDSTATE}'
+						#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 > 코드관리 > 창고코드(자재창고) 관리
+	설		명	: 창고코드(자재창고) 정보를 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-05-22
+	주요 변경 로그	:
+	-->
+	<query id="GetListMateWarehouseCode" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	WH.WAREHOUSEID
+						,ISNULL(DC1.DICTIONARYNAME, WH.WAREHOUSENAME)							AS "WAREHOUSENAME$$KO-KR"
+					    ,ISNULL(DC2.DICTIONARYNAME, WH.WAREHOUSENAME)							AS "WAREHOUSENAME$$EN-US"
+					    ,ISNULL(DC3.DICTIONARYNAME, WH.WAREHOUSENAME)							AS "WAREHOUSENAME$$JA-JP"
+					    ,ISNULL(DC.DICTIONARYNAME, WH.WAREHOUSENAME)							AS WAREHOUSENAME
+						,WH.WAREHOUSETYPE
+						,WH.DEPARTMENTID
+						,WH.DESCRIPTION
+						,WH.VALIDSTATE 
+						,UC.USERNAME AS CREATOR
+						,WH.CREATEDTIME
+						,UM.USERNAME AS MODIFIER
+						,WH.MODIFIEDTIME
+				FROM	SF_WAREHOUSE WH
+						LEFT OUTER JOIN	SF_USER UC ON WH.CREATOR = UC.USERID
+						LEFT OUTER JOIN SF_USER UM ON WH.MODIFIER = UM.USERID
+						LEFT OUTER JOIN SF_DICTIONARY	DC1	ON	WH.DICTIONARYID			= DC1.DICTIONARYID
+															AND DC1.LANGUAGETYPE		= 'ko-KR'
+						LEFT OUTER JOIN SF_DICTIONARY	DC2	ON	WH.DICTIONARYID			= DC2.DICTIONARYID
+															AND	DC2.LANGUAGETYPE		= 'en-US'
+						LEFT OUTER JOIN SF_DICTIONARY	DC3	ON	WH.DICTIONARYID			= DC3.DICTIONARYID
+															AND	DC3.LANGUAGETYPE		= 'ja-JP'
+						LEFT OUTER JOIN SF_DICTIONARY	DC	ON	WH.DICTIONARYID			= DC.DICTIONARYID
+															AND	DC.LANGUAGETYPE		= '$!{LANGUAGETYPE}'
+				WHERE	1=1
+						AND WH.WAREHOUSETYPE = '0001'
+						AND WH.VALIDSTATE = 'Valid'
+						#if ("$!{P_WAREHOUSENAME}" != "")
+							AND	WH.WAREHOUSENAME LIKE '%$!{P_WAREHOUSENAME}%'
+						#end
+						#if ("$!{P_WAREHOUSETYPE}" != "" && "$!{P_WAREHOUSETYPE}" != "*")
+							AND	WH.WAREHOUSETYPE = '$!{P_WAREHOUSETYPE}'
+						#end
+						#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+							AND	WH.VALIDSTATE = '$!{P_VALIDSTATE}'
+						#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 > 설비점검관리 > 점검항목
+	설		명	: 설비점검항목을 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-04-03
+	주요 변경 로그	: 2020-06-11 한주석 설비점검명 다국어처리
+	-->
+	<query id="GetEquipCheckList" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	sm.MAINTITEMID AS EQUIPCHECKID
+						,ISNULL(DC.DICTIONARYNAME, sm.MAINTITEMNAME) AS EQUIPCHECKNAME
+						,sm.VALIDSTATE
+						,UC.USERNAME AS CREATOR
+						,sm.CREATEDTIME
+						,UM.USERNAME AS MODIFIER
+						,sm.MODIFIEDTIME
+				FROM	SF_MAINTITEM sm
+						LEFT OUTER JOIN	SF_USER UC ON sm.CREATOR = UC.USERID
+						LEFT OUTER JOIN SF_USER UM ON sm.MODIFIER = UM.USERID
+						LEFT OUTER JOIN SF_DICTIONARY 	DC 	ON	sm.DICTIONARYID	= DC.DICTIONARYID 
+															AND DC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE	1=1
+						#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+							AND	sm.VALIDSTATE = '$!{P_VALIDSTATE}'
+						#end
+			]]>
+		</statement>
+	</query>
+	<!-- <query id="GetEquipCheckList" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	UE.EQUIPCHECKID
+						,ISNULL(DC.DICTIONARYNAME, UE.EQUIPCHECKNAME)		AS EQUIPCHECKNAME
+						,UE.EQUIPCHECKNAME
+						,UE.CHECKTYPE
+						,UE.CHECKWAY
+						,UE.CHECKCYCLE
+						,UE.CHECKCOUNT
+						,UE.RESULTWAY
+						,UE.DESCRIPTION
+						,UE.VALIDSTATE
+						,UC.USERNAME AS CREATOR
+						,UE.CREATEDTIME
+						,UM.USERNAME AS MODIFIER
+						,UE.MODIFIEDTIME
+				FROM	UL_EQUIPMENTCHECKLIST UE
+						LEFT OUTER JOIN	SF_USER UC ON UE.CREATOR = UC.USERID
+						LEFT OUTER JOIN SF_USER UM ON UE.MODIFIER = UM.USERID
+						LEFT OUTER JOIN SF_DICTIONARY 	DC 	ON	UE.DICTIONARYID	= DC.DICTIONARYID 
+															AND DC.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+				WHERE	1=1
+						#if ("$!{P_CONDITIONVALUE}" != "")
+							AND	(DC.DICTIONARYNAME LIKE '%$!{P_CONDITIONVALUE}%'
+							OR	UE.EQUIPCHECKNAME  LIKE '%$!{P_CONDITIONVALUE}%')
+						#end
+						#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+							AND	UE.VALIDSTATE = '$!{P_VALIDSTATE}'
+						#end
+			]]>
+		</statement>
+	</query> -->
+	
+	<!--
+	프 로 그 램 명	: 기준정보 > 설비점검관리 > 설비그룹별점검항목
+	설		명	: 설비그룹별 점검항목을 관리한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-04-03
+	주요 변경 로그	: 2020-06-04, 박정훈, UL_EQUIPMENTCHECKLIST의 다국어 QUERY 수정
+				  2020-06-10, 한주석, 조회조건 A.EQUIPGROUPID -> A.EQUIPMENTCLASSID 수정
+	--> 
+	<query id="GetEquipCheckMapp" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	se.EQUIPMENTCLASSID
+						,se.MAINTITEMID AS EQUIPCHECKID
+						,sm.MAINTITEMNAME AS EQUIPCHECKNAME
+						,se.MAINTTYPE AS CHECKTYPE
+						,se.VALIDATIONTYPE AS CHECKWAY
+						,se.MAINTDURATION AS CHECKCOUNT
+						,se.MAINTDURATIONUNIT AS CHECKCYCLE
+						,se.VALIDATIONTYPE AS CHECKWAY
+						,se.RESULTTYPE AS RESULTTYPE
+						,CAST(se.MAINTSEQUENCE AS INT) AS MAINTSEQUENCE
+						,se.VALIDSTATE
+						,UC.USERNAME AS CREATOR
+						,se.CREATEDTIME
+						,UM.USERNAME AS MODIFIER
+						,se.MODIFIEDTIME
+				FROM	SF_EQUIPMENTMAINTITEM se
+						LEFT OUTER JOIN SF_MAINTITEM sm ON se.MAINTITEMID = sm.MAINTITEMID
+						LEFT OUTER JOIN	SF_USER UC ON se.CREATOR = UC.USERID
+						LEFT OUTER JOIN SF_USER UM ON se.MODIFIER = UM.USERID
+				WHERE	1=1
+						#if ("$!{P_EQUIPMENTGROUP}" != "" && "$!{P_EQUIPMENTGROUP}" != "*")
+							AND		se.EQUIPMENTCLASSID = '$!{P_EQUIPMENTGROUP}'
+						#end
+						#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+							AND		se.VALIDSTATE = '$!{P_VALIDSTATE}'
+						#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 > 코드관리 > 작업장별설비코드관리
+	설		명	: 작업장별 설비코드를 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-04-03
+	주요 변경 로그	: 사용안함.
+	-->
+	<query id="GetEquipByArea" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	m.AREAEQUIPMENTID
+						,m.AREAID
+						,(
+							SELECT	CASE WHEN B.DICTIONARYNAME IS NOT NULL THEN  B.DICTIONARYNAME
+								            ELSE A.CODENAME
+								    END
+							FROM	SF_CODE A
+									LEFT JOIN SF_DICTIONARY B ON A.DICTIONARYID = B.DICTIONARYID AND B.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+							WHERE	A.CODECLASSID = 'AreaCode' AND A.CODEID = m.AREAID
+						) AS AREANAME
+						,(SELECT PARENTCODEID FROM SF_CODE WHERE CODEID = m.AREAID) AS AREAGROUPID
+						,(
+							SELECT	CASE WHEN B.DICTIONARYNAME IS NOT NULL THEN  B.DICTIONARYNAME
+								            ELSE A.CODENAME
+								    END
+							FROM	SF_CODE A
+									LEFT JOIN SF_DICTIONARY B ON A.DICTIONARYID = B.DICTIONARYID AND B.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+							WHERE	A.CODECLASSID = 'AreaGroupCode' AND A.CODEID = (SELECT PARENTCODEID FROM SF_CODE WHERE CODEID = m.AREAID)
+						) AS AREAGROUPNAME
+						,m.EQUIPMENTID
+						,eq.EQUIPMENTNAMEKOR
+						,eq.EQUIPMENTNAMEENG
+						,eq.EQUIPMENTNAMEJPN
+						,m.DESCRIPTION
+						,m.VALIDSTATE
+						,UC.USERNAME AS CREATOR
+						,m.CREATEDTIME
+						,UM.USERNAME AS MODIFIER
+						,m.MODIFIEDTIME
+				FROM	UL_EQUIPMENTBYAREA m
+						LEFT JOIN SF_EQUIPMENT eq ON m.EQUIPMENTID = eq.EQUIPMENTID
+						LEFT OUTER JOIN	SF_USER UC ON m.CREATOR = UC.USERID
+						LEFT OUTER JOIN SF_USER UM ON m.MODIFIER = UM.USERID
+				WHERE	1=1
+						#if ("$!{P_AREACODE}" != "" && "$!{P_AREACODE}" != "*")
+							AND	m.AREAID = '$!{P_AREACODE}'
+						#end
+						#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+							AND	m.VALIDSTATE = '$!{P_VALIDSTATE}'
+						#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 > 코드 관리 > 설비별Parameter관리
+	설		명	: 설비별Parameter관리 리스트를 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-03-06
+	주요 변경 로그	: 2020-06-11 한주석 다국어처리(일단 주석처리)
+	-->
+	<query id="GetEquipParameter" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	UE.EQUIPMENTID
+						,UE.PARAMETERID
+				--		,ISNULL(DK.DICTIONARYNAME, UE.PARAMETERNAME)		AS "PARAMETERNAME$$KO-KR"
+				--		,ISNULL(DE.DICTIONARYNAME, UE.PARAMETERNAME)		AS "PARAMETERNAME$$EN-US"
+				--		,ISNULL(DJ.DICTIONARYNAME, UE.PARAMETERNAME)		AS "PARAMETERNAME$$JA-JP"
+						,UE.PARAMETERNAMEKOR
+						,UE.PARAMETERNAMEENG
+						,UE.PARAMETERNAMEJPN
+						,UE.PARAMETERLEVEL
+						,UE.UNIT
+						,UE.DATAFORMAT
+						,UE.LOWERSPECLIMIT
+						,UE.TARGET
+						,UE.UPPERSPECLIMIT
+						,UE.GATHERCYCLE
+						,UE.LIMITTIME
+						,UE.MANAGESTATE
+						,UE.LOWERCONTROLLIMIT
+						,UE.AVERAGEVALUE
+						,UE.UPPERCONTROLLIMIT
+						,UE.SVPARAMETERID
+						,UE.SVRATE
+						,UE.INTERLOCKSTATE
+						,UE.DESCRIPTION
+						,UE.VALIDSTATE
+						,UC.USERNAME AS CREATOR
+						,UE.CREATEDTIME
+						,UM.USERNAME AS MODIFIER
+						,UE.MODIFIEDTIME
+				FROM	UL_EQUIPMENTPARAMETER UE	
+						LEFT OUTER JOIN	SF_USER UC ON UE.CREATOR = UC.USERID
+						LEFT OUTER JOIN SF_USER UM ON UE.MODIFIER = UM.USERID
+			--			LEFT OUTER JOIN SF_DICTIONARY	DK	ON	UE.DICTIONARYID		= DK.DICTIONARYID
+			--												AND DK.LANGUAGETYPE		= 'ko-KR'
+			--			LEFT OUTER JOIN SF_DICTIONARY	DE	ON	UE.DICTIONARYID		= DE.DICTIONARYID
+			--												AND	DE.LANGUAGETYPE		= 'en-US'
+			--			LEFT OUTER JOIN SF_DICTIONARY	DJ	ON	UE.DICTIONARYID		= DJ.DICTIONARYID
+			--												AND	DJ.LANGUAGETYPE		= 'ja-JP'						
+				WHERE	1=1
+						#if ("$!{P_EQUIPMENTID}" != "")
+							AND	UE.EQUIPMENTID = '$!{P_EQUIPMENTID}'
+						#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 > 코드 관리 > 설비별Parameter관리
+	설		명	: 설비별Parameter관리 리스트를 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-03-06
+	주요 변경 로그	: 2020-06-11 한주석 다국어처리(일단 주석처리)
+	-->
+	<query id="GetEquipParameter" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	UE.PARAMETERID
+				--		,ISNULL(DK.DICTIONARYNAME, UE.PARAMETERNAME)		AS "PARAMETERNAME$$KO-KR"
+				--		,ISNULL(DE.DICTIONARYNAME, UE.PARAMETERNAME)		AS "PARAMETERNAME$$EN-US"
+				--		,ISNULL(DJ.DICTIONARYNAME, UE.PARAMETERNAME)		AS "PARAMETERNAME$$JA-JP"
+						,UE.PARAMETERNAMEKOR
+						,UE.PARAMETERNAMEENG
+						,UE.PARAMETERNAMEJPN
+						,UE.PARAMETERLEVEL
+						,UE.UNIT
+						,UE.DATAFORMAT
+						,UE.LOWERSPECLIMIT
+						,UE.TARGET
+						,UE.UPPERSPECLIMIT
+						,UE.GATHERCYCLE
+						,UE.LIMITTIME
+						,UE.MANAGESTATE
+						,UE.LOWERCONTROLLIMIT
+						,UE.AVERAGEVALUE
+						,UE.UPPERCONTROLLIMIT
+						,UE.SVPARAMETERID
+						,UE.SVRATE
+						,UE.INTERLOCKSTATE
+						,UE.DESCRIPTION
+						,UE.VALIDSTATE
+						,UC.USERNAME AS CREATOR
+						,UE.CREATEDTIME
+						,UM.USERNAME AS MODIFIER
+						,UE.MODIFIEDTIME
+				FROM	UL_EQUIPMENTPARAMETER UE	
+						LEFT OUTER JOIN	SF_USER UC ON UE.CREATOR = UC.USERID
+						LEFT OUTER JOIN SF_USER UM ON UE.MODIFIER = UM.USERID
+			--			LEFT OUTER JOIN SF_DICTIONARY	DK	ON	UE.DICTIONARYID		= DK.DICTIONARYID
+			--												AND DK.LANGUAGETYPE		= 'ko-KR'
+			--			LEFT OUTER JOIN SF_DICTIONARY	DE	ON	UE.DICTIONARYID		= DE.DICTIONARYID
+			--												AND	DE.LANGUAGETYPE		= 'en-US'
+			--			LEFT OUTER JOIN SF_DICTIONARY	DJ	ON	UE.DICTIONARYID		= DJ.DICTIONARYID
+			--												AND	DJ.LANGUAGETYPE		= 'ja-JP'						
+				WHERE	1=1
+						#if ("$!{P_EQUIPMENTID}" != "")
+							AND	UE.EQUIPMENTID = '$!{P_EQUIPMENTID}'
+						#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 > 항목관리 > 수입검사항목
+	설		명	: 수입검사항목을 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-04-07
+	주요 변경 로그	:
+	-->
+	<query id="GetIqcInspectionList" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	UI.ITEMID
+					    ,UI.ITEMNAME
+					    ,IIF(LEN(UI.FILEDATA) > 0,'Yes','No') AS FILESTATE
+					    ,UI.FILENAME
+					    ,CONVERT(VARCHAR(MAX), CONVERT(VARBINARY(MAX), UI.FILEDATA)) AS FILEDATA
+						,UI.DESCRIPTION
+						,UC.USERNAME AS CREATOR
+						,UI.CREATEDTIME
+						,UM.USERNAME AS MODIFIER
+						,UI.MODIFIEDTIME
+				FROM	UL_IQCINSPLIST UI	
+						LEFT OUTER JOIN	SF_USER UC ON UI.CREATOR = UC.USERID
+						LEFT OUTER JOIN SF_USER UM ON UI.MODIFIER = UM.USERID
+				WHERE	1=1
+						#if ("$!{P_CONDITIONVALUE}" != "")
+						AND	UI.ITEMID LIKE '%$!{P_CONDITIONVALUE}%'
+						OR	UI.ITEMNAME LIKE '%$!{P_CONDITIONVALUE}%'
+						OR	UI.DESCRIPTION LIKE '%$!{P_CONDITIONVALUE}%'
+						OR	UI.FILENAME LIKE '%$!{P_CONDITIONVALUE}%'
+						#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 > 항목관리 > 작업메뉴얼(master)
+	설		명	: 작업메뉴얼을 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-04-08
+	주요 변경 로그	:
+	-->
+	<query id="GetWorkManualMaster" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	M.WORKMANUALID
+						,M.WORKMANUALNAME
+						,M.PROCESSID
+						,ISNULL(DC1.DICTIONARYNAME, P.PROCESSNAME)							AS "PROCESSNAME$$KO-KR"
+					    ,ISNULL(DC2.DICTIONARYNAME, P.PROCESSNAME)							AS "PROCESSNAME$$EN-US"
+					    ,ISNULL(DC3.DICTIONARYNAME, P.PROCESSNAME)							AS "PROCESSNAME$$JA-JP"
+						,P.PROCESSNAMEENG
+						,P.PROCESSNAMEJPN
+						,M.AREAID
+						,M.WORKGROUPID
+						,M.DESCRIPTION
+						,UC.USERNAME AS CREATOR
+						,M.CREATEDTIME
+						,UM.USERNAME AS MODIFIER
+						,M.MODIFIEDTIME
+				FROM	UL_WORKMANUALMASTER M
+						LEFT JOIN UL_PROCESS P ON M.PROCESSID = P.PROCESSID
+						LEFT OUTER JOIN	SF_USER UC ON M.CREATOR = UC.USERID
+						LEFT OUTER JOIN SF_USER UM ON M.MODIFIER = UM.USERID
+						LEFT OUTER JOIN SF_DICTIONARY	DC1	ON	P.DICTIONARYID			= DC1.DICTIONARYID
+															AND DC1.LANGUAGETYPE		= 'ko-KR'
+						LEFT OUTER JOIN SF_DICTIONARY	DC2	ON	P.DICTIONARYID			= DC2.DICTIONARYID
+															AND	DC2.LANGUAGETYPE		= 'en-US'
+						LEFT OUTER JOIN SF_DICTIONARY	DC3	ON	P.DICTIONARYID			= DC3.DICTIONARYID
+															AND	DC3.LANGUAGETYPE		= 'ja-JP'
+						WHERE	1=1
+						#if ("$!{P_PROCESSLARGE}" != "" && "$!{P_PROCESSLARGE}" != "*")
+							AND	(SELECT PARENTPROCESSID FROM UL_PROCESS WHERE PROCESSID = M.PROCESSID) = '$!{P_PROCESSLARGE}'
+						#end
+						#if ("$!{P_AREACODE}" != "" && "$!{P_AREACODE}" != "*")
+							AND	M.AREAID = '$!{P_AREACODE}'
+						#end
+						#if ("$!{P_WORKGROUPCODE}" != "" && "$!{P_WORKGROUPCODE}" != "*")
+							AND	M.WORKGROUPID = '$!{P_WORKGROUPCODE}'
+						#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 > 항목관리 > 작업메뉴얼(Detail)
+	설		명	: 작업메뉴얼을 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-04-08
+	주요 변경 로그	:
+	-->
+	<query id="GetWorkManualDetail" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	D.WORKMANUALID
+						,D.REVISIONID
+						,D.REVISIONNAME
+						,IIF(LEN(D.FILEDATA) > 0,'Yes','No') AS FILESTATE
+					    ,D.FILENAME
+					    ,CONVERT(VARCHAR(MAX), CONVERT(VARBINARY(MAX), D.FILEDATA)) AS FILEDATA
+						,D.DESCRIPTION
+						,UC.USERNAME AS CREATOR
+						,D.CREATEDTIME
+						,UM.USERNAME AS MODIFIER
+						,D.MODIFIEDTIME
+				FROM	UL_WORKMANUALDETAIL D	
+						LEFT OUTER JOIN	SF_USER UC ON D.CREATOR = UC.USERID
+						LEFT OUTER JOIN SF_USER UM ON D.MODIFIER = UM.USERID
+				WHERE	1=1
+						#if ("$!{P_WORKMANUALID}" != "")
+							AND	D.WORKMANUALID = '$!{P_WORKMANUALID}'
+						#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 > 항목관리 > 작업메뉴얼(최신Rev)
+	설		명	: 작업메뉴얼을 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-04-09
+	주요 변경 로그	:
+	-->
+	<query id="GetWorkManual" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	m.*
+						,p.PROCESSNAMEKOR
+						,p.PROCESSNAMEENG
+						,p.PROCESSNAMEJPN
+						,d.FILENAME
+						,CONVERT(VARCHAR(MAX), CONVERT(VARBINARY(MAX), d.FILEDATA)) AS FILEDATA
+						,d.DESCRIPTION
+				FROM	(
+							SELECT	m.WORKMANUALID
+									,m.PROCESSID
+									,MAX(d.REVISIONID) AS REVISIONID
+							FROM	UL_WORKMANUALMASTER m
+									LEFT JOIN UL_WORKMANUALDETAIL d ON m.WORKMANUALID = d.WORKMANUALID
+							GROUP BY m.WORKMANUALID, m.PROCESSID
+						)  m
+						LEFT JOIN UL_PROCESS p ON m.PROCESSID = p.PROCESSID
+						LEFT JOIN UL_WORKMANUALDETAIL d ON m.WORKMANUALID = d.WORKMANUALID AND m.REVISIONID = d.REVISIONID
+				WHERE	1=1	
+						#if ("$!{P_PROCESSLARGE}" != "" && "$!{P_PROCESSLARGE}" != "*")
+							AND (SELECT PARENTPROCESSID FROM UL_PROCESS WHERE PROCESSID = m.PROCESSID) = '$!{P_PROCESSLARGE}'
+						#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 > 라우팅관리 > 라우팅마스터
+	설		명	: 라우팅마스터 데이터를 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-04-14
+	주요 변경 로그	:
+	-->
+	<query id="GetRoutingMaster" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	m.ROUTINGID
+						,m.ORDERTYPE
+						,m.ROUTINGNAMEKOR
+						,m.ROUTINGNAMEENG
+						,m.ROUTINGNAMEJPN
+						,m.PROCESSID
+						,m.MODELID
+						,(SELECT COUNT(ITEMID) FROM UL_ROUTINGITEM WHERE ROUTINGID = m.ROUTINGID) AS ITEMCNT
+						,m.LOTUNIT
+						,m.ITEMASSETCATEGORY
+						,m.WORKGROUPID
+						,m.DESCRIPTION
+						,m.VALIDSTATE
+						,UC.USERNAME AS CREATOR
+						,m.CREATEDTIME
+						,UM.USERNAME AS MODIFIER
+						,m.MODIFIEDTIME
+				FROM	UL_ROUTINGMASTER m
+						LEFT OUTER JOIN	SF_USER UC ON m.CREATOR = UC.USERID
+						LEFT OUTER JOIN SF_USER UM ON m.MODIFIER = UM.USERID
+				WHERE	1=1
+						#if ("$!{P_ORDERTYPE}" != "" && "$!{P_ORDERTYPE}" != "*")
+							AND	m.ORDERTYPE = '$!{P_ORDERTYPE}'
+						#end
+						#if ("$!{P_PROCESSLARGE}" != "" && "$!{P_PROCESSLARGE}" != "*")
+							AND	m.PROCESSID = '$!{P_PROCESSLARGE}'
+						#end
+						#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+							AND	m.VALIDSTATE = '$!{P_VALIDSTATE}'
+						#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 > 라우팅관리 > 라우팅품목
+	설		명	: 라우팅품목 데이터를 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-04-14
+	주요 변경 로그	:
+	-->
+	<query id="GetRoutingItem" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	ri.ROUTINGID
+						,ri.ITEMID
+						,ui.PRODUCTDEFNAME
+						,ri.RESULTSTATE
+						,ri.OUTSOURCESTATE
+						,ri.VALIDSTATE
+						,ri.PROCESSDSTATE
+						,ri.STANDWORKTIME
+						,UC.USERNAME AS CREATOR
+						,ri.CREATEDTIME
+						,UM.USERNAME AS MODIFIER
+						,ri.MODIFIEDTIME
+				FROM	UL_ROUTINGITEM ri
+						LEFT JOIN SF_PRODUCTDEFINITION ui ON ri.ITEMID = ui.PRODUCTDEFID
+						LEFT OUTER JOIN	SF_USER UC ON ri.CREATOR = UC.USERID
+						LEFT OUTER JOIN SF_USER UM ON ri.MODIFIER = UM.USERID
+				WHERE	1=1
+						#if ("$!{P_ROUTINGID}" != "")
+							AND	ri.ROUTINGID = '$!{P_ROUTINGID}'
+						#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 > 라우팅관리 > 라우팅실적입력항목
+	설		명	: 라우팅실적입력항목 데이터를 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-04-14
+	주요 변경 로그	: 개발중....
+	-->
+	<query id="GetRoutingResult" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	SG.PROCESSSEGMENTID
+					,	ISNULL(DC1.DICTIONARYNAME, SG.PROCESSSEGMENTNAME)			AS PROCESSSEGMENTNAMEKOR
+					,	DC2.DICTIONARYNAME											AS PROCESSSEGMENTNAMEENG
+					,	DC3.DICTIONARYNAME											AS PROCESSSEGMENTNAMEJPN
+					,	SG.DESCRIPTION
+					,	SG.VALIDSTATE
+					,	UC1.USERNAME 												AS CREATOR
+					,	SG.CREATEDTIME
+					,	UC2.USERNAME 												AS MODIFIER
+					,	SG.MODIFIEDTIME
+				FROM	SF_PROCESSSEGMENT		SG
+				LEFT OUTER JOIN UL_PROCESS 		PR	ON	SG.PROCESSSEGMENTID 	= PR.PROCESSID
+				LEFT OUTER JOIN	SF_USER 		UC1	ON	SG.CREATOR 				= UC.USERID
+				LEFT OUTER JOIN SF_USER 		UC2	ON	SG.MODIFIER 			= UM.USERID
+				LEFT OUTER JOIN SF_DICTIONARY	DC1	ON	SG.DICTIONARYID			= DC1.DICTIONARYID
+													AND DC1.LANGUAGETYPE		= 'ko-KR'
+				LEFT OUTER JOIN SF_DICTIONARY	DC2	ON	SG.DICTIONARYID			= DC2.DICTIONARYID
+													AND	DC2.LANGUAGETYPE		= 'en-US'
+				LEFT OUTER JOIN SF_DICTIONARY	DC3	ON	SG.DICTIONARYID			= DC3.DICTIONARYID
+													AND	DC3.LANGUAGETYPE		= 'ja-JP'
+				WHERE	1=1
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 > 코드 관리 > 작업장(공정)별 작업자 정보
+	설		명	: 작업장정보 리스트를 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-03-05
+	주요 변경 로그	:
+	-->
+	<query id="GetListArea" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	SC.CODEID AS AREACODE
+						,CASE WHEN SD.DICTIONARYNAME is Not Null THEN SD.DICTIONARYNAME ELSE SC.CODENAME END AS AREANAME
+				
+				FROM	SF_CODE	SC
+						LEFT JOIN SF_DICTIONARY SD ON SC.DICTIONARYID = SD.DICTIONARYID AND SD.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+				WHERE	1=1
+						AND	SC.CODECLASSID = 'AREACODE'
+				
+						#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+							AND	SC.VALIDSTATE = '$!{P_VALIDSTATE}'
+						#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 공정대분류 콤보박스 리스트
+	설		명	: 공정대분류 콤보리스트를 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-04-08
+	주요 변경 로그	: WHERE	P.PARENTPROCESSID = '' 삭제 - JYEE
+	--> 
+	<query id="GetComboProcessLargeCategory" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	P.PROCESSID AS CODEID
+						,(
+							CASE WHEN '$!{P_LANGUAGETYPE}' = 'ko-KR' THEN P.PROCESSNAMEKOR
+								WHEN '$!{P_LANGUAGETYPE}' = 'en-US' THEN P.PROCESSNAMEENG
+								WHEN '$!{P_LANGUAGETYPE}' = 'ja-JP' THEN P.PROCESSNAMEJPN
+							END
+						) AS CODENAME
+				FROM	UL_PROCESS	P
+				ORDER BY P.PROCESSID ASC
+			]]>
+		</statement>
+	</query>
+	<!--  
+	<query id="GetComboProcessLargeCategory" version="00001">
+		<statement>
+			<![CDATA[		
+				SELECT	M.CODEID
+						,M.CODENAME
+				FROM	(
+							SELECT	P.PROCESSID AS CODEID
+									,P.PROCESSNAMEKOR AS CODENAME
+									,'ko-KR' AS LANGUAGETYPE
+							FROM	UL_PROCESS	P
+							WHERE	P.PARENTPROCESSID = ''
+									AND P.VALIDSTATE = 'Valid'
+							UNION ALL
+							SELECT	P.PROCESSID AS CODEID
+									,P.PROCESSNAMEENG AS CODENAME
+									,'en-US' AS LANGUAGETYPE
+							FROM	UL_PROCESS	P
+							WHERE	P.PARENTPROCESSID = ''
+									AND P.VALIDSTATE = 'Valid'
+							UNION ALL
+							SELECT	P.PROCESSID AS CODEID
+									,P.PROCESSNAMEJPN AS CODENAME
+									,'ja-JP' AS LANGUAGETYPE
+							FROM	UL_PROCESS	P
+							WHERE	P.PARENTPROCESSID = ''
+									AND P.VALIDSTATE = 'Valid'
+						) AS M
+				WHERE	1=1
+						AND M.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+				ORDER BY M.CODEID ASC
+			]]>
+		</statement>
+	</query>
+	-->
+	
+	<!--
+	프 로 그 램 명	: Equipment 콤보박스 리스트
+	설		명	: 설비 콤보리스트를 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-04-09
+	주요 변경 로그	: 2020-07-02 정승원 IFSTATE 추가
+	-->
+	<query id="GetComboEquipment" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	EQUIPMENTID AS CODEID
+						,EQUIPMENTNAME AS CODENAME
+				FROM	SF_EQUIPMENT
+				WHERE	1=1
+						AND VALIDSTATE = 'Valid'
+						#if ("$!{P_AREACODE}" != "" && "$!{P_AREACODE}" != "*")
+							AND	AREAID = '$!{P_AREACODE}'
+						#end
+						#if("$!{IFSTATE}" != "")
+							AND IFSTATE = '$!{IFSTATE}' 
+						#end
+						#if("$!{P_EQUIPMENTGROUP}" != "")
+							AND EQUIPMENTCLASSID = '$!{P_EQUIPMENTGROUP}' 
+						#end
+						#if("$!{P_ISDAILYCHECK}" != "")
+							AND ISDAILYCHECK = 'Y' 
+						#end
+						
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: CellGroup 콤보박스 리스트
+	설		명	: cell그룹 콤보박스 리스트를 조회
+	작	성	자	: jylee
+	작	성	일	: 2020-04-14
+	주요 변경 로그	:
+	-->
+	<query id="GetComboCellGroup" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT 
+					CELLGROUPID AS CODEID,
+					CELLGROUPNAME AS CODENAME
+				FROM UL_CELLGROUP
+				WHERE	1=1
+					AND VALIDSTATE = 'Valid'
+				#if ("$!{P_WAREHOUSEID}" != "")
+					AND	WAREHOUSEID = '$!{P_WAREHOUSEID}'
+				#end
+			]]>
+		</statement>
+	</query>
+	
+		<!--
+	프 로 그 램 명	: 기준정보 - 창고관리 - 창고CELL관리
+	설		명	: 마스터그리드 출력
+	작	성	자	: jylee
+	작	성	일	: 2020-04-14
+	주요 변경 로그	: 2020-06-10 | JYLEE | 쿼리 전체 수정
+				  2020-06-15 | JYLEE | 테이블 변경 반영
+	-->
+	<query id="GetCellGroupMasterList" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			--id : GetCellGroupMasterList
+			--version : 00001
+			
+			
+				SELECT  
+					CELLG.CELLGROUPID 			AS CELLGROUPID 								-- CELL그룹ID
+					,	CELLG.CELLGROUPNAME 	AS CELLGROUPNAME 							-- CELL그룹명
+					,	CELLG.TEAMID 			AS TEAM 									-- TEAMID
+					,	ISNULL(DIC3.DICTIONARYNAME, TEAM.TEAMNAME) AS TEAMNAME 				-- TEAMNAME
+					,	CELLG.WAREHOUSEID 		AS WAREHOUSEID 								-- 창고ID
+					,	ISNULL(DIC2.DICTIONARYNAME, WAREH.WAREHOUSENAME) AS WAREHOUSENAME 	-- 창고명
+					,	CELLG.AREAID 			AS AREAID 									-- AREAID
+					,	CELLG.TYPE 			 	AS TYPE										-- TYPEID
+					,	ISNULL(DIC.DICTIONARYNAME, CODE.CODENAME)AS TYPENAME 				-- TYPE
+					,	CELLG.DESCRIPTION		AS DESCRIPTION								-- 설명
+					,	CELLG.MAINUSERID     	AS MAINUSERID 								-- 담당자ID(정)
+					,	USM.USERNAME   			AS MAINUSERNAME 							-- 담당자명 (정)
+					,	CELLG.SUBUSERID		 	AS SUBUSERID 								-- 담당자ID(부)
+					,	USS.USERNAME	 			AS SUBUSERNAME 							-- 담당자명(부)
+					,	CELLG.VALIDSTATE	 	AS VALIDSTATE 								-- 유효상태
+					,	UC.USERNAME			 	AS CREATOR 									-- 생성자
+					,	CELLG.CREATEDTIME	 	AS CREATEDTIME 								-- 생성일
+					,	UM.USERNAME			 	AS MODIFIER 								-- 수정자
+					,	CELLG.MODIFIEDTIME	 	AS MODIFIEDTIME 							-- 수정일
+				FROM 	UL_CELLGROUP CELLG
+				LEFT JOIN SF_USER UC ON CELLG.CREATOR = UC.USERID
+				LEFT JOIN SF_USER UM ON CELLG.MODIFIER = UM.USERID
+				LEFT JOIN SF_USER USM ON CELLG.MAINUSERID = USM.USERID
+				LEFT JOIN SF_USER USS ON CELLG.SUBUSERID = USS.USERID
+				LEFT JOIN SF_WAREHOUSE WAREH ON WAREH.WAREHOUSEID = CELLG.WAREHOUSEID
+				LEFT JOIN CT_TEAM TEAM ON TEAM.TEAMID = CELLG.TEAMID
+				LEFT JOIN SF_CODE CODE ON CODE.CODEID = CELLG.TYPE AND CODE.CODECLASSID = 'RackKeepDivision'
+																	AND CODE.VALIDSTATE = 'Valid'
+				LEFT JOIN SF_DICTIONARY DIC ON DIC.DICTIONARYID = CODE.DICTIONARYID 
+															AND	DIC.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+															AND DIC.VALIDSTATE = 'Valid'
+				LEFT JOIN SF_DICTIONARY DIC2 ON DIC2.DICTIONARYID = WAREH.DICTIONARYID 
+															AND	DIC2.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+															AND DIC2.VALIDSTATE = 'Valid'
+				LEFT JOIN SF_DICTIONARY DIC3 ON DIC3.DICTIONARYID = TEAM.DICTIONARYID 
+															AND	DIC3.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+															AND DIC3.VALIDSTATE = 'Valid'
+				WHERE 	1 = 1  
+				#if ("$!{P_WAREHOUSE}" != "" && "$!{P_WAREHOUSE}" != "*")
+				AND		WAREH.WAREHOUSEID = '$!{P_WAREHOUSE}'
+				#end
+				#if ("$!{P_TEAM}" != "" && "$!{P_TEAM}" != "*")
+				AND		TEAM.TEAMID  = '$!{P_TEAM}'
+				#end
+				#if ("$!{P_CELLGROUPID}" != "" && "$!{P_CELLGROUPID}" != "*")
+				AND		CELLG.CELLGROUPID = '$!{P_CELLGROUPID}'
+				#end
+				#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+				AND		CELLG.VALIDSTATE = '$!{P_VALIDSTATE}'
+				#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 - 창고관리 - 창고CELL관리
+	설		명	: 셀관리 서브그리드 출력
+	작	성	자	: jylee
+	작	성	일	: 2020-04-14
+	주요 변경 로그	: 2020-04-21 랙관리 => 셀관리
+				  2020-06-05 쿼리수정 | scmo
+				  2020-06-11 LOCATION 추가, | JYLEE
+				  2020-06-15 ITEM => CONSUMABLE | JYLEE
+	-->
+	<query id="GetCellList" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			--id : GetCellList
+			--version : 00001
+			
+				SELECT 	
+						CELL.CELLID 					AS CELLID 				-- 셀ID
+						,	CELL.CELLNAME 				AS CELLNAME 			-- 셀명
+						,	CELL.CELLGROUPID 			AS CELLGROUPID 			-- 셀그룹ID
+						,	GRP.CELLGROUPNAME 			AS CELLGROUPNAME 		-- 셀그룹명
+						,	CELL.CONSUMABLEDEFID 		AS ITEMID 				-- 품목ID
+						,	CON.PARTNUMBER				AS PARTNUMBER
+						,	CON.CONSUMABLEDEFNAME 		AS ITEMNAME 			-- 품목명
+						,	CELL.QTY 					AS QTY 					-- 수량
+						,	CELL.INTIME 				AS INTIME 				-- 최근입고시간
+						,	CELL.INQTY 					AS INQTY 				-- 최근입고수량
+						,	CELL.OUTTIME 				AS OUTTIME 				-- 최근출고시간
+						,	CELL.OUTQTY 				AS OUTQTY 				-- 최근출고수량
+						,	CELL.VALIDSTATE 			AS VALIDSTATE 			-- 유효상태
+						,	CELL.LOCATION 				AS LOCATION 			-- 위치(간반)
+						,	CELL.DISPLAYSEQUENCE 		AS DISPLAYSEQUENCE      -- 표시순서
+						,	UC.CREATOR 					AS CREATOR 				-- 생성자
+						,	CELL.CREATEDTIME 			AS CREATEDTIME 			-- 생성일
+						,	UM.MODIFIER 				AS MODIFIER 			-- 수정자
+						,	CELL.MODIFIEDTIME 			AS MODIFIEDTIME 		-- 수정일
+				FROM 	UL_CELL CELL
+						LEFT JOIN UL_CELLGROUP GRP ON CELL.CELLGROUPID = GRP.CELLGROUPID
+						LEFT JOIN SF_CONSUMABLEDEFINITION CON ON CON.CONSUMABLEDEFID = CELL.CONSUMABLEDEFID
+						LEFT OUTER JOIN	SF_USER UC ON CELL.CREATOR = UC.USERID
+						LEFT OUTER JOIN SF_USER UM ON CELL.MODIFIER = UM.USERID
+				WHERE 	1=1
+						#if ("$!{P_CELLGROUPID}" != "" && "$!{P_CELLGROUPID}" !="*")
+							AND	CELL.CELLGROUPID = '$!{P_CELLGROUPID}'
+						#end
+						#if ("$!{P_ITEMCODE}" != "")
+							AND CON.PARTNUMBER= '$!{P_ITEMCODE}'
+						#end
+						ORDER BY CELL.DISPLAYSEQUENCE
+						
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: Area 콤보박스 리스트
+	설		명	: Area 콤보리스트를 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-03-04
+	주요 변경 로그	:
+	-->
+	<query id="GetComboArea" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	SC.CODEID AS CODEID
+						,CASE WHEN SD.DICTIONARYNAME is Not Null THEN SD.DICTIONARYNAME ELSE SC.CODENAME END AS CODENAME
+				
+				FROM	SF_CODE	SC
+						LEFT JOIN SF_DICTIONARY SD ON SC.DICTIONARYID = SD.DICTIONARYID AND SD.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+				WHERE	1=1
+						AND	SC.CODECLASSID = 'AREACODE'
+						AND	SC.VALIDSTATE = 'Valid'
+			]]>
+		</statement>
+	</query>
+	<!--
+	프 로 그 램 명	: 창고 콤보박스 리스트
+	설		명	: 창고 콤보리스트를 조회한다.
+	작	성	자	: jylee
+	작	성	일	: 2020-04-21
+	주요 변경 로그	: 2020-05-25 scmo 수정
+	-->
+	<query id="GetComboWarehouse" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT 
+						sw.WAREHOUSEID CODEID
+						,ISNULL(dic.DICTIONARYNAME, sw.WAREHOUSENAME) AS CODENAME
+				FROM 	SF_WAREHOUSE sw
+						LEFT JOIN SF_DICTIONARY dic ON dic.DICTIONARYID = sw.DICTIONARYID
+													AND dic.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE	1=1
+						AND sw.VALIDSTATE = 'Valid'
+			]]>
+		</statement>
+	</query>
+	
+    <!--
+	프 로 그 램 명	: 기준정보 - 코드관리 - 스펙관리
+	설		명	: 스펙관리 그리드 리스트 출력
+	작	성	자	: jylee
+	작	성	일	: 2020-04-30
+	주요 변경 로그	: 
+	-->
+	<query id="GetSpecCode" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	SP.SPECID
+						,SP.SPECNAMEKOR
+						,SP.SPECNAMEENG
+						,SP.SPECNAMEJPN
+						,SP.DESCRIPTION
+						,SP.VALIDSTATE
+						,UC.USERNAME AS CREATOR
+						,SP.CREATEDTIME
+						,UM.USERNAME AS MODIFIER
+						,SP.MODIFIEDTIME
+				FROM	UL_SPECCODE SP
+						LEFT OUTER JOIN	SF_USER UC ON SP.CREATOR = UC.USERID
+						LEFT OUTER JOIN SF_USER UM ON SP.MODIFIER = UM.USERID
+				WHERE	1=1
+						#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+							AND	SP.VALIDSTATE = '$!{P_VALIDSTATE}'
+						#end
+			]]>
+		</statement>
+	</query>
+	 <!--
+	프 로 그 램 명	: 기준정보 - 코드관리 - 기종관리
+	설		명	: 기종 리스트 출력
+	작	성	자	: jylee
+	작	성	일	: 2020-05-04
+	주요 변경 로그	: 
+	-->
+	<query id="GetModelCode" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT
+					UL.MODELID AS MODELID,
+					UL.MODELNAMEKOR AS MODELNAMEKOR,
+					UL.MODELNAMEENG AS MODELNAMEENG,
+					UL.MODELNAMEJPN AS MODELNAMEJPN,
+					UL.DESCRIPTION AS DESCRIPTION,
+					UL.VALIDSTATE AS VALIDSTATE,
+					UC.USERNAME AS CREATOR,
+					UL.CREATEDTIME AS CREATEDTIME,
+					UM.USERNAME AS MODIFIER,
+					UL.MODIFIEDTIME AS MODIFIEDTIME
+				FROM UL_MODEL UL
+					LEFT OUTER JOIN	SF_USER UC ON UL.CREATOR = UC.USERID
+					LEFT OUTER JOIN SF_USER UM ON UL.MODIFIER = UM.USERID
+			]]>
+		</statement>
+	</query>
+		 <!--
+	프 로 그 램 명	: 기준정보 - 코드관리 - 기종스펙맵핑
+	설		명	: 매핑리스트 출력
+	작	성	자	: jylee
+	작	성	일	: 2020-05-04
+	주요 변경 로그	: 
+	-->
+	<query id="GetModelSpecList" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT
+					UL.MODELID AS MODELID,
+					UL.MODELNAME AS MODELNAME,
+					UL.SPECID AS SPECID,
+					UL.SPECNAME AS SPECNAME,
+					UL.DESCRIPTION AS DESCRIPTION,
+					UL.VALIDSTATE AS VALIDSTATE,
+					UC.USERNAME AS CREATOR,
+					UL.CREATEDTIME AS CREATEDTIME,
+					UM.USERNAME AS MODIFIER,
+					UL.MODIFIEDTIME AS MODIFIEDTIME
+				FROM UL_MODELMAPPING UL
+					LEFT OUTER JOIN	SF_USER UC ON UL.CREATOR = UC.USERID
+					LEFT OUTER JOIN SF_USER UM ON UL.MODIFIER = UM.USERID
+			]]>
+		</statement>
+	</query>
+	<!--
+	프 로 그 램 명	: 기준정보 - 코드관리 - 기종품목맵핑
+	설		명	: 매핑리스트 출력
+	작	성	자	: jylee
+	작	성	일	: 2020-05-06
+	주요 변경 로그	: 
+	-->
+	<query id="GetModelItemList" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT
+					UL.MODELID AS MODELID,
+					UL.MODELNAME AS MODELNAME,
+					UL.ITEMID AS ITEMID,
+					UL.ITEMNAME AS ITEMNAME,
+					UL.ITEMSTANDARD AS ITEMSTANDARD,
+					UL.ITEMASSETCATEGORY AS ITEMASSETCATEGORY,
+					UL.DOMESTICFOREIGN AS DOMESTICFOREIGN,
+					UL.VALIDSTATE AS VALIDSTATE,
+					UC.USERNAME AS CREATOR,
+					UL.CREATEDTIME AS CREATEDTIME,
+					UM.USERNAME AS MODIFIER,
+					UL.MODIFIEDTIME AS MODIFIEDTIME
+				FROM UL_MODELITEMMAPPING UL
+					LEFT OUTER JOIN	SF_USER UC ON UL.CREATOR = UC.USERID
+					LEFT OUTER JOIN SF_USER UM ON UL.MODIFIER = UM.USERID
+			]]>
+		</statement>
+	</query>
+	<!--
+	프 로 그 램 명	: 기준정보 - 공정편성 - 작업장(공정)별 사용자 관리
+	설		명	: 화면 리스트 출력
+	작	성	자	: jylee
+	작	성	일	: 2020-05-05
+	주요 변경 로그	:
+	-->
+	<query id="GetUserInfoByAreaList" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT
+					UL.AREAID AS AREAID,
+					UL.PROCESSID AS PROCESSID,
+					UL.USERID AS USERID,
+					UL.USERNAME AS USERNAME,
+					UL.POSITION AS POSITION,
+					UL.TEAM AS TEAM,
+					UC.USERNAME AS CREATOR,
+					UL.CREATEDTIME AS CREATEDTIME,
+					UM.USERNAME AS MODIFIER,
+					UL.MODIFIEDTIME AS MODIFIEDTIME,
+					UL.VALIDSTATE AS VALIDSTATE
+				FROM UL_USERINFOBYAREA UL
+					LEFT OUTER JOIN	SF_USER UC ON UL.CREATOR = UC.USERID
+					LEFT OUTER JOIN SF_USER UM ON UL.MODIFIER = UM.USERID
+				WHERE 1=1
+						#if ("$!{P_AREACODE}" != "" && "$!{P_AREACODE}" != "*")
+							AND	UL.AREAID = '$!{P_AREACODE}'
+						#end
+						#if ("$!{P_PROCESSCODE}" != "" && "$!{P_PROCESSCODE}" != "*")
+							AND	UL.PROCESSID = '$!{P_PROCESSCODE}'
+						#end
+						#if ("$!{P_TEAM}" != "" && "$!{P_TEAM}" != "*")
+							AND	UL.TEAM = '$!{P_TEAM}'
+						#end
+						#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+							AND	UL.VALIDSTATE = '$!{P_VALIDSTATE}'
+						#end
+
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 - 공정편성 - 품목별표준공수관리
+	설		명	: 관리 리스트 출력
+	작	성	자	: jylee
+	작	성	일	: 2020-05-05
+	주요 변경 로그	: 
+	-->
+	<query id="GetScopeMgtList" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT
+					UL.ITEMID AS ITEMID,
+					UL.ITEMNAME AS ITEMNAME,
+					UL.MODELNAME AS MODELNAME,
+					UL.DRAWINGNUMBER AS DRAWINGNUMBER,
+					UL.PROCESSID AS PROCESSID,
+					UL.TEAM AS TEAM,
+					UL.SCOPE AS SCOPE,
+					UL.VALIDSTATE AS VALIDSTATE,
+					UC.USERNAME AS CREATOR,
+					UL.CREATEDTIME AS CREATEDTIME,
+					UM.USERNAME AS MODIFIER,
+					UL.MODIFIEDTIME AS MODIFIEDTIME
+				FROM UL_SCOPEBYITEM UL
+					LEFT OUTER JOIN	SF_USER UC ON UL.CREATOR = UC.USERID
+					LEFT OUTER JOIN SF_USER UM ON UL.MODIFIER = UM.USERID
+				WHERE 1=1
+						#if ("$!{P_PROCESSCODE}" != "" && "$!{P_PROCESSCODE}" != "*")
+							AND	UL.PROCESSID = '$!{P_PROCESSCODE}'
+						#end
+						#if ("$!{P_TEAM}" != "" && "$!{P_TEAM}" != "*")
+							AND	UL.TEAM = '$!{P_TEAM}'
+						#end
+						#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+							AND	UL.VALIDSTATE= '$!{P_VALIDSTATE}'
+						#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 - 코드관리 - 공정코드
+	설		명	: 공정 전체 리스트 출력
+	작	성	자	: jylee
+	작	성	일	: 2020-05-07
+	주요 변경 로그	: 2020-05-22 JYLEE => 추가 : 공정구분, 검사실적
+				  2020-06-04 유태근 / ISUSEUSERLOTSERIAL, LOTCREATERULEID 추가조회
+				  2020-06-11 한주석 / 다국어처리 작업지시유무 조회조건 삭제
+	-->
+	<query id="GetProcessList" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			-- Id = GetProcessList
+			-- Version = 00001				
+			SELECT 
+					SF.PROCESSSEGMENTID AS PROCESSSEGMENTID 				-- 공정ID
+				,	SF.PROCESSSEGMENTVERSION AS PROCESSSEGMENTVERSION 		-- 버전
+				,	ISNULL(DC1.DICTIONARYNAME, SF.PROCESSSEGMENTNAME)		AS "PROCESSSEGMENTNAME$$KO-KR"
+				,	ISNULL(DC2.DICTIONARYNAME, SF.PROCESSSEGMENTNAME)		AS "PROCESSSEGMENTNAME$$EN-US"
+				,	ISNULL(DC3.DICTIONARYNAME, SF.PROCESSSEGMENTNAME)		AS "PROCESSSEGMENTNAME$$JA-JP"
+				,	SF.PROCESSSEGMENTCLASSID
+				,	SF.ISMAINPROCESSSEGMENT									-- 메인공정여부
+				,	SF.DESCRIPTION AS DESCRIPTION 							-- 설명
+				,	SF.PROCESSSEGMENTTYPE AS PROCESSSEGMENTTYPE             -- 공정구분
+				,	SF.CHECKRESULT AS CHECKRESULT							-- 검사실적
+				,	SF.VALIDSTATE AS VALIDSTATE								-- 유효상태
+				,	UC.USERNAME AS CREATOR									-- 생성자
+				,	SF.CREATEDTIME AS CREATEDTIME							-- 생성일
+				,	UM.USERNAME AS MODIFIER									-- 수정자
+				,	SF.MODIFIEDTIME AS MODIFIEDTIME 						-- 수정일
+				,	SF.ISUSEUSERLOTSERIAL
+				,	SF.LOTCREATERULEID
+				,	SF.PLANTID
+				,	SF.ENTERPRISEID
+			FROM SF_PROCESSSEGMENT SF
+				LEFT OUTER JOIN	SF_USER UC ON SF.CREATOR = UC.USERID
+				LEFT OUTER JOIN SF_USER UM ON SF.MODIFIER = UM.USERID
+				LEFT OUTER JOIN SF_DICTIONARY	DC1	ON	SF.DICTIONARYID			= DC1.DICTIONARYID
+													AND DC1.LANGUAGETYPE		= 'ko-KR'
+				LEFT OUTER JOIN SF_DICTIONARY	DC2	ON	SF.DICTIONARYID			= DC2.DICTIONARYID
+													AND	DC2.LANGUAGETYPE		= 'en-US'
+				LEFT OUTER JOIN SF_DICTIONARY	DC3	ON	SF.DICTIONARYID			= DC3.DICTIONARYID
+													AND	DC3.LANGUAGETYPE		= 'ja-JP'				
+			WHERE 1=1
+				#if ("$!{P_PROCESSTYPE}" != "" && "$!{P_PROCESSTYPE}" != "*")
+					AND	SF.PROCESSSEGMENTTYPE = '$!{P_PROCESSTYPE}'
+				#end
+				#if ("$!{P_CHECKRESULT}" != "" && "$!{P_CHECKRESULT}" != "*")
+					AND	SF.CHECKRESULT = '$!{P_CHECKRESULT}'
+				#end
+				#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+					AND	SF.VALIDSTATE = '$!{P_VALIDSTATE}'
+				#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 - 코드관리 - 공정코드
+	설		명	: 공정 전체 리스트 출력
+	작	성	자	: jylee
+	작	성	일	: 2020-05-07
+	주요 변경 로그	: 2020-06-08 강유라 중복 id/version 최근거 남기고 주석처리
+	-->
+	<!-- <query id="GetProcessList" version="00001">
+		<statement>
+			<![CDATA[
+			SELECT 
+				SF.PROCESSSEGMENTID AS PROCESSSEGMENTID,
+				SF.PROCESSSEGMENTNAMEKOR AS PROCESSSEGMENTNAMEKOR,
+				SF.PROCESSSEGMENTNAMEENG AS PROCESSSEGMENTNAMEENG,
+				SF.PROCESSSEGMENTNAMEJPN AS PROCESSSEGMENTNAMEJPN,
+				SF.DESCRIPTION AS DESCRIPTION,
+				SF.WORKORDER AS WORKORDER,
+				SF.PROCESSSEGMENTTYPE AS PROCESSSEGMENTTYPE,
+				SF.CHECKRESULT AS CHECKRESULT,
+				SF.VALIDSTATE AS VALIDSTATE,
+				UC.USERNAME AS CREATOR,
+				SF.CREATEDTIME AS CREATEDTIME,
+				UM.USERNAME AS MODIFIER,
+				SF.MODIFIEDTIME AS MODIFIEDTIME
+			FROM SF_PROCESSSEGMENT SF
+				LEFT OUTER JOIN	SF_USER UC ON SF.CREATOR = UC.USERID
+				LEFT OUTER JOIN SF_USER UM ON SF.MODIFIER = UM.USERID
+			WHERE 1=1
+				#if ("$!{P_WORKORDER}" != "" && "$!{P_WORKORDER}" != "*")
+					AND	SF.WORKORDER = '$!{P_WORKORDER}'
+				#end
+				#if ("$!{P_PROCESSTYPE}" != "" && "$!{P_PROCESSTYPE}" != "*")
+					AND	SF.PROCESSSEGMENTTYPE = '$!{P_PROCESSTYPE}'
+				#end
+				#if ("$!{P_CHECKRESULT}" != "" && "$!{P_CHECKRESULT}" != "*")
+					AND	SF.CHECKRESULT = '$!{P_CHECKRESULT}'
+				#end
+				#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+					AND	SF.VALIDSTATE = '$!{P_VALIDSTATE}'
+				#end
+			]]>
+		</statement>
+	</query> -->
+	
+	<!--
+	프 로 그 램 명	: 기준정보 -항목관리- 품목 라우터 관리
+	설		명	: 품목 라우터 조회조건 팝업 데이터 조회
+	작	성	자	: 강유라
+	작	성	일	: 2020-05-20
+	주요 변경 로그	: 2020-06-11 한주석 다국어처리 
+	-->
+	<query id="GetProcessDefList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetProcessDefList
+				-- Version : 00001
+				SELECT 
+						PD.PROCESSDEFID
+					,	PD.PROCESSDEFVERSION
+					,	ISNULL(PDD.DICTIONARYNAME,PD.PROCESSDEFNAME)  				AS PROCESSDEFNAME
+						
+				FROM 	SF_PROCESSDEFINITION 			PD 
+				LEFT OUTER JOIN SF_DICTIONARY 			PDD ON  PD.PROCESSDEFNAME = PDD.DICTIONARYID
+															AND PDD.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				WHERE	1 = 1	
+					
+				#if ("$!{P_PROCESSDEFTXT}" != "" && "$!{P_PROCESSDEFTXT}" != "*")
+					AND	(PD.PROCESSDEFID LIKE '%$!{P_PROCESSDEFTXT}%'
+					OR PDD.DICTIONARYNAME LIKE '%$!{P_PROCESSDEFTXT}%')
+				#end
+															
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 -항목관리- 품목 라우터 관리
+	설		명	: 공정 팝업에 바인딩할 데이터 조회
+	작	성	자	: 강유라
+	작	성	일	: 2020-05-20
+	주요 변경 로그	: 
+	-->
+	<query id="GetProcessSegmentList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetProcessSegmentList
+				-- Version : 00001
+				SELECT
+						PS.PROCESSSEGMENTID
+					,	ISNULL(PSD.DICTIONARYNAME,PS.PROCESSSEGMENTNAME)	AS PROCESSSEGMENTNAME
+					,	PS.PROCESSSEGMENTVERSION
+				FROM 	SF_PROCESSSEGMENT 									PS
+				LEFT OUTER JOIN SF_DICTIONARY 								PSD ON PS.DICTIONARYID = PSD.DICTIONARYID
+																			    AND PSD.LANGUAGETYPE ='$!{_TXNINFO.LANGUAGETYPE}'
+    			WHERE 1=1
+				#if ("$!{PROCESSSEGMENTTYPE}" != "" && "$!{PROCESSSEGMENTTYPE}" != "*")
+					AND	PS.PROCESSSEGMENTTYPE = '$!{PROCESSSEGMENTTYPE}'
+				#end
+				
+				#if ("$!{P_PROCESSSEGMENTTXT}" != "" && "$!{P_PROCESSSEGMENTTXT}" != "*")
+					AND	(PS.PROCESSSEGMENTID LIKE '%$!{P_PROCESSSEGMENTTXT}%'
+					OR PSD.DICTIONARYNAME LIKE '%$!{P_PROCESSSEGMENTTXT}%')
+				#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 -항목관리- 품목 라우터 관리
+	설		명	: 품목 라우팅 리스트 조회
+	작	성	자	: 강유라
+	작	성	일	: 2020-05-20
+	주요 변경 로그	: 2020-06-11 한주석 다국어처리
+	-->
+	<query id="SelectProcessDefinitionList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : SelectProcessDefinitionList
+				-- Version : 00001
+				WITH PRODUCTCNT AS
+				(
+				
+					SELECT 
+							PD.PROCESSDEFID
+						,	COUNT(PD.PROCESSDEFID) AS 	PRODUCTCNT	
+
+					FROM 	SF_PRODUCTDEFINITION 													PD
+					GROUP BY
+							PD.PROCESSDEFID
+				)
+				SELECT 
+						PC.PROCESSDEFID
+					,	PC.PROCESSDEFVERSION
+					,	PC.PROCESSCLASSID
+					--,	PCD.DICTIONARYNAME 															AS PROCESSDEFNAME
+					,	ISNULL(DK.DICTIONARYNAME, PC.PROCESSDEFNAME)	AS "PROCESSDEFNAME$$KO-KR"
+					,	ISNULL(DE.DICTIONARYNAME, PC.PROCESSDEFNAME)	AS "PROCESSDEFNAME$$EN-US"
+					,	ISNULL(DJ.DICTIONARYNAME, PC.PROCESSDEFNAME)	AS "PROCESSDEFNAME$$JA-JP"
+					,	PP.PROCESSSEGMENTID
+					,	PP.PROCESSSEGMENTVERSION
+					,	PSD.DICTIONARYNAME	 														AS PROCESSSEGMENTNAME
+					,	CASE WHEN ISNULL(PD.PRODUCTCNT,0) = 0
+							 THEN 0
+							 ELSE PD.PRODUCTCNT	
+						END 																		AS PRODUCTCNT	
+					,	CU.USERNAME 																AS CREATOR
+					,	PC.CREATEDTIME
+					,	MU.USERNAME 																AS MODIFIER
+					,	PC.MODIFIEDTIME
+				FROM 	SF_PROCESSDEFINITION 														PC
+				INNER JOIN SF_PROCESSPATH  															PP  ON  PC.PROCESSDEFID = PP.PROCESSDEFID
+																								    	AND PC.PROCESSDEFVERSION = PP.PROCESSDEFVERSION
+				LEFT OUTER JOIN SF_DICTIONARY 														PCD ON  PC.PROCESSDEFNAME = PCD.DICTIONARYID
+																										AND PCD.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				LEFT OUTER JOIN SF_DICTIONARY														DK	ON	PC.PROCESSDEFNAME = DK.DICTIONARYID
+																										AND	DK.LANGUAGETYPE = 'ko-KR'
+			    LEFT OUTER JOIN SF_DICTIONARY														DE	ON	PC.PROCESSDEFNAME = DE.DICTIONARYID
+																										AND	DE.LANGUAGETYPE = 'en-US'
+			    LEFT OUTER JOIN SF_DICTIONARY														DJ	ON	PC.PROCESSDEFNAME = DJ.DICTIONARYID
+																										AND	DJ.LANGUAGETYPE = 'ja-JP'																						
+				INNER JOIN SF_PROCESSSEGMENT 														PS  ON  PP.PROCESSSEGMENTID = PS.PROCESSSEGMENTID
+																										AND PP.PROCESSSEGMENTVERSION = PS.PROCESSSEGMENTVERSION
+				LEFT OUTER JOIN SF_DICTIONARY 														PSD ON  PS.DICTIONARYID = PSD.DICTIONARYID
+																			  							AND PSD.LANGUAGETYPE ='$!{_TXNINFO.LANGUAGETYPE}'																						
+				LEFT OUTER JOIN PRODUCTCNT 															PD  ON  PC.PROCESSDEFID = PD.PROCESSDEFID																								
+				LEFT OUTER JOIN SF_USER 															CU  ON PC.CREATOR  = CU.USERID
+				LEFT OUTER JOIN SF_USER 															MU  ON PC.MODIFIER = MU.USERID	
+				
+				WHERE	1 = 1 
+				#if ("$!{P_PROCESSDEFID}" != "" && "$!{P_PROCESSDEFID}" != "*")
+					AND	PC.PROCESSDEFID = '$!{P_PROCESSDEFID}'
+				#end
+			
+				#if ("$!{P_PROCESSSEGMENTID}" != "" && "$!{P_PROCESSSEGMENTID}" != "*")
+					AND	PP.PROCESSSEGMENTID = '$!{P_PROCESSSEGMENTID}'
+				#end		
+			]]>
+		</statement>
+	</query>
+
+	
+	
+	<!--
+	프 로 그 램 명	: 기준정보 -항목관리- 품목 라우터 관리
+	설		명	: 품목 라우팅정보로 품목 Mapping 리스트 조회
+	작	성	자	: 강유라
+	작	성	일	: 2020-05-20
+	주요 변경 로그	: 2020-05-29 강유라 - 다국어 컬럼 변경 적용 (PRODUCTDEFNAME => DICTIONARYID)
+				  20020-06-11 강유라 기종 PRODUCTCLASS => MODELID 변경
+	-->
+	<query id="SelectProductMappingListByProcessDefInfo" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : SelectProductMappingListByProcessDefInfo
+				-- Version : 00001
+				SELECT
+						PD.PRODUCTDEFID
+					,	PD.PARTNUMBER															
+					,	PD.PRODUCTDEFVERSION	
+					,	COALESCE(PDD.DICTIONARYNAME,PD.PRODUCTDEFNAME)							AS PRODUCTDEFNAME
+					,	MCD.DICTIONARYNAME														AS PRODUCTMODEL
+					, 	CD.DICTIONARYNAME 														AS PRODUCTDEFTYPE
+					--품목구분_미정
+					,	PD.LOTSIZE  
+					,	PD.PROCESSDEFID
+					,	PD.PROCESSDEFVERSION
+												
+				FROM 	SF_PRODUCTDEFINITION 													PD 
+				INNER JOIN SF_PROCESSDEFINITION 												PC  ON  PD.PROCESSDEFID  = PC.PROCESSDEFID
+																	   				   	 			AND PD.PROCESSDEFVERSION  = PC.PROCESSDEFVERSION 
+				LEFT OUTER JOIN SF_DICTIONARY 													PDD ON  PD.DICTIONARYID = PDD.DICTIONARYID
+																									AND PDD.LANGUAGETYPE ='$!{_TXNINFO.LANGUAGETYPE}'
+				LEFT OUTER JOIN SF_CODE 														MC  ON  PD.MODELID = MC.CODEID
+																									AND MC.CODECLASSID ='ModelCode'
+				LEFT OUTER JOIN SF_DICTIONARY 													MCD ON  MC.DICTIONARYID = MCD.DICTIONARYID
+																									AND MCD.LANGUAGETYPE ='$!{_TXNINFO.LANGUAGETYPE}'
+				LEFT OUTER JOIN SF_CODE 														C   ON  PD.PRODUCTDEFTYPE = C.CODEID
+																									AND C.CODECLASSID ='PRODUCTDEFTYPE'
+				LEFT OUTER JOIN SF_DICTIONARY 													CD  ON  C.DICTIONARYID = CD.DICTIONARYID
+																									AND CD.LANGUAGETYPE ='$!{_TXNINFO.LANGUAGETYPE}'			
+				WHERE	1 = 1 
+				#if ("$!{PROCESSDEFID}" != "" && "$!{PROCESSDEFID}" != "*")
+					AND	PD.PROCESSDEFID = '$!{PROCESSDEFID}'
+				#end
+				
+				#if ("$!{PROCESSDEFVERSION}" != "" && "$!{PROCESSDEFVERSION}" != "*")
+					AND	PD.PROCESSDEFVERSION = '$!{PROCESSDEFVERSION}'
+				#end	
+		
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 -항목관리- 품목 라우터 관리
+	설		명	: processDef 그리그드 공정 업데이트할 processPath 조회
+	작	성	자	: 강유라
+	작	성	일	: 2020-05-20
+	주요 변경 로그	: 
+	-->
+	<query id="GetProcessPathByProcessDefInfo" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetProcessPathByProcessDefInfo
+				-- Version : 00001
+				SELECT 
+						PP.PROCESSPATHID
+				FROM 	SF_PROCESSPATH 				PP
+				WHERE 	1 = 1
+				AND PROCESSDEFID ='$!{PROCESSDEFID}'
+				AND PROCESSDEFVERSION ='$!{PROCESSDEFVERSION}'
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	프 로 그 램 명	: 기준정보 - 항목관리 - SPEC 관리
+	설		명	: 공정 조회
+	작	성	자	: 정승원
+	작	성	일	: 2020-05-20
+	주요 변경 로그	: 
+	-->
+	<query id="GetProcessList" version="00002">
+		<statement>
+			<![CDATA[
+			--
+			-- id : GetProcessList
+			-- version : 00002
+			SELECT
+					PS.PROCESSSEGMENTID
+				,	ISNULL(DC.DICTIONARYNAME, PS.PROCESSSEGMENTNAME)	AS PROCESSSEGMENTNAME
+			FROM	SF_PROCESSSEGMENT	PS
+			LEFT JOIN SF_DICTIONARY		DC	ON	PS.DICTIONARYID = DC.DICTIONARYID
+											AND	DC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+			WHERE 	1 = 1
+			#if("$!{TXTPROCESSSEGMENT}" != "")
+			AND (PS.PROCESSSEGMENTID LIKE '%$!{TXTPROCESSSEGMENT}%' 
+			OR 	PS.PROCESSSEGMENTNAME LIKE '%$!{TXTPROCESSSEGMENT}%'
+			OR 	DC.DICTIONARYNAME LIKE '%$!{TXTPROCESSSEGMENT}%')
+			#end
+			#if("$!{PROCESSSEGMENTTYPE}" != "*" && "$!{PROCESSSEGMENTTYPE}" != "")
+			AND PS.PROCESSSEGMENTTYPE = '$!{PROCESSSEGMENTTYPE}'
+			#end
+			AND PS.VALIDSTATE = 'Valid'
+			ORDER BY PS.PROCESSSEGMENTID ASC
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 - 항목관리 - SPEC 관리
+	설		명	: SPECID 조회
+	작	성	자	: 정승원
+	작	성	일	: 2020-05-20
+	주요 변경 로그	: 
+	-->
+	<query id="GetSpecList" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			-- id : GetSpecList
+			-- version : 00001
+			SELECT 
+					SP.SPECDEFID
+				,	ISNULL(DC.DICTIONARYNAME, SP.SPECDEFNAME) AS SPECDEFNAME
+			FROM 	CT_SPECDEFINITION	SP
+			LEFT JOIN SF_DICTIONARY		DC	ON	SP.DICTIONARYID = DC.DICTIONARYID
+											AND DC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+			WHERE 	1 = 1
+			#if("$!{TXTSPECDEF}" != "")
+			AND 	(SP.SPECDEFID LIKE '%$!{TXTSPECDEF}%' 
+			OR 		SP.SPECDEFNAME LIKE '%$!{TXTSPECDEF}%')
+			#end
+			AND 	SP.VALIDSTATE = 'Valid'
+			ORDER BY SP.SPECDEFID ASC
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 - 항목관리 - SPEC 관리
+	설		명	: SPECID 리스트 조회
+	작	성	자	: 정승원
+	작	성	일	: 2020-05-20
+	주요 변경 로그	: 
+	-->
+	<query id="SelectSpecList" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			-- id : SelectSpecList
+			-- version : 00001
+			SELECT 
+					SP.SPECDEFID
+				,	SP.SPECDEFNAME
+				,	ISNULL(KDC.DICTIONARYNAME, SP.SPECDEFNAME)	AS "SPECDEFNAME$$KO-KR"
+				,	ISNULL(EDC.DICTIONARYNAME, SP.SPECDEFNAME)	AS "SPECDEFNAME$$EN-US"
+				,	ISNULL(JDC.DICTIONARYNAME, SP.SPECDEFNAME)	AS "SPECDEFNAME$$JA-JP"
+				,	SP.PROCESSSEGMENTID
+				,	ISNULL(PDC.DICTIONARYNAME, PS.PROCESSSEGMENTNAME)		AS PROCESSSEGMENTNAME
+				,	SP.ISDIVIDE
+				,	SP.VALIDSTATE
+				,	ISNULL(U1.USERNAME, SP.CREATOR) AS CREATOR
+				,	SP.CREATEDTIME
+				,	ISNULL(U2.USERNAME, SP.MODIFIER) AS MODIFIER
+				,	SP.MODIFIEDTIME
+				,	SP.ENTERPRISEID
+				,	SP.PLANTID
+			FROM 	CT_SPECDEFINITION	SP
+			LEFT JOIN SF_DICTIONARY		KDC	ON	SP.DICTIONARYID = KDC.DICTIONARYID
+											AND	KDC.LANGUAGETYPE = 'ko-KR'
+			LEFT JOIN SF_DICTIONARY		EDC	ON	SP.DICTIONARYID = EDC.DICTIONARYID
+											AND	EDC.LANGUAGETYPE = 'en-US'
+			LEFT JOIN SF_DICTIONARY		JDC	ON	SP.DICTIONARYID = JDC.DICTIONARYID
+											AND	JDC.LANGUAGETYPE = 'ja-JP'
+			LEFT JOIN SF_PROCESSSEGMENT PS	ON	SP.PROCESSSEGMENTID = PS.PROCESSSEGMENTID
+											AND	PS.PROCESSSEGMENTVERSION = '*'
+			LEFT JOIN SF_DICTIONARY		PDC	ON	PS.DICTIONARYID = PDC.DICTIONARYID
+											AND	PDC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+			LEFT JOIN SF_USER			U1	ON	SP.CREATOR = U1.USERID
+			LEFT JOIN SF_USER			U2	ON	SP.MODIFIER = U2.USERID
+			WHERE 1 = 1
+			#if("$!{SPECDEFID}" != "")
+			AND EXISTS (
+							SELECT 	VALUE
+							FROM	ufn_selectStringToSplit('$!{SPECDEFID}', ',')	S
+							WHERE	SP.SPECDEFID = S.VALUE
+					   )
+			#end
+			#if("$!{PROCESSSEGMENTID}" != "")
+			AND EXISTS (
+							SELECT 	VALUE
+							FROM	ufn_selectStringToSplit('$!{PROCESSSEGMENTID}', ',')	S
+							WHERE	SP.PROCESSSEGMENTID = S.VALUE
+					   )
+			#end
+			AND SP.VALIDSTATE = 'Valid'
+			ORDER BY SP.SPECDEFID ASC;
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 - 항목관리 - SPEC 관리
+	설		명	: 항목 조회
+	작	성	자	: 정승원
+	작	성	일	: 2020-05-20
+	주요 변경 로그	: 
+	-->
+	<query id="GetInspItemList" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			--id : GetInspItemList
+			--version : 00001
+			SELECT
+					IM.ITEMID
+				,	IM.ITEMNAME
+				,	IM.UNIT
+				,	ISNULL(CD.CODENAME, IM.INPUTTYPE) AS INPUTTYPE
+			FROM 	UL_INSPITEM	IM
+			LEFT JOIN SF_CODE	CD	ON	IM.INPUTTYPE = CD.CODEID
+									AND	CD.CODECLASSID = 'InspItemInputType'
+			WHERE	1 = 1
+			#if("$!{TXTITEMID}" != "")
+			AND 	(IM.ITEMID ILIKE '%$!{TXTITEMID}%' OR IM.ITEMNAME LIKE '%$!{TXTITEMID}%')
+			#end
+			AND 	IM.VALIDSTATE = 'Valid'
+			ORDER BY IM.ITEMID ASC;
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 - 항목관리 - SPEC 관리
+	설		명	: 세부작업 공정 조회
+	작	성	자	: 정승원
+	작	성	일	: 2020-05-21
+	주요 변경 로그	: 2020-09-17 | 이준용 | SP.VALIDSTATE 추가
+				  2021-07-14 | 김지호 | SP.SPECDEFIDVERSION 추가, 조인문 VALIDSTATE 주석처리
+	-->
+	<query id="GetSubSegmentList" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			-- id : GetSubSegmentList
+			-- version : 00001
+			SELECT
+					SP.SPECSEQUENCE
+				,	SP.SPECDEFID
+				,	SP.SUBPROCESSSEGMENTID
+				,	ISNULL(DICTIONARYNAME, PS.PROCESSSEGMENTNAME) AS SUBPROCESSSEGMENTNAME
+				,	CAST(SP.USERSEQUENCE AS INT)AS USERSEQUENCE
+				,	SP.ISRESULT
+				,	SP.ISOUTSOURCING
+				,	SP.VALIDSTATE
+				,	SP.SPECDEFIDVERSION
+			FROM 	CT_SUBSEGMENTSPEC			SP
+			LEFT JOIN SF_PROCESSSEGMENT			PS	ON	SP.SUBPROCESSSEGMENTID = PS.PROCESSSEGMENTID
+													AND	PS.PROCESSSEGMENTVERSION = '*'
+			LEFT JOIN SF_DICTIONARY				DIC	ON	PS.DICTIONARYID = DIC.DICTIONARYID
+													AND DIC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+			WHERE 	1 = 1
+			AND 	SP.SPECDEFID = '$!{SPECDEFID}'
+			#if ("$!{P_SPECDEFIDVERSION}" == "")
+			AND		SP.VALIDSTATE = 'Valid'
+			#end
+			#if ("$!{P_SPECDEFIDVERSION}" != "")
+			AND		SP.SPECDEFIDVERSION = '$!{P_SPECDEFIDVERSION}'
+			#end
+			ORDER BY CAST(SP.USERSEQUENCE AS INT) ASC;
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 - 항목관리 - SPEC 관리
+	설		명	: 실적 입력 항목 조회
+	작	성	자	: 정승원
+	작	성	일	: 2020-05-21
+	주요 변경 로그	: 2021-07-14 | 김지호 | SP.SPECDEFIDVERSION 추가 ,조인문 VALIDSTATE 주석처리
+	-->
+	<query id="GetSubSegmentDetailList" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			-- id : GetSubSegmentDetailList
+			-- version : 00001
+			SELECT 
+					SP.SPECDEFID
+				--,	SP.SUBPROCESSSEGMENTID
+				,	SP.SPECSEQUENCE
+				,	SP.DISPLAYSEQUENCE
+				,	SP.PARAMETERID
+				,	ISNULL(DC.DICTIONARYNAME, PDN.PARAMETERNAME)	AS PARAMETERNAME
+				,	SP.SPECTYPE
+				,	PDN.INPUTTYPE
+				,	PDN.UNIT
+				,	SP.LSL
+				,	SP.USL
+				,	SP.ISMEASURE
+				,	SP.ISSPECFORCE
+				,	SP.VALIDSTATE
+				,	SP.SPECDEFIDVERSION
+			FROM 	CT_SUBSEGMENTSPECDETAIL		SP
+			LEFT JOIN CT_PARAMETERDEFINITION	PDN	ON	SP.PARAMETERID = PDN.PARAMETERID
+			LEFT JOIN SF_DICTIONARY				DC	ON	PDN.DICTIONARYID = DC.DICTIONARYID
+													AND  DC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+			WHERE 1 = 1
+			AND 	SP.SPECDEFID = '$!{SPECDEFID}'
+			AND 	SP.SPECSEQUENCE = '$!{SPECSEQUENCE}'
+			#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+			--AND		SP.VALIDSTATE = '$!{P_VALIDSTATE}'
+			#end
+			#if ("$!{P_SPECDEFIDVERSION}" == "")
+			AND		SP.VALIDSTATE = 'Valid'
+			#end
+			#if ("$!{P_SPECDEFIDVERSION}" != "")
+			AND		SP.SPECDEFIDVERSION = '$!{P_SPECDEFIDVERSION}'
+			#end
+			ORDER BY CAST(SP.DISPLAYSEQUENCE AS INT) ASC;
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 - 항목관리 - 작업장 관리
+	설		명	: 작업장 항목 조회
+	작	성	자	: 모세찬
+	작	성	일	: 2020-05-25
+	주요 변경 로그	: 2020-06-11 한주석 다국어처리 
+	-->
+	<query id="GetArea" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			--id : GetArea
+			--version : 00001
+			SELECT	AR.AREAID
+				,	ISNULL(DC1.DICTIONARYNAME, AR.AREANAME)						AS "AREANAME$$KO-KR"
+				,	ISNULL(DC2.DICTIONARYNAME, AR.AREANAME)						AS "AREANAME$$EN-US"
+				,	ISNULL(DC3.DICTIONARYNAME, AR.AREANAME)						AS "AREANAME$$JA-JP"
+				,	AR.WAREHOUSEID
+				,	AR.VALIDSTATE
+				,	UC.USERNAME 			AS CREATOR
+				,	AR.CREATEDTIME
+				,	UM.USERNAME 			AS MODIFIER
+				,	AR.MODIFIEDTIME
+				,	ISNULL(AR.DESCRIPTION, AR.AREANAME)	AS DESCRIPTION
+			FROM 	SF_AREA					AR
+			LEFT OUTER JOIN	SF_USER 		UC	ON 	AR.CREATOR 			= UC.USERID
+			LEFT OUTER JOIN SF_USER 		UM	ON 	AR.MODIFIER 		= UM.USERID
+			LEFT OUTER JOIN SF_DICTIONARY	DC1	ON 	AR.DICTIONARYID 	= DC1.DICTIONARYID
+												AND DC1.LANGUAGETYPE	= 'ko-KR'
+			LEFT OUTER JOIN SF_DICTIONARY	DC2	ON 	AR.DICTIONARYID 	= DC2.DICTIONARYID
+												AND DC2.LANGUAGETYPE	= 'en-US'
+			LEFT OUTER JOIN SF_DICTIONARY	DC3	ON 	AR.DICTIONARYID 	= DC3.DICTIONARYID
+												AND DC3.LANGUAGETYPE	= 'ja-JP'
+			WHERE	1=1
+			#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+				AND	m.VALIDSTATE = '$!{P_VALIDSTATE}'
+			#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 - 공정코드 - 공정기종별 기준서 등록
+	설		명	: 기준서 조회
+	작	성	자	: 한주석
+	작	성	일	: 2020-06-04
+	주요 변경 로그	: 
+	-->
+	<query id="SelectProcessSegmentStandard" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			--id : SelectProcessSegmentStandard
+			--version : 00001
+			SELECT
+					MS.PROCESSSEGMENTID
+				,	MS.MODELID
+				,	MS.STANDARD1
+				,	MS.STANDARD2
+				,	MS.STANDARD3
+				,	ISNULL(CU.USERNAME, MS.CREATOR)		AS CREATOR
+				,	MS.CREATEDTIME
+				,	ISNULL(MU.USERNAME, MS.MODIFIER)	AS MODIFIER
+				,	MS.MODIFIEDTIME
+			FROM	CT_MODELSTANDARDINFO	MS
+			LEFT JOIN SF_USER				CU	ON	MS.CREATOR	= CU.USERID
+			LEFT JOIN SF_USER				MU	ON	MS.MODIFIER	= MU.USERID
+			WHERE 	1 = 1
+			#if ("$!{P_MODEL}" != "" && "$!{P_MODEL}" != "*")
+				AND MS.MODELID = '$!{P_MODEL}'
+			#end
+			#if ("$!{P_PROCESSSEGMENT}" != "" && "$!{P_PROCESSSEGMENT}" != "*")
+				AND MS.PROCESSSEGMENTID = '$!{P_PROCESSSEGMENT}'
+			#end
+			
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 - 공정코드 - 공정기종별 기준서 등록
+	설		명	: 공정조회 콤보
+	작	성	자	: 한주석
+	작	성	일	: 2020-06-04
+	주요 변경 로그	: 
+	-->
+	<query id="GetProcessSegment" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			--id : GetProcessSegment
+			--version : 00001
+			SELECT
+					PS.PROCESSSEGMENTID									AS CODEID
+				,	ISNULL(DC.DICTIONARYNAME, PS.PROCESSSEGMENTNAME)	AS CODENAME
+			FROM	SF_PROCESSSEGMENT	PS
+			LEFT JOIN SF_DICTIONARY		DC	ON	PS.DICTIONARYID = DC.DICTIONARYID
+											AND	DC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+			WHERE 	1 = 1
+			AND PS.PROCESSSEGMENTTYPE = 'MAIN'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 - 항목 - 검사 기준 이미지 등록
+	설		명	: 검사 기준 이미지 리스트 조회
+	작	성	자	: 정승원
+	작	성	일	: 2020-05-29
+	주요 변경 로그	: 2020-06-09 정승원 FILEID, FILENAME 조회조건 추가
+	-->
+	<query id="SelectInspectionFileList" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			--id : SelectInspectionFileList
+			--version : 00001
+			SELECT
+					INF.INSPECTIONTYPE
+				,	INF.FILEID
+				,	INF.RESOURCEID
+				,	INF.FILENAME
+				,	INF.FILESIZE
+				,	INF.FILEEXT
+				,	INF.FILEDATA
+				,	INF.ENTERPRISEID
+				,	INF.PLANTID
+				,	ISNULL(U1.USERNAME, INF.CREATOR)	AS CREATOR
+				,	INF.CREATEDTIME
+				,	ISNULL(U2.USERNAME, INF.MODIFIER)	AS MODIFIER
+				,	INF.MODIFIEDTIME
+				--수입검사, 출하검사 이미지
+				,	INF.FILENAME		AS RECEIVINGFILENAME
+				,	INF.FILENAME		AS SHIPPINGFILENAME
+			FROM 	SF_INSPECTIONFILE	INF
+			LEFT JOIN SF_USER			U1	ON	INF.CREATOR = U1.USERID
+			LEFT JOIN SF_USER			U2	ON	INF.MODIFIER = U2.USERID
+			WHERE 1 = 1
+			#if("$!{P_INSPECTIONTYPE}" != "" && "$!{P_INSPECTIONTYPE}" != "*")
+			AND INF.INSPECTIONTYPE = '$!{P_INSPECTIONTYPE}'
+			#end
+			#if("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+			--AND INF.VALIDSTATE = '$!{P_VALIDSTATE}'
+			#end
+			#if("$!{FILEID}" != "")
+			AND INF.FILEID LIKE '%$!{FILEID}%'
+			#end
+			#if("$!{FILENAME}" != "")
+			AND INF.FILENAME LIKE '%$!{FILENAME}%'
+			#end
+			ORDER BY INF.FILENAME ASC;
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 - 항목관리 - SPEC 관리
+	설		명	: 항목 조회
+	작	성	자	: 정승원
+	작	성	일	: 2020-05-20
+	주요 변경 로그	: 2020-06-09 정승원 PARAMETERTYPE 조건 추가
+	-->
+	<query id="GetParameterDefList" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			-- Id : GetParameterDefList
+			-- Version : 00001
+			
+			DECLARE @TXTITEMID varchar(2000)
+
+			#if("$!{TXTITEMID}" != "")
+			SET @TXTITEMID = '%$!{TXTITEMID}%'
+			SET @TXTITEMID = REPLACE(@TXTITEMID, '[', '[[]')
+			#end
+			
+			SELECT 
+					PD.PARAMETERID
+				,	ISNULL(DC.DICTIONARYNAME, PD.PARAMETERNAME) AS PARAMETERNAME
+				,	PD.UNIT
+				,	PD.INPUTTYPE
+			FROM 	CT_PARAMETERDEFINITION	PD
+			LEFT JOIN SF_DICTIONARY			DC	ON	PD.DICTIONARYID = DC.DICTIONARYID
+												AND DC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+			WHERE 1 = 1
+			#if("$!{TXTITEMID}" != "")
+			AND 	(PD.PARAMETERID LIKE @TXTITEMID 
+			OR 		PD.PARAMETERNAME LIKE @TXTITEMID
+			OR		DC.DICTIONARYNAME LIKE @TXTITEMID)
+			#end
+			#if("$!{PARAMETERTYPE}" != "")
+			AND		PD.PARAMETERTYPE = '$!{PARAMETERTYPE}'
+			#end
+			AND 	PD.VALIDSTATE = 'Valid'
+			ORDER BY PD.PARAMETERID ASC;
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 설비관리 - 항목관리 - 파라미터 모니터링
+	설		명	: 파라미터 항목 조회
+	작	성	자	: 유형하
+	작	성	일	: 2020-06-11
+	-->
+	<query id="GetParameterDefList" version="00002">
+		<statement>
+			<![CDATA[
+			--
+			-- Id : GetParameterDefList
+			-- Version : 00001
+			SELECT 
+					PD.PARAMETERID
+				,	ISNULL(DC.DICTIONARYNAME, PD.PARAMETERNAME) AS PARAMETERNAME
+			FROM 	CT_PARAMETERDEFINITION	PD
+			LEFT JOIN SF_DICTIONARY			DC	ON	PD.DICTIONARYID = DC.DICTIONARYID
+												AND DC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+			WHERE 1 = 1
+			#if("$!{TXTPARAMETER}" != "")
+			AND		(UPPER(PD.PARAMETERID) LIKE UPPER('%$!{TXTPARAMETER}%')
+			OR		 UPPER(PD.PARAMETERNAME) LIKE UPPER('%$!{TXTPARAMETER}%')
+			OR		UPPER(DC.DICTIONARYNAME) LIKE UPPER('%$!{TXTPARAMETER}%')	)
+			#end	
+			AND     PD.PARAMETERTYPE = 'Equipment'			
+			AND 	PD.VALIDSTATE = 'Valid'
+			ORDER BY PD.PARAMETERID ASC;
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 - 코드정보 - 설비코드
+	설		명	: 설비그룹 리스트 조회
+	작	성	자	: 유태근
+	작	성	일	: 2020-06-05
+	주요 변경 로그	: 
+	-->
+	<query id="GetEquipmentClassList" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			--id : GetEquipmentClassList
+			--version : 00001
+			SELECT	
+					EC.EQUIPMENTCLASSID
+				,	ISNULL(D.DICTIONARYNAME, EC.EQUIPMENTCLASSNAME)	AS EQUIPMENTCLASSNAME
+			FROM	SF_EQUIPMENTCLASS								EC 
+			LEFT OUTER JOIN SF_DICTIONARY							D	ON	D.DICTIONARYID = EC.DICTIONARYID
+																		AND D.LANGUAGETYPE = '${LANGUAGETYPE}'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 설비관리 - 항목 - Parameter모니터링
+	설		명	: 설비그룹 리스트 조회
+	작	성	자	: 유형하
+	작	성	일	: 2020-06-10
+	주요 변경 로그	: 
+	-->
+	<query id="GetEquipmentClassList" version="00002">
+		<statement>
+			<![CDATA[
+			--
+			--id : GetEquipmentClassList
+			--version : 00002
+			SELECT DISTINCT
+			       EC.EQUIPMENTCLASSID
+				,	ISNULL(D.DICTIONARYNAME, EC.EQUIPMENTCLASSNAME)	AS EQUIPMENTCLASSNAME
+			FROM SF_EQUIPMENTCLASS EC
+			INNER JOIN SF_EQUIPMENT 								SE ON EC.EQUIPMENTCLASSID = SE.EQUIPMENTCLASSID
+			LEFT OUTER JOIN SF_DICTIONARY							D	ON	D.DICTIONARYID = EC.DICTIONARYID
+																		AND D.LANGUAGETYPE = '${P_LANGUAGETYPE}' 
+			WHERE 1=1
+			AND   ISNULL(SE.IFSTATE,'N') = 'Y'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 설비관리 - 일상점검
+	설		명	: 설비그룹 리스트 조회
+	작	성	자	: 모세찬 
+	작	성	일	: 2020-07-22
+	주요 변경 로그	: 
+	-->
+	<query id="GetEquipmentClassList" version="00003">
+		<statement>
+			<![CDATA[
+			--
+			--id : GetEquipmentClassList
+			--version : 00003
+						SELECT	
+					DISTINCT EC.EQUIPMENTCLASSID
+				,	ISNULL(D.DICTIONARYNAME, EC.EQUIPMENTCLASSNAME)	AS EQUIPMENTCLASSNAME
+			FROM	SF_EQUIPMENTCLASS								EC 
+			INNER JOIN SF_EQUIPMENT                                 SE  ON EC.EQUIPMENTCLASSID = SE.EQUIPMENTCLASSID
+			INNER JOIN SF_AREA                                      SA  ON SE.AREAID = SA.AREAID AND SA.AREAID = '$!{P_AREACODE}'
+			LEFT OUTER JOIN SF_DICTIONARY							D	ON	D.DICTIONARYID = EC.DICTIONARYID
+																		AND D.LANGUAGETYPE = '${LANGUAGETYPE}' 
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 - 정보 - BOM조회
+	설		명	: BOM의 품목 조회조건 리스트를 조회한다.
+	작	성	자	: 유태근
+	작	성	일	: 2020-05-28
+	주요 변경 로그	: 
+	-->
+	<query id="GetBomProductList" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			--id : GetBomProductList
+			--version : 00001
+			SELECT 
+					PD.PARTNUMBER									AS PRODUCTDEFID			-- 품목ID
+				,	PD.PRODUCTDEFVERSION													-- 품목버전
+				,	PD.PRODUCTDEFNAME														-- 품목명
+				,	PD.PRODUCTDEFID									AS PRODUCTDEFSEQ		-- 품목SEQUENCE
+				,	PD.PRODUCTDEFID + '|' + PD.PRODUCTDEFVERSION	AS PRODUCTDEFIDVERSION 	-- 품목SEQUENCE + Version
+			FROM SF_PRODUCTDEFINITION								PD
+			WHERE 	1 = 1
+			
+			#if ("$!{PRODUCTDEFIDNAME}" != "")
+				AND 	(PD.PARTNUMBER LIKE '%$!{PRODUCTDEFIDNAME}%' OR PD.PRODUCTDEFNAME LIKE '%$!{PRODUCTDEFIDNAME}%')
+			#end
+							
+			ORDER BY 
+					PD.CREATEDTIME DESC;
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 - 정보 - BOM조회
+	설		명	: BOM의 트리리스트를 조회한다.
+	작	성	자	: 유태근
+	작	성	일	: 2020-06-01
+	주요 변경 로그	: 2020-06-11 유태근 / SF_CONSUMABLEDEFINITION 테이블 참조, 쿼리속도, 기준조건 변경
+				  2020-07-16 유태근 / 품목코드 변경
+	-->
+	<query id="SelectBomTreeList" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			--id : SelectBomTreeList
+			--version : 00001
+			WITH BOMTREE AS 
+			(
+				SELECT   
+						BV.ITEMSEQ																					AS	PARENTPRODUCTDEFID	-- 부모품목 ID
+					,	BV.MATITEMSEQ																				AS	PRODUCTDEFID		-- 품목 ID 
+					,	CONVERT(VARCHAR(MAX), CONVERT(VARCHAR, BV.ITEMSEQ) + '|' + CONVERT(VARCHAR, BV.MATITEMSEQ))	AS 	PATH				-- 경로(기준 : 품목ID)
+					,	CONVERT(VARCHAR(MAX), BV.ITEMNO + '|' +  BV.MATITEMNO)										AS 	NUMPATH				-- 경로(기준 : 품목NUMBER)
+					,	CONVERT(VARCHAR(MAX), PPD.CONSUMABLEDEFNAME + '|' + PD.CONSUMABLEDEFNAME)					AS 	PATHNAME			-- 경로(기준 : 품목명)
+					,	CONVERT(VARCHAR(MAX), BV.NEEDQTY)															AS 	NEEDQTYPATH			-- 경로(기준 : 소요량)
+					,	1																							AS 	LEVEL				-- 트리레벨
+				FROM	[UCKERP].[$!{DBLINKNAME}].[dbo].[uck_VIEW_ITEMPROCMAT] 	BV
+				INNER JOIN SF_CONSUMABLEDEFINITION								PPD	ON	PPD.CONSUMABLEDEFID = BV.ITEMSEQ
+				INNER JOIN SF_CONSUMABLEDEFINITION								PD	ON	PD.CONSUMABLEDEFID = BV.MATITEMSEQ
+				WHERE	1 = 1
+				AND 	BV.ITEMSEQ = '$!{P_PRODUCTDEFID}'
+			
+			    UNION ALL
+			
+			    SELECT   
+						BV.ITEMSEQ																			AS	PARENTPRODUCTDEFID			-- 부모품목 ID
+					,	BV.MATITEMSEQ																		AS	PRODUCTDEFID				-- 품목 ID
+					,	CONVERT(VARCHAR(MAX), BT.PATH + '|' + CONVERT(VARCHAR, BV.MATITEMSEQ))				AS 	PATH						-- 경로(기준 : 품목ID)
+					,	CONVERT(VARCHAR(MAX), BT.NUMPATH + '|' + BV.MATITEMNO)								AS 	NUMPATH						-- 경로(기준 : 품목NUMBER)
+					,	CONVERT(VARCHAR(MAX), BT.PATHNAME + '|' + PD.CONSUMABLEDEFNAME)						AS 	PATHNAME					-- 경로(기준 : 품목명)
+					,	CONVERT(VARCHAR(MAX), BT.NEEDQTYPATH + '|' + CONVERT(VARCHAR(100), BV.NEEDQTY))		AS 	NEEDQTYPATH					-- 경로(기준 : 소요량)
+					,	BT.LEVEL + 1																		AS 	LEVEL						-- 트리레벨
+			   FROM		BOMTREE														BT
+			   INNER JOIN [UCKERP].[$!{DBLINKNAME}].[dbo].[uck_VIEW_ITEMPROCMAT]	BV	ON	BV.ITEMSEQ = BT.PRODUCTDEFID
+			   INNER JOIN SF_CONSUMABLEDEFINITION									PD	ON	PD.CONSUMABLEDEFID = BV.MATITEMSEQ
+			)
+			SELECT   
+					BOM.PATH 																		-- 경로(기준 : 품목ID)
+				,	BOM.NUMPATH																		-- 경로(기준 : 품목NUMBER)
+				,	BOM.PATHNAME																	-- 경로(기준 : 품목명)
+				,	BOM.NEEDQTYPATH																	-- 경로(기준 : 소요량)
+				,	BOM.LEVEL																		-- 트리레벨
+				,	LEFT(BOM.PATH, CHARINDEX('|', BOM.PATH )-1)			AS	ROOTPRODUCTDEFID		-- 최상위 품목 ID
+				,	LEFT(BOM.NUMPATH, CHARINDEX('|', BOM.NUMPATH )-1)	AS	ROOTPRODUCTDEFNUMBER	-- 최상위 품목 NUMBER
+				,	RPD.CONSUMABLEDEFNAME								AS	ROOTPRODUCTDEFNAME		-- 최상위 품목명					
+				,	RPD.STANDARD																	-- 최상위 품목 규격						
+				,	RPT.TEAMID																		-- 최상위 품목 팀
+				,	ISNULL(TD.DICTIONARYNAME, T.TEAMNAME)				AS	TEAMNAME				-- 최상위 품목 팀명
+				,	RPT.MODELID																		-- 최상위 품목 기종 ID
+				,	ISNULL(MCD.DICTIONARYNAME, MC.CODENAME)				AS  MODELNAME				-- 최상위 품목 기종명
+				,	RPD.UNIT																		-- 최상위 품목 단위
+				,	BOM.PARENTPRODUCTDEFID															-- 상위 품목 ID
+				,	PPD.CONSUMABLEDEFNAME								AS	PARENTPRODUCTDEFNAME	-- 상위 품목명
+				,	BOM.PRODUCTDEFID																-- 품목 ID
+				,	PD.CONSUMABLEDEFNAME															-- 품목명
+			FROM	BOMTREE										BOM
+			INNER JOIN	SF_CONSUMABLEDEFINITION					RPD	ON	RPD.CONSUMABLEDEFID = LEFT(BOM.PATH, CHARINDEX('|', BOM.PATH )-1)
+			INNER JOIN 	SF_CONSUMABLEDEFINITION					PPD	ON	PPD.CONSUMABLEDEFID = BOM.PARENTPRODUCTDEFID
+			INNER JOIN	SF_CONSUMABLEDEFINITION					PD	ON	PD.CONSUMABLEDEFID = BOM.PRODUCTDEFID
+			LEFT JOIN SF_PRODUCTDEFINITION						RPT ON	RPT.PRODUCTDEFID = RPD.CONSUMABLEDEFID
+			LEFT JOIN SF_CODE									MC	ON	MC.CODEID = RPT.MODELID
+																	AND MC.CODECLASSID = 'ModelCode'
+			LEFT JOIN SF_DICTIONARY								MCD	ON	MCD.DICTIONARYID = MC.DICTIONARYID
+																	AND MCD.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+			LEFT JOIN CT_TEAM									T	ON	T.TEAMID = RPT.TEAMID
+			LEFT JOIN SF_DICTIONARY								TD	ON	TD.DICTIONARYID = T.DICTIONARYID
+																	AND	TD.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+			WHERE 	1 = 1
+			ORDER BY 
+					PATH;	
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 - 코드정보 - 설비그룹
+	설		명	: 설비그룹 조회
+	작	성	자	: 유태근
+	작	성	일	: 2020-06-05
+	주요 변경 로그	: 
+	-->
+	<query id="SelectEquipmentClass" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			--id : SelectEquipmentClass
+			--version : 00001
+			SELECT
+					EC.ENTERPRISEID
+				,	EC.PLANTID 
+				,	EC.EQUIPMENTCLASSID
+				,	ISNULL(KD.DICTIONARYNAME, EC.EQUIPMENTCLASSNAME)	AS	"EQUIPMENTCLASSNAME$$KO-KR"
+				,	ISNULL(ED.DICTIONARYNAME, EC.EQUIPMENTCLASSNAME)	AS	"EQUIPMENTCLASSNAME$$EN-US"
+				,	ISNULL(JD.DICTIONARYNAME, EC.EQUIPMENTCLASSNAME)	AS	"EQUIPMENTCLASSNAME$$JA-JP"
+				,	EC.DESCRIPTION
+				,	EC.VALIDSTATE
+				,	CU.USERNAME							AS	CREATOR
+				,	EC.CREATEDTIME
+				,	MU.USERNAME							AS	MODIFIER
+				,	EC.MODIFIEDTIME
+			FROM	SF_EQUIPMENTCLASS					EC 
+			LEFT OUTER JOIN SF_DICTIONARY				KD	ON	KD.DICTIONARYID = EC.DICTIONARYID
+															AND KD.LANGUAGETYPE = 'ko-KR'
+			LEFT OUTER JOIN SF_DICTIONARY				ED	ON	ED.DICTIONARYID = EC.DICTIONARYID
+															AND ED.LANGUAGETYPE = 'en-US'
+			LEFT OUTER JOIN SF_DICTIONARY				JD	ON	JD.DICTIONARYID = EC.DICTIONARYID
+															AND JD.LANGUAGETYPE = 'ja-JP'
+			LEFT OUTER JOIN SF_DICTIONARY				ECD	ON	ECD.DICTIONARYID = EC.DICTIONARYID
+															AND ECD.LANGUAGETYPE = '${P_LANGUAGETYPE}'
+			LEFT OUTER JOIN SF_USER						CU	ON	CU.USERID = EC.CREATOR
+			LEFT OUTER JOIN SF_USER						MU	ON	MU.USERID = EC.MODIFIER
+			WHERE	1 = 1
+			
+			#if ("$!{P_EQUIPMENTCLASSIDNAME}" != "" && "$!{P_EQUIPMENTCLASSIDNAME}" != "*")
+				AND		EC.EQUIPMENTCLASSID LIKE '%$!{P_EQUIPMENTCLASSIDNAME}%'
+				OR		KD.DICTIONARYNAME LIKE '%$!{P_EQUIPMENTCLASSIDNAME}%'
+				OR		ED.DICTIONARYNAME LIKE '%$!{P_EQUIPMENTCLASSIDNAME}%'
+				OR		JD.DICTIONARYNAME LIKE '%$!{P_EQUIPMENTCLASSIDNAME}%'
+				OR 		EC.EQUIPMENTCLASSNAME LIKE '%$!{P_EQUIPMENTCLASSIDNAME}%'
+			#end	
+			
+			#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+				AND 	EC.VALIDSTATE = '$!{P_VALIDSTATE}'
+			#end		
+			
+			ORDER BY 
+					EC.CREATEDTIME;
+			]]>
+		</statement>
+	</query>
+	
+			
+	<!--
+		설		명	: 작업자 를 조회한다. 
+		생	성	자	: 한주석
+		생	성	일	: 2019-06-18 
+		수  정   이  력	:
+	-->
+
+	<query id="GetUserAreaPerson" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				--id : GetUserAreaPerson
+				--version : 10001
+			
+				SELECT	
+						U.USERID
+					,	U.USERNAME
+				FROM	SF_USER				U
+				WHERE	1 = 1
+				AND		U.VALIDSTATE = 'Valid'
+				#if ("$!{USERID}" != "*" && "$!{USERID}" != "")
+					AND 	UPPER(U.USERID) LIKE UPPER('%$!{USERID}%')
+				#end
+				#if ("$!{USERNAME}" != "*" && "$!{USERNAME}" != "")
+					AND 	UPPER(U.USERNAME) LIKE UPPER('%$!{USERNAME}%')
+				#end				
+				
+			]]>
+		</statement>
+	</query>
+	
+	
+		<!--
+	프 로 그 램 명	: 기준정보 - 항목관리 - 작업장별 작업자 관리
+	설		명	: 작업장 그리드 조회
+	작	성	자	: 한주석
+	작	성	일	: 2020-05-25
+	주요 변경 로그	: 
+	-->
+	<query id="GetArea" version="00002">
+		<statement>
+			<![CDATA[
+			--
+			--id : GetArea
+			--version : 00002		
+			WITH TEMP AS 
+				(
+				   SELECT   COUNT(*)            AS   CNT
+				      ,   A.AREAID
+				   FROM   CT_AREAWORKER         A
+				   LEFT JOIN SF_AREA            B   ON   B.AREAID = A.AREAID
+				   WHERE   1 = 1
+				   	#if ("$!{P_VALIDSTATE}" != "*" && "$!{P_VALIDSTATE}" != "")
+					AND  A.VALIDSTATE = '$!{P_VALIDSTATE}'
+					#end
+				   GROUP BY
+				         A.AREAID
+				)
+				SELECT 
+				      A.AREAID
+				   , ISNULL(DC.DICTIONARYNAME, A.AREANAME)   AS AREANAME
+				   , ISNULL(B.CNT, 0)   AS WORKERNUMBER
+				FROM   SF_AREA      A   
+				LEFT JOIN TEMP      B   ON   B.AREAID = A.AREAID
+				LEFT  JOIN SF_DICTIONARY   DC   ON    A.DICTIONARYID    = DC.DICTIONARYID
+				                                    AND DC.LANGUAGETYPE   = '$!{P_LANGUAGETYPE}' 
+				WHERE 1=1
+				#if ("$!{P_AREACODE}" != "*" && "$!{P_AREACODE}" != "")
+					AND  A.AREAID = '$!{P_AREACODE}'
+				#end
+				
+			]]>
+		</statement>
+	</query>
+	
+	
+	<!--
+	프 로 그 램 명	: 기준정보 - 항목관리 - 작업장별 작업자 관리
+	설		명	: 작업장 그리드 조회
+	작	성	자	: 한주석
+	작	성	일	: 2020-05-25
+	주요 변경 로그	: 2021-05-26 scmo WHERE절 내 VALIDSTATE 수정.
+	-->
+	<query id="GetUserAreaPerson" version="00002">
+		<statement>
+			<![CDATA[
+			--
+			--id : GetUserAreaPerson
+			--version : 00002
+			SELECT	AW.AREAID
+				,	AW.USERID
+				,	U.USERNAME
+				,	AW.VALIDSTATE
+				,	CU.USERNAME							AS	CREATOR
+				,	AW.CREATEDTIME
+				,	MU.USERNAME							AS	MODIFIER
+				,	AW.MODIFIEDTIME
+			FROM 	CT_AREAWORKER						AW	
+			LEFT OUTER JOIN SF_USER						CU	ON	CU.USERID = AW.CREATOR
+			LEFT OUTER JOIN SF_USER						MU	ON	MU.USERID = AW.MODIFIER
+			LEFT OUTER JOIN SF_USER						U	ON	U.USERID = AW.USERID
+			WHERE	1=1
+			AND AW.AREAID = '$!{P_AREAID}'
+			#if ("$!{P_VALIDSTATE}" != "*" && "$!{P_VALIDSTATE}" != "")
+					AND  U.VALIDSTATE = '$!{P_VALIDSTATE}'
+			#end
+			
+			]]>
+		</statement>
+	</query>
+	
+	
+	
+	<!--
+	프 로 그 램 명	: 기준정보 - 항목관리 - 세부공정별 작업자 관리
+	설		명	: 공정 팝업 조회
+	작	성	자	: 한주석
+	작	성	일	: 2020-06-09
+	주요 변경 로그	: 
+	-->
+	<query id="GetSubProcess" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			--id : GetSubProcess
+			--version : 00001						
+				WITH TEMP AS 
+				(
+				   SELECT   COUNT(*)            AS   CNT
+				      ,   A.SUBPROCESSSEGMENTID
+				   FROM   CT_SUBPROCESSWORKER         A
+				   LEFT JOIN SF_PROCESSSEGMENT            B   ON   B.PROCESSSEGMENTID = A.SUBPROCESSSEGMENTID
+				   WHERE   1 = 1
+				   	#if ("$!{P_VALIDSTATE}" != "*" && "$!{P_VALIDSTATE}" != "")
+					AND  A.VALIDSTATE = '$!{P_VALIDSTATE}'
+					#end
+				   GROUP BY
+				         A.SUBPROCESSSEGMENTID
+				)
+				SELECT 
+				      A.PROCESSSEGMENTID							   AS SUBPROCESSSEGMENTID
+				   , ISNULL(DC.DICTIONARYNAME, A.PROCESSSEGMENTNAME)   AS SUBPROCESSSEGMENTNAME
+				   , ISNULL(B.CNT, 0)   AS WORKERNUMBER
+				FROM   SF_PROCESSSEGMENT      A   
+				LEFT JOIN TEMP      B   ON   B.SUBPROCESSSEGMENTID = A.PROCESSSEGMENTID
+				LEFT  JOIN SF_DICTIONARY   DC   ON    A.DICTIONARYID    = DC.DICTIONARYID
+				                                    AND DC.LANGUAGETYPE   = '$!{P_LANGUAGETYPE}'  
+				WHERE 1=1
+				AND A.PROCESSSEGMENTTYPE ='Sub'
+				#if ("$!{P_PROCESSSEGMENT}" != "" && "$!{P_PROCESSSEGMENT}" != "*")
+					AND A.PROCESSSEGMENTID = '$!{P_PROCESSSEGMENT}'
+				#end
+
+
+				
+			]]>
+		</statement>
+	</query>
+	
+	
+	<!--
+	프 로 그 램 명	: 기준정보 - 항목관리 - 세부공정별 작업자 관리
+	설		명	: 세부공정별 작업자 그리드 조회
+	작	성	자	: 한주석
+	작	성	일	: 2020-05-25
+	주요 변경 로그	: 
+	-->
+	<query id="GetUserProcessPerson" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			--id : GetUserProcessPerson
+			--version : 00001
+			SELECT	PW.PROCESSSEGMENTID		
+				,	PW.SUBPROCESSSEGMENTID 
+				,	ISNULL(DC.DICTIONARYNAME, PG.PROCESSSEGMENTNAME)	AS PROCESSSEGMENTNAME
+				,	PW.USERID
+				,	U.USERNAME
+				,	PW.VALIDSTATE
+				,	CU.USERNAME							AS	CREATOR
+				,	PW.CREATEDTIME
+				,	MU.USERNAME							AS	MODIFIER
+				,	PW.MODIFIEDTIME
+			FROM 	CT_SUBPROCESSWORKER					PW	
+			LEFT OUTER JOIN SF_PROCESSSEGMENT			PG  ON	PW.PROCESSSEGMENTID = PG.PROCESSSEGMENTID
+			LEFT JOIN SF_DICTIONARY						DC	ON	PG.DICTIONARYID = DC.DICTIONARYID
+															AND	DC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+			LEFT OUTER JOIN SF_USER						CU	ON	CU.USERID = PW.CREATOR
+			LEFT OUTER JOIN SF_USER						MU	ON	MU.USERID = PW.MODIFIER
+			LEFT OUTER JOIN SF_USER						U	ON	U.USERID = PW.USERID
+			WHERE	1=1
+			AND PW.SUBPROCESSSEGMENTID = '$!{P_PROCESSSEGMENT}'
+			#if ("$!{P_VALIDSTATE}" != "*" && "$!{P_VALIDSTATE}" != "")
+					AND  PW.VALIDSTATE = '$!{P_VALIDSTATE}'
+			#end
+			
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 - 항목관리 - 세부공정별 작업자 관리
+	설		명	: 세부공정 콤보박스
+	작	성	자	: 한주석
+	작	성	일	: 2020-06-04
+	주요 변경 로그	: 
+	-->
+	<query id="GetProcessSegment" version="00002">
+		<statement>
+			<![CDATA[
+			--
+			--id : GetProcessSegment
+			--version : 00002
+			SELECT
+					PS.PROCESSSEGMENTID									AS CODEID
+				,	ISNULL(DC.DICTIONARYNAME, PS.PROCESSSEGMENTNAME)	AS CODENAME
+			FROM	SF_PROCESSSEGMENT	PS
+			LEFT JOIN SF_DICTIONARY		DC	ON	PS.DICTIONARYID = DC.DICTIONARYID
+											AND	DC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+			WHERE 	1 = 1
+			AND PS.PROCESSSEGMENTTYPE = 'Sub'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 - 항목관리 - 세부공정별 작업자 관리
+	설		명	: 메인공정 팝업
+	작	성	자	: 한주석
+	작	성	일	: 2020-06-04
+	주요 변경 로그	: 
+	-->
+	<query id="GetMainProcessSegment" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			--id : GetMainProcessSegment
+			--version : 00001
+			SELECT
+					PS.PROCESSSEGMENTID									
+				,	ISNULL(DC.DICTIONARYNAME, PS.PROCESSSEGMENTNAME)	AS PROCESSSEGMENTNAME
+			FROM	SF_PROCESSSEGMENT	PS
+			LEFT JOIN SF_DICTIONARY		DC	ON	PS.DICTIONARYID = DC.DICTIONARYID
+											AND	DC.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+			WHERE 	1 = 1
+			AND PS.PROCESSSEGMENTTYPE = 'MAIN'
+			#if ("$!{PROCESSSEGMENTID}" != "")
+			AND 	PS.PROCESSSEGMENTID LIKE '%$!{PROCESSSEGMENTID}%'
+			#end
+			#if ("$!{PROCESSSEGMENTNAME}" != "")
+			AND		ISNULL(DC.DICTIONARYNAME, PS.PROCESSSEGMENTNAME) LIKE '%$!{PROCESSSEGMENTNAME}%' 
+			#end	
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 - 창고관리 - CELL
+	설		명	: 창고리스트(SELECT)
+	작	성	자	: JYLEE
+	작	성	일	: 2020-06-09
+	주요 변경 로그	: 
+	-->
+	<query id="SelectWarehouseList" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			--id : SelectWarehouseList
+			--version : 00001
+			
+				SELECT	
+						WH.WAREHOUSEID 										AS WAREHOUSEID 			-- 창고ID
+						,	ISNULL(WHD.DICTIONARYNAME, WH.WAREHOUSENAME) 	AS WAREHOUSENAME 		-- 창고명
+						,	CD.CODENAME 									AS WAREHOUSETYPE 		-- 창고타입
+						,	WH.DESCRIPTION 									AS DESCRIPTION 			-- 설명
+				FROM	SF_WAREHOUSE WH
+						LEFT JOIN SF_USER UC ON WH.CREATOR = UC.USERID
+						LEFT JOIN SF_USER UM ON WH.MODIFIER = UM.USERID
+						LEFT JOIN SF_CODE CD ON WH.WAREHOUSETYPE = CD.CODEID 
+													AND CD.CODECLASSID = 'WarehouseType'
+						LEFT JOIN SF_DICTIONARY WHD ON WHD.DICTIONARYID = WH.DICTIONARYID
+													AND WHD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE	1=1
+						AND WH.VALIDSTATE = 'Valid'
+				#if ("$!{P_WAREHOUSENAME}" != "*" && "$!{P_WAREHOUSENAME}" != "")
+					AND  WH.WAREHOUSENAME LIKE '%$!{P_WAREHOUSENAME}%'
+				#end
+				
+						
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보  TEAM콤보박스
+	설		명	: TEAM리스트 조회
+	작	성	자	: JYLEE
+	작	성	일	: 2020-06-10
+	주요 변경 로그	: CT_TEAM테이블 반영
+	-->
+	<query id="GetTeamList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				--id : GetTeamList
+				--version : 00001
+
+				SELECT 
+							TM.TEAMID								AS CODEID
+						,	ISNULL(DIC.DICTIONARYNAME, TM.TEAMNAME) AS CODENAME
+				FROM		CT_TEAM			TM
+				LEFT JOIN	SF_DICTIONARY	DIC ON TM.DICTIONARYID = DIC.DICTIONARYID
+												AND DIC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE 	1=1
+						AND	TM.VALIDSTATE = 'Valid'
+						#if ("$!{P_NOTIN}" != "")
+							AND  TM.TEAMID NOT IN ('T05', 'T06')
+						#end
+				ORDER BY	TM.TEAMID
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	프 로 그 램 명	: 기준정보  TEAM콤보박스
+	설		명	: TEAM리스트 조회
+	작	성	자	: JYLEE
+	작	성	일	: 2020-06-10
+	주요 변경 로그	: CT_TEAM테이블 반영
+	-->
+	<query id="GetTeamList" version="00002">
+		<statement>
+			<![CDATA[
+				--
+				--id : GetTeamList
+				--version : 00002
+
+				SELECT 
+							TM.TEAMID								AS CODEID
+						,	ISNULL(DIC.DICTIONARYNAME, TM.TEAMNAME) AS CODENAME
+				FROM		CT_TEAM			TM
+				LEFT JOIN	SF_DICTIONARY	DIC ON TM.DICTIONARYID = DIC.DICTIONARYID
+												AND DIC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE 	1=1
+						AND	TM.VALIDSTATE = 'Valid'
+						#if ("$!{P_NOTIN}" != "")
+							AND  TM.TEAMID NOT IN ('T06')
+						#end
+				ORDER BY	TM.TEAMID
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보  부서콤보박스
+	설		명	: 부서 리스트 조회
+	작	성	자	: scmo
+	작	성	일	: 2020-07-02
+	주요 변경 로그	: CT_DEPARTMENT 테이블 반영
+	-->
+	<query id="GetDepartmentList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				--id : GetDepartmentList
+				--version : 00001
+
+				SELECT 
+							cd.DEPARTMENTID								AS CODEID
+						,	ISNULL(DIC.DICTIONARYNAME, cd.DEPARTMENTNAME) AS CODENAME
+				FROM		CT_DEPARTMENT			cd
+				LEFT JOIN	SF_DICTIONARY	DIC ON cd.DICTIONARYID = DIC.DICTIONARYID
+												AND DIC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE cd.VALIDSTATE = 'Valid'
+				ORDER BY	cd.DEPARTMENTID
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보  사용자정보(ERP_EMPNO)
+	설		명	: 사용자 조회
+	작	성	자	: scmo
+	작	성	일	: 2020-07-13
+	주요 변경 로그	: 
+	-->
+	<query id="GetUserByEmpNo" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				--id : GetUserByEmpNo
+				--version : 00001
+				SELECT 		us.ERP_EMPNO AS USERID
+							,us.USERNAME 
+				FROM		SF_USER			us
+				WHERE 		1=1
+							AND us.VALIDSTATE = 'Valid'
+							AND us.ERP_EMPNO <> '999'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 
+	설		명	: 세부공정 콤보박스
+	작	성	자	: 한주석
+	작	성	일	: 2020-06-10
+	주요 변경 로그	: 
+	-->
+	<query id="GetProcessSegment" version="00003">
+		<statement>
+			<![CDATA[
+			--
+			--id : GetProcessSegment
+			--version : 00003
+			SELECT	PP.PROCESSSEGMENTID									AS CODEID
+				,	ISNULL(DC.DICTIONARYNAME, PS.PROCESSSEGMENTNAME)	AS CODENAME
+			FROM	SF_PROCESSPATH		PP
+			LEFT JOIN SF_PROCESSSEGMENT	PS	ON	PP.PROCESSSEGMENTID = PS.PROCESSSEGMENTID
+			LEFT JOIN SF_DICTIONARY		DC	ON	PS.DICTIONARYID = DC.DICTIONARYID
+											AND	DC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+			WHERE 	1 = 1
+			AND PP.PATHTYPE LIKE '%Start%'
+			GROUP BY PP.PROCESSSEGMENTID, ISNULL(DC.DICTIONARYNAME, PS.PROCESSSEGMENTNAME)
+			ORDER BY PP.PROCESSSEGMENTID
+			]]>
+		</statement>
+	</query>
+	
+	
+	<!--
+	설		명	: 작업장 목록을 조회 
+	생	성	자	: 한주석
+	생	성	일	: 2020-06-10
+	수  정   이  력	: 
+	-->
+	<query id="GetAreaList" version="00002">
+		<statement>
+			<![CDATA[
+				--
+				-- id : GetAreaList
+				-- version : 00002
+				
+				SELECT	
+							AR.AREAID
+						,	ISNULL(ARD.DICTIONARYNAME, AR.AREANAME)		AS	AREANAME
+				FROM 		SF_AREA			AR
+				LEFT JOIN	SF_DICTIONARY	ARD	ON	ARD.DICTIONARYID = AR.DICTIONARYID
+												AND	ARD.LANGUAGETYPE = '$!{LANGUAGETYPE}'	
+				WHERE		AR.VALIDSTATE = 'Valid'
+				#if ("$!{TXTAREA}" != "*" && "$!{TXTAREA}" != "")
+					AND  (AR.AREAID LIKE '%$!{TXTAREA}%'
+					OR	ARD.DICTIONARYNAME LIKE '%$!{TXTAREA}%'
+					OR  AR.AREANAME LIKE '%$!{TXTAREA}%')
+				#end
+				--ORDER BY	AREAID
+				ORDER BY 	ISNULL(ARD.DICTIONARYNAME, AR.AREANAME) ASC
+			]]>
+		</statement>
+	</query>
+	
+		<!--
+	설		명	: 작업장 목록을 조회 
+	생	성	자	: 유형하
+	생	성	일	: 2020-06-10
+	수  정   이  력	: 
+	-->
+	<query id="GetAreaList" version="00003">
+		<statement>
+			<![CDATA[
+				--
+				-- id : GetAreaList
+				-- version : 00003
+				
+				SELECT	
+							AR.AREAID
+						,	ISNULL(ARD.DICTIONARYNAME, AR.AREANAME)		AS	AREANAME
+				FROM 		SF_AREA			AR
+				LEFT JOIN	SF_DICTIONARY	ARD	ON	ARD.DICTIONARYID = AR.DICTIONARYID
+												AND	ARD.LANGUAGETYPE = '$!{LANGUAGETYPE}'	
+				WHERE		AR.VALIDSTATE = 'Valid'				
+				--ORDER BY	AREAID
+				ORDER BY 	ISNULL(ARD.DICTIONARYNAME, AR.AREANAME) ASC
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 코드클래스 조회
+	생	성	자	: 정승원
+	생	성	일	: 2020-06-12
+	수  정   이  력	: 
+	-->
+	<query id="GetInputParameter" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- id : GetInputParameter
+				-- version : 00001
+				SELECT 
+						SC2.CODECLASSID
+					,	ISNULL(D.DICTIONARYNAME, SC2.CODECLASSNAME) AS CODECLASSNAME
+				FROM 	SF_CODECLASS 		SC2  
+				LEFT JOIN SF_DICTIONARY 	D	ON	SC2.DICTIONARYID = D.DICTIONARYID
+												AND D.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE PARENTCODECLASSID ='$!{PARENTCODECLASSID}'
+				ORDER BY SC2.CODECLASSID ASC;
+			]]>
+		</statement>
+	</query>
+	
+	
+		<!--
+	설		명	: 공정그룹 조회
+	생	성	자	: 한주석
+	생	성	일	: 2020-06-15
+	수  정   이  력	: 
+	-->
+	<query id="GetProcessSegmentClass" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- id : GetProcessSegmentClass
+				-- version : 00001
+				SELECT 
+						PGC.PROCESSSEGMENTCLASSID							   AS CODEID
+					,	ISNULL(D.DICTIONARYNAME, PGC.PROCESSSEGMENTCLASSNAME)  AS CODENAME
+				FROM 	SF_PROCESSSEGMENTCLASS 	PGC  
+				LEFT JOIN SF_DICTIONARY 	D	ON	PGC.DICTIONARYID = D.DICTIONARYID
+												AND D.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보  > 공정코드 > 작업매뉴얼 등록/조회
+	설		명	: 
+	작	성	자	: 정승원
+	작	성	일	: 2020-06-16
+	주요 변경 로그	: 2021-01-28 정송은 사용여부 조회조건 추가
+				  2021-05-13 정송은 도면번호, 수정자, 수정시간 추가
+	-->
+	<query id="SelectManualList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				--id : SelectManualList
+				--version : 00001
+				SELECT
+						WM.MANUALNO
+					,	WM.MANUALID								--관리번호
+					,	WM.MANUALNAME							--이름
+					,	WM.MANUALVERSION						--개정번호
+					,	WM.PROCESSSEGMENTID						--공정
+					,	WM.MANUALTYPE							--타입
+					,	WM.STATE								--상태
+					,   WM.DRAWINGNO                            --도면번호
+					,	ISNULL(U1.USERNAME, WM.CREATOR)			REGISTUSER
+					,	CONVERT(CHAR(19), WM.CREATEDTIME, 20)	REGISTDATE
+					,	ISNULL(U2.USERNAME, WM.SCRAPUSER)		SCRAPUSER
+					,	CONVERT(CHAR(19), WM.SCRAPDATE, 20)		SCRAPDATE
+					,	ISNULL(U3.USERNAME, WM.MODIFIER)		MODIFIER
+					,	CONVERT(CHAR(19), WM.MODIFIEDTIME, 20)	MODIFIEDTIME
+					,	''										"OPEN"
+					,	F.FILENAME
+					,	F.FILEPATH
+					,	F.FILEEXT
+					,	F.FILEDATA
+				FROM CT_WORKMANUAL 			WM
+				LEFT JOIN SF_USER			U1	ON	WM.CREATOR = U1.USERID
+				LEFT JOIN SF_USER			U2	ON	WM.SCRAPUSER = U2.USERID
+				LEFT JOIN SF_USER 			U3	ON	WM.MODIFIER = U3.USERID
+				LEFT JOIN SF_FILE			F	ON	WM.MANUALNO = F.MANUALNO
+												AND WM.MANUALVERSION = F.MANUALVERSION
+				WHERE 1 = 1
+				#if("$!{P_PROCESSSEGMENT}" != "")
+				AND EXISTS (
+							SELECT 	1
+							FROM	ufn_selectStringToSplit('$!{P_PROCESSSEGMENT}', ',')	S
+							WHERE	WM.PROCESSSEGMENTID = S.VALUE
+					   		)
+				#end
+				#if("$!{P_MANUALID}" != "" && "$!{P_MANUALID}" != "*")
+				AND WM.MANUALID = '$!{P_MANUALID}'
+				#end
+				
+				#if("$!{P_VALIDSTATE}" != "")
+				AND WM.VALIDSTATE = '$!{P_VALIDSTATE}'
+				#end
+				
+				#if("$!{P_ID}" != "" && "$!{P_ID}" != "*")
+				AND WM.DRAWINGNO = '$!{P_ID}'
+				#end
+				
+				ORDER BY WM.MANUALID, WM.MANUALNAME;
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보  > 공정코드 > 작업매뉴얼 등록/조회
+	설		명	: 
+	작	성	자	: 정승원
+	작	성	일	: 2020-06-16
+	주요 변경 로그	: 
+	-->
+	<query id="SelectManualFileList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				--id : SelectManualFileList
+				--version : 00001
+				SELECT 
+						F.MANUALNO
+					,	W.MANUALID
+					,	W.MANUALNAME
+					,	F.MANUALVERSION
+					,	F.FILENAME
+					,	'' REGIST
+					,	'' "OPEN"
+					,	F.FILEPATH
+					,	F.FILENAME
+					,	F.FILEEXT
+					,	F.FILESIZE
+					,	F.FILEDATA
+					,	W.STATE
+				FROM 	SF_FILE				F
+				INNER JOIN CT_WORKMANUAL	W	ON	F.MANUALNO = W.MANUALNO
+				WHERE 1 = 1
+				AND F.MANUALNO = '$!{MANUALNO}'
+				ORDER BY F.MANUALVERSION DESC;
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보  > 공정코드 > 작업매뉴얼 등록/조회
+	설		명	: 
+	작	성	자	: 정승원
+	작	성	일	: 2020-06-16
+	주요 변경 로그	: 
+	-->
+	<query id="GetManualIdList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				--id : GetManualIdList
+				--version : 00001
+				SELECT 
+						DISTINCT MANUALID
+					,	MANUALID MANUALNAME
+				FROM 	CT_WORKMANUAL
+				ORDER BY MANUALID ASC
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 공정관리 > 공정실적 > 수리/개조 실적 관리
+	설		명	: 수리/개조 공정 조회
+	작	성	자	: 황유성
+	작	성	일	: 2020-06-23
+	주요 변경 로그	: 
+	-->
+	<query id="GetRepairProcessList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				--id : GetRepairProcessList
+				--version : 00001
+	
+				SELECT 		PROCESSDEFID
+						,	PROCESSDEFNAME
+				FROM		SF_PROCESSDEFINITION
+				WHERE		PROCESSCLASSID = 'RTC003'	-- 수리/개조
+				AND			VALIDSTATE = 'Valid'	
+				ORDER BY 	PROCESSDEFID
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 공정관리 > 공정실적 > 조립진척현황
+	설		명	: 세부공정 조회
+	작	성	자	: 황유성
+	작	성	일	: 2020-06-23
+	주요 변경 로그	: 
+	-->
+	<query id="GetSubSegmentList" version="00002">
+		<statement>
+			<![CDATA[
+				--
+				-- id : GetSubSegmentList
+				-- version : 00002
+				SELECT
+						SP.SUBPROCESSSEGMENTID
+					,	ISNULL(MAX(DIC.DICTIONARYNAME), MAX(PS.PROCESSSEGMENTNAME)) AS SUBPROCESSSEGMENTNAME
+					,	MAX(CAST(SP.USERSEQUENCE AS INT))	AS USERSEQUENCE
+				FROM		CT_SPECDEFINITION			SD
+				JOIN		CT_SUBSEGMENTSPEC			SP	ON	SD.SPECDEFID = SP.SPECDEFID
+															AND SP.VALIDSTATE = 'Valid'
+				LEFT JOIN	SF_PROCESSSEGMENT			PS	ON	SP.SUBPROCESSSEGMENTID = PS.PROCESSSEGMENTID
+															AND	PS.PROCESSSEGMENTVERSION = '*'
+				LEFT JOIN	SF_DICTIONARY				DIC	ON	PS.DICTIONARYID = DIC.DICTIONARYID
+															AND DIC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE 		1 = 1
+				#if ("$!{P_PROCESSSEGMENT}" != "" && "$!{P_PROCESSSEGMENT}" != "*")
+				AND 		SD.PROCESSSEGMENTID = '$!{P_PROCESSSEGMENT}'
+				#end
+				GROUP BY	SP.SUBPROCESSSEGMENTID
+				ORDER BY 	MAX(CAST(SP.USERSEQUENCE AS INT)) ASC;
+			]]>
+		</statement>
+	</query>
+	
+	
+	
+	<!--
+	프 로 그 램 명	: 기준정보 - 공정관리 - 공정별 기종등록
+	설		명	: 공정 그리드 조회
+	작	성	자	: 한주석
+	작	성	일	: 2020-06-30
+	주요 변경 로그	: 
+	-->
+	<query id="GetProcessSegment" version="00004">
+		<statement>
+			<![CDATA[
+			--
+			--id : GetProcessSegment
+			--version : 00004						
+				WITH TEMP AS 
+				(
+				   SELECT   COUNT(*)            AS   CNT
+				      ,   A.PROCESSSEGMENTID
+				   FROM   CT_PROCESSSEGMENTMODEL          A
+				   LEFT JOIN SF_PROCESSSEGMENT            B   ON   B.PROCESSSEGMENTID = A.PROCESSSEGMENTID
+				   WHERE   1 = 1
+				   	#if ("$!{P_VALIDSTATE}" != "*" && "$!{P_VALIDSTATE}" != "")
+					AND  A.VALIDSTATE = '$!{P_VALIDSTATE}'
+					#end
+				   GROUP BY
+				         A.PROCESSSEGMENTID
+				)
+				SELECT 
+				      A.PROCESSSEGMENTID							   AS PROCESSSEGMENTID
+				   , ISNULL(DC.DICTIONARYNAME, A.PROCESSSEGMENTNAME)   AS PROCESSSEGMENTNAME
+				   , ISNULL(B.CNT, 0)   								AS MODELNUMBER
+				FROM   SF_PROCESSSEGMENT      A   
+				
+				LEFT JOIN TEMP      B   ON   B.PROCESSSEGMENTID = A.PROCESSSEGMENTID
+				LEFT  JOIN SF_DICTIONARY   DC   ON    A.DICTIONARYID    = DC.DICTIONARYID
+				                                    AND DC.LANGUAGETYPE   = '$!{P_LANGUAGETYPE}'  
+				WHERE 1=1
+				AND A.PROCESSSEGMENTTYPE ='Main'
+				#if ("$!{P_PROCESSSEGMENT}" != "" && "$!{P_PROCESSSEGMENT}" != "*")
+					AND A.PROCESSSEGMENTID = '$!{P_PROCESSSEGMENT}'
+				#end
+				
+			]]>
+		</statement>
+	</query>
+	
+	
+	<!--
+	프 로 그 램 명	: 기준정보 - 공정관리 - 공정별 기종등록
+	설		명	: 모델 그리드 조회
+	작	성	자	: 한주석
+	작	성	일	: 2020-06-30
+	주요 변경 로그	: 
+	-->
+	<query id="GetModelByProcess" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			--id : GetModelByProcess
+			--version : 00001					
+
+				 SELECT	PM.PROCESSSEGMENTID
+				      ,	PM.PROCESSSEGMENTVERSION
+				      ,	PM.MODELID
+				      ,	ISNULL(MCD.DICTIONARYNAME, MC.CODENAME)		AS  MODELNAME				--  기종명
+				      ,	PM.ENTERPRISEID
+				      ,	PM.PLANTID
+				      ,	PM.VALIDSTATE
+				      , ISNULL(US1.USERNAME, PM.CREATOR)   AS CREATOR
+			   		  ,	PM.CREATEDTIME
+					  ,	ISNULL(US2.USERNAME, PM.MODIFIER)  AS MODIFIER
+			    	  , PM.MODIFIEDTIME
+				FROM   CT_PROCESSSEGMENTMODEL			PM
+				LEFT JOIN SF_USER      					US1	ON  PM.CREATOR  = US1.USERID
+				LEFT JOIN SF_USER      					US2 ON  PM.MODIFIER  = US2.USERID 
+				LEFT JOIN  SF_PROCESSSEGMENT			PG	ON	PM.PROCESSSEGMENTID = PG.PROCESSSEGMENTID
+				LEFT JOIN SF_CODE						MC	ON	MC.CODEID = PM.MODELID
+															AND MC.CODECLASSID = 'ModelCode'
+				LEFT JOIN SF_DICTIONARY					MCD	ON	MCD.DICTIONARYID = MC.DICTIONARYID
+															AND MCD.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+				WHERE 1=1
+				#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+					AND PM.VALIDSTATE = '$!{P_VALIDSTATE}'
+				#end
+				#if ("$!{P_PROCESSSEGMENT}" != "" && "$!{P_PROCESSSEGMENT}" != "*")
+					AND PM.PROCESSSEGMENTID = '$!{P_PROCESSSEGMENT}'
+				#end
+				
+			]]>
+		</statement>
+	</query>
+	
+	
+		<!--
+	프 로 그 램 명	:
+	설		명	: 모든공정조회
+	작	성	자	: 한주석
+	작	성	일	: 2020-06-30
+	주요 변경 로그	: 
+	-->
+	<!-- Id/Version 이 중복되어 주석처리함
+	<query id="GetProcessSegment" version="00003">
+		<statement>
+			<![CDATA[
+			
+			id : GetProcessSegment
+			version : 00003
+			SELECT
+					PS.PROCESSSEGMENTID									AS CODEID
+				,	ISNULL(DC.DICTIONARYNAME, PS.PROCESSSEGMENTNAME)	AS CODENAME
+			FROM	SF_PROCESSSEGMENT	PS
+			LEFT JOIN SF_DICTIONARY		DC	ON	PS.DICTIONARYID = DC.DICTIONARYID
+											AND	DC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+			WHERE 	1 = 1
+			]]>
+		</statement>
+	</query>
+	-->
+	
+	
+	<!--
+	프 로 그 램 명	: 기준정보 - 기타 - 팀 정보
+	설		명	: 팀을 조회한다
+	작	성	자	: 한주석
+	작	성	일	: 2020-07-08
+	주요 변경 로그	: 
+	-->
+	<query id="GetTeam" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			--id : GetTeam
+			--version : 00001					
+
+				 SELECT	T.TEAMID
+				      ,	T.TEAMNAME
+					  ,	ISNULL(KD.DICTIONARYNAME, T.TEAMNAME)					AS	"TEAMNAME$$KO-KR"
+					  ,	ISNULL(ED.DICTIONARYNAME, T.TEAMNAME)					AS	"TEAMNAME$$EN-US"
+				 	  ,	ISNULL(JD.DICTIONARYNAME, T.TEAMNAME)					AS	"TEAMNAME$$JA-JP"
+				      ,	T.VALIDSTATE
+				      ,	T.DESCRIPTION
+				      , ISNULL(US1.USERNAME, T.CREATOR)   AS CREATOR
+			   		  ,	T.CREATEDTIME
+					  ,	ISNULL(US2.USERNAME, T.MODIFIER)  AS MODIFIER
+			    	  , T.MODIFIEDTIME
+				FROM   CT_TEAM			T
+				LEFT OUTER JOIN SF_USER      				US1	ON  T.CREATOR  = US1.USERID
+				LEFT OUTER JOIN SF_USER      				US2 ON  T.MODIFIER  = US2.USERID 
+				LEFT OUTER JOIN SF_DICTIONARY				KD	ON	KD.DICTIONARYID = T.DICTIONARYID
+																AND KD.LANGUAGETYPE = 'ko-KR'
+				LEFT OUTER JOIN SF_DICTIONARY				ED	ON	ED.DICTIONARYID = T.DICTIONARYID
+																AND ED.LANGUAGETYPE = 'en-US'
+				LEFT OUTER JOIN SF_DICTIONARY				JD	ON	JD.DICTIONARYID = T.DICTIONARYID
+																AND JD.LANGUAGETYPE = 'ja-JP'
+				WHERE 1=1
+				#if ("$!{P_TEAM}" != "" && "$!{P_TEAM}" != "*")
+					AND T.TEAMID = '$!{P_TEAM}'
+				#end
+				#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+					AND T.VALIDSTATE = '$!{P_VALIDSTATE}'
+				#end
+				
+			]]>
+		</statement>
+	</query>
+	
+	
+	<!--
+	프 로 그 램 명	: 기준정보 - 기타 - 단위정보
+	설		명	: 단위를 조회한다
+	작	성	자	: 한주석
+	작	성	일	: 2020-07-08
+	주요 변경 로그	: 
+	-->
+	<query id="GetUnit" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			--id : GetUnit
+			--version : 00001					
+
+				 SELECT	UD.UNITID
+				      ,	UD.UNITNAME
+				      ,	UD.UNIT
+				      ,	UD.VALIDSTATE
+				      ,	UD.DESCRIPTION
+				      , ISNULL(US1.USERNAME, UD.CREATOR)   AS CREATOR
+			   		  ,	UD.CREATEDTIME
+					  ,	ISNULL(US2.USERNAME, UD.MODIFIER)  AS MODIFIER
+			    	  , UD.MODIFIEDTIME
+				FROM   CT_UNITDEFINITION			UD
+				LEFT OUTER JOIN SF_USER      				US1	ON  UD.CREATOR  = US1.USERID
+				LEFT OUTER JOIN SF_USER      				US2 ON  UD.MODIFIER  = US2.USERID 
+				WHERE 1=1
+				#if ("$!{P_UNIT}" != "" && "$!{P_UNIT}" != "*")
+					AND UD.UNITID = '$!{P_UNIT}'
+				#end
+				#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+					AND UD.VALIDSTATE = '$!{P_VALIDSTATE}'
+				#end
+				
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 기준정보 - 폼목관리 - 기종정보팝업
+	설		명	: 기종정보 셀렉트 팝업 조회
+	작	성	자	: 모세찬
+	작	성	일	: 2020-07-14
+	주요 변경 로그	: 
+	-->
+	<query id="GetModelPopup" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			--id : GetModelPopup
+			--version : 00001					
+			SELECT	CD.CODEID
+					,ISNULL(DIC.DICTIONARYNAME, CD.CODENAME) AS CODENAME
+					,CD.DISPLAYSEQUENCE
+					,PM.PROCESSSEGMENTID
+			FROM	SF_CODE		CD
+					LEFT OUTER JOIN SF_DICTIONARY DIC ON DIC.DICTIONARYID = CD.DICTIONARYID AND DIC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+					LEFT OUTER JOIN CT_PROCESSSEGMENTMODEL PM ON CD.CODEID = PM.MODELID
+			WHERE	1=1
+					AND CD.CODECLASSID = 'ModelCode'
+					AND CD.VALIDSTATE = 'Valid'
+				
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	프 로 그 램 명	: 기준정보 - 스펙관리
+	설		명	: 스펙 조회
+	작	성	자	: 황유성
+	작	성	일	: 2020-08-03
+	주요 변경 로그	: 2021-06-08 정송은 SPECSEQUENCE 컬럼 추가
+				  2021-07-12 황인혁 SPECDEFIDVERSION 테이블(리비전 테이블) LEFT JOIN 추가
+	-->
+	<query id="GetSpecListForCheck" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- id : GetSpecListForCheck
+				-- version : 00001					
+		
+				SELECT		SD.SPECDEFID
+						,   SDV.SPECDEFIDVERSION
+						,	ISNULL(SDD.DICTIONARYNAME, SD.SPECDEFNAME)			AS SPECDEFNAME
+						,	SD.PROCESSSEGMENTID
+						,	ISNULL(PSD.DICTIONARYNAME, PS.PROCESSSEGMENTNAME)	AS PROCESSSEGMENTNAME
+						,	SD.ISDIVIDE
+						,	SS.SUBPROCESSSEGMENTID
+						,	ISNULL(SPD.DICTIONARYNAME, SP.PROCESSSEGMENTNAME)	AS SUBPROCESSSEGMENTNAME
+						,	SS.USERSEQUENCE
+						,	SS.ISRESULT
+						,	SS.ISOUTSOURCING 
+						,	DT.PARAMETERID
+						,	ISNULL(PAD.DICTIONARYNAME, PA.PARAMETERNAME)		AS PARAMETERNAME
+						,	PA.INPUTTYPE
+						,	ISNULL(ITD.DICTIONARYNAME, PA.INPUTTYPE)			AS INPUTTYPENAME
+						,	PA.DECIMALPLACE
+						,	PA.CODECLASSID
+						,	ISNULL(CCD.DICTIONARYNAME, CC.CODECLASSNAME)		AS CODECLASSNAME
+						,	PA.ISNOTREQUIRED 
+						,	DT.SPECTYPE
+						,	ISNULL(STD.DICTIONARYNAME, ST.CODENAME)				AS SPECTYPENAME
+						,	CASE WHEN DT.SPECTYPE IN ('BOTH', 'LOWER') 
+								THEN FORMAT(DT.LSL, #[['#,##0']]# + CASE WHEN ISNULL(PA.DECIMALPLACE, 0) > 0 THEN '.' + REPLICATE('0', PA.DECIMALPLACE) ELSE '' END) 
+								ELSE NULL 
+							END AS LSL
+						,	CASE WHEN DT.SPECTYPE IN ('BOTH', 'UPPER') 
+								THEN FORMAT(DT.USL, #[['#,##0']]# + CASE WHEN ISNULL(PA.DECIMALPLACE, 0) > 0 THEN '.' + REPLICATE('0', PA.DECIMALPLACE) ELSE '' END) 
+								ELSE NULL 
+							END AS USL
+						,	DT.ISMEASURE
+						,	DT.ISSPECFORCE
+						,	UN.UNIT
+						,	DT.DISPLAYSEQUENCE
+						,	ISNULL(VSD.DICTIONARYNAME, DT.VALIDSTATE)			AS VALIDSTATE
+						,	DT.SPECSEQUENCE
+						,   SDV.MODIFIER
+						,   SDV.MODIFIEDTIME
+						,   SDV.REASONFORCHANGE
+				FROM		CT_SPECDEFINITION		SD
+				LEFT JOIN   CT_SPECDEFINITIONVERSION SDV ON SDV.SPECDEFID = SD.SPECDEFID
+				LEFT JOIN	CT_SUBSEGMENTSPEC		SS	ON	SS.SPECDEFID = SD.SPECDEFID
+														AND SS.SPECDEFIDVERSION = SDV.SPECDEFIDVERSION
+				LEFT JOIN	CT_SUBSEGMENTSPECDETAIL	DT	ON	DT.SPECDEFID = SS.SPECDEFID
+														AND DT.SPECDEFIDVERSION = SDV.SPECDEFIDVERSION
+														AND DT.SPECSEQUENCE = SS.SPECSEQUENCE
+													#if("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+														AND	DT.VALIDSTATE = '$!{P_VALIDSTATE}'
+													#end
+				LEFT JOIN 	CT_PARAMETERDEFINITION	PA	ON	PA.PARAMETERID = DT.PARAMETERID
+				LEFT JOIN	SF_DICTIONARY			SDD	ON	SDD.DICTIONARYID = SD.DICTIONARYID
+														AND	SDD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN	SF_PROCESSSEGMENT		PS	ON	PS.PROCESSSEGMENTID = SD.PROCESSSEGMENTID
+				LEFT JOIN	SF_DICTIONARY			PSD	ON	PSD.DICTIONARYID = PS.DICTIONARYID
+														AND PSD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN	SF_PROCESSSEGMENT		SP	ON	SP.PROCESSSEGMENTID = SS.SUBPROCESSSEGMENTID
+				LEFT JOIN	SF_DICTIONARY			SPD	ON	SPD.DICTIONARYID = SP.DICTIONARYID
+														AND	SPD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN	SF_DICTIONARY			PAD	ON	PAD.DICTIONARYID = PA.DICTIONARYID
+														AND	PAD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN	SF_CODE					IT	ON	IT.CODECLASSID = 'InspItemInputType'
+														AND	IT.CODEID = PA.INPUTTYPE
+				LEFT JOIN	SF_DICTIONARY			ITD	ON	ITD.DICTIONARYID = IT.DICTIONARYID
+														AND	ITD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN	SF_CODECLASS			CC	ON	CC.CODECLASSID = PA.CODECLASSID
+				LEFT JOIN	SF_DICTIONARY			CCD	ON	CCD.DICTIONARYID = CC.DICTIONARYID
+														AND	CCD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN	SF_CODE					ST	ON	ST.CODECLASSID = 'SpecType'
+														AND	ST.CODEID = DT.SPECTYPE
+				LEFT JOIN	SF_DICTIONARY			STD	ON	STD.DICTIONARYID = ST.DICTIONARYID
+														AND	STD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN	CT_UNITDEFINITION		UN	ON	UN.UNITID = PA.UNIT
+				LEFT JOIN	SF_CODE					VS	ON	VS.CODECLASSID = 'VALIDSTATE'
+														AND	VS.CODEID = DT.VALIDSTATE
+				LEFT JOIN	SF_DICTIONARY			VSD	ON	VSD.DICTIONARYID = VS.DICTIONARYID
+														AND	VSD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE		SD.VALIDSTATE = 'Valid'
+				#if("$!{SPECDEFID}" != "")
+				AND EXISTS (
+								SELECT 	VALUE
+								FROM	ufn_selectStringToSplit('$!{SPECDEFID}', ',')	S
+								WHERE	SD.SPECDEFID = S.VALUE
+						   )
+				#end
+				#if("$!{PROCESSSEGMENTID}" != "")
+				AND EXISTS (
+								SELECT 	VALUE
+								FROM	ufn_selectStringToSplit('$!{PROCESSSEGMENTID}', ',')	S
+								WHERE	SD.PROCESSSEGMENTID = S.VALUE
+						   )
+				#end
+				ORDER BY 	SD.SPECDEFID, CAST(SDV.SPECDEFIDVERSION AS INT) DESC, CAST(SS.USERSEQUENCE AS INT), DT.DISPLAYSEQUENCE
+			]]>
+		</statement>
+	</query>
+	
+	
+	<!--
+	설		명	: 작업매뉴얼 등록/조회 필터 조회조건 도면번호 코드 가져오기
+	생	성	자	: 정송은
+	생	성	일	: 2021-05-13
+	수  정   이  력	: 
+	-->
+	<query id = "GetManualDrawingNo" version = "00001">
+		<statement>
+			<![CDATA[
+				--
+				-- id : GetManualDrawingNo
+				-- version : 00001					
+		
+				SELECT DRAWINGNO AS ID
+					  ,DRAWINGNO AS VALUE
+				FROM CT_WORKMANUAL
+				WHERE MANUALTYPE = 'Drawing'
+				ORDER BY DRAWINGNO
+
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 스펙복사 서브공정 리스트 가져오기
+	생	성	자	: 채세운
+	생	성	일	: 2021-06-23
+	수  정   이  력	: 
+	-->
+	<query id = "GetSubSpecListForCopy" version = "00001">
+		<statement>
+			<![CDATA[
+				--
+				-- id : GetSubSpecListForCopy
+				-- version : 00001					
+		
+				SELECT		SUBPROCESSSEGMENTID
+						,	SPECSEQUENCE
+						,	SPECDEFIDVERSION
+						,	USERSEQUENCE
+						,	ISRESULT
+						,	ISOUTSOURCING
+						,	DESCRIPTION
+						,	VALIDSTATE
+						,	ISMEASURE
+				FROM 		CT_SUBSEGMENTSPEC
+				WHERE 		1 = 1
+				AND         VALIDSTATE = 'Valid'
+				#if("$!{SPECDEFID}" != "")
+					AND 	SPECDEFID = '$!{SPECDEFID}'
+				#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 스펙복사 서브공정상세 리스트 가져오기
+	생	성	자	: 채세운
+	생	성	일	: 2021-06-23
+	수  정   이  력	: 
+	-->
+	<query id = "GetSubSpecDetailListForCopy" version = "00001">
+		<statement>
+			<![CDATA[
+				--
+				-- id : GetSubSpecDetailListForCopy
+				-- version : 00001					
+		
+				SELECT 		SPECDEFID 		-- 2021-07-13 김지호 추가
+						,	SPECSEQUENCE
+						,	SPECDEFIDVERSION
+						, 	PARAMETERID 
+						,	SPECTYPE 
+						,	LSL 
+						,	CSL
+						,	USL 
+						,	TARGET
+						,	DESCRIPTION
+						,	VALIDSTATE
+						,	ISMEASURE
+						,	DISPLAYSEQUENCE 
+						,	ISSPECFORCE 
+				FROM 		CT_SUBSEGMENTSPECDETAIL
+				WHERE 		1 = 1
+				AND         VALIDSTATE = 'Valid'
+				#if("$!{SPECDEFID}" != "")
+					AND 	SPECDEFID = '$!{SPECDEFID}'
+				#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 스펙복사 팝업 데이터 불러오기
+	생	성	자	: 채세운
+	생	성	일	: 2021-06-23
+	수  정   이  력	: 
+	-->
+	<query id = "GetSpecdefidList" version = "00001">
+		<statement>
+			<![CDATA[
+				--
+				-- id : GetSpecdefidList
+				-- version : 00001			
+				
+				SELECT 		SPECDEFID
+				FROM 		CT_SPECDEFINITION
+				WHERE 		1 = 1
+				#if("$!{SPECDEFID}" != "")
+					AND 	SPECDEFID != '$!{SPECDEFID}'
+				#end
+				ORDER BY	SPECDEFID ASC
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 기준관리 > 스펙관리 > 해당 스펙 선택 시 > 스펙 버전관리 그리드 데이터 조회
+	생	성	자	: 김지호
+	생	성	일	: 2021-07-08
+	수  정   이  력	: 2021-08-09 주시은 수정자 이름으로 조회되게 변경
+	-->
+	<query id = "GetSpecdefVersionList" version = "00001">
+		<statement>
+			<![CDATA[
+				--
+				-- id : GetSpecdefVersionList
+				-- version : 00001			
+				
+				SELECT 			SP.SPECDEFID
+						, 		SP.SPECDEFIDVERSION
+						, 		ISNULL(US.USERNAME, SP.MODIFIER)	AS	MODIFIER
+						, 		SP.MODIFIEDTIME
+						, 		SP.REASONFORCHANGE
+						,		SP.VALIDSTATE
+				FROM 			CT_SPECDEFINITIONVERSION	SP
+				LEFT OUTER JOIN SF_USER      				US ON  SP.MODIFIER  = US.USERID
+				WHERE 		1 = 1
+				#if("$!{SPECDEFID}" != "")
+					AND 	SPECDEFID = '$!{SPECDEFID}'
+				#end
+				ORDER BY	SPECDEFIDVERSION DESC
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 기준관리 > 스펙관리 > 해당 스펙 선택 시 > 최신 스펙 버전 가져오기
+	생	성	자	: 김지호
+	생	성	일	: 2021-07-13
+	수  정   이  력	: 
+	-->
+	<query id = "GetLatestSpecdefVersion" version = "00001">
+		<statement>
+			<![CDATA[
+				--
+				-- id : GetLatestSpecdefVersion
+				-- version : 00001			
+				
+				SELECT 		SPECDEFID, SPECDEFIDVERSION, VALIDSTATE
+				FROM 		CT_SPECDEFINITIONVERSION
+				WHERE 		1 = 1
+				AND VALIDSTATE = 'Valid' -- 제일 최신인 데이터만 Valid
+				#if("$!{SPECDEFID}" != "")
+					AND 	SPECDEFID = '$!{SPECDEFID}'
+				#end
+				ORDER BY	SPECDEFIDVERSION DESC
+			]]>
+		</statement>
+	</query>
+	
+	
+	<!--
+	설		명	: 기준정보 > 출하검사기준 > 리비전 그리드 조회
+	생	성	자	: 주시은
+	생	성	일	: 2022-05-02
+	수  정   이  력	: 
+	-->
+	<query id = "GetRevisionForShipInspStandard" version = "00001">
+		<statement>
+			<![CDATA[
+				--
+				-- id : GetRevisionForShipInspStandard
+				-- version : 00001			
+				SELECT
+						A.REVNO
+					,	A.CREATOR
+					,	A.CREATEDTIME
+					,	A.REASONDESCRIPTION
+				FROM	(
+							SELECT
+									US.REVNO								AS REVNO
+								,	ISNULL(UC.USERNAME, US.CREATOR)			AS CREATOR
+								,	CONVERT(CHAR(10), US.CREATEDTIME, 23)	AS CREATEDTIME
+								,	US.REASONDESCRIPTION					AS REASONDESCRIPTION
+							FROM	UL_SHIPINSPSTANDARD		US
+							LEFT JOIN SF_USER				UC	ON	US.CREATOR = UC.USERID
+							WHERE	1=1
+									AND US.VALIDSTATE = 'Valid'
+						) A
+				GROUP BY A.REVNO, A.CREATOR, A.CREATEDTIME, A.REASONDESCRIPTION
+				ORDER BY A.REVNO ASC
+			]]>
+		</statement>
+	</query>
+	
+	
+	<!--
+	설		명	: 기준정보 > 출하검사기준 > 검사기준 그리드 조회
+	생	성	자	: 주시은
+	생	성	일	: 2022-05-02
+	수  정   이  력	: 
+	-->
+	<query id = "GetShipInspecData" version = "00001">
+		<statement>
+			<![CDATA[
+				--
+				-- id : GetShipInspecData
+				-- version : 00001			
+				SELECT
+						US.REVNO
+					,	US.INSPECTIONID
+					,	US.INSPECTIONNAME
+				FROM	UL_SHIPINSPSTANDARD US
+				WHERE	1=1
+						AND US.REVNO = '$!{REVNO}'
+						AND US.INSPECTIONID <> 'REF'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 기준정보 > 출하검사기준 > 검사기준 그리드 조회 (참조  컬럼)
+	생	성	자	: 주시은
+	생	성	일	: 2022-05-02
+	수  정   이  력	: 
+	-->
+	<query id = "GetShipInspecDataRef" version = "00001">
+		<statement>
+			<![CDATA[
+				--
+				-- id : GetShipInspecDataRef
+				-- version : 00001			
+				SELECT
+						US.REVNO
+					,	US.INSPECTIONID
+					,	US.INSPECTIONNAME
+				FROM	UL_SHIPINSPSTANDARD US
+				WHERE	1=1
+						AND US.REVNO = '$!{REVNO}'
+						AND US.INSPECTIONID = 'REF'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 기준정보 > 출하검사기준 > 검사기준 정보 조회 (리비전 삭제를 위해)
+	생	성	자	: 주시은
+	생	성	일	: 2022-05-02
+	수  정   이  력	: 
+	-->
+	<query id = "GetShipInspecDataForDelete" version = "00001">
+		<statement>
+			<![CDATA[
+				--
+				-- id : GetShipInspecDataForDelete
+				-- version : 00001			
+				SELECT
+						US.REVNO
+					,	US.INSPECTIONID
+					,	US.INSPECTIONNAME
+				FROM	UL_SHIPINSPSTANDARD US
+				WHERE	1=1
+						AND US.REVNO = '$!{REVNO}'
+			]]>
+		</statement>
+	</query>
+</list>

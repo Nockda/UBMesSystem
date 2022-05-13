@@ -1,0 +1,15 @@
+2022-03-22 09:25:47.8172|INFO|Get language list start. 
+2022-03-22 09:25:51.5495|INFO|Get language list complete. 
+2022-03-22 09:25:51.5495|INFO|Get message list start. 
+2022-03-22 09:25:52.0122|INFO|Get message list complete. 
+2022-03-22 09:25:52.0244|INFO|Get service list start. 
+2022-03-22 09:25:52.0244|INFO|Get service list complete. 
+2022-03-22 09:25:52.1649|INFO|Get langauge type list start. 
+2022-03-22 09:25:52.2821|INFO|Get langauge type list complete. 
+2022-03-22 09:25:52.2821|INFO|Get plant list start. 
+2022-03-22 09:25:52.3841|INFO|Get plant list complete. 
+2022-03-22 09:25:52.3841|INFO|Get save id YN start. 
+2022-03-22 09:25:52.3841|INFO|Get save id YN complete. 
+2022-03-22 09:25:52.3841|INFO|Get save id start. 
+2022-03-22 09:25:52.3841|INFO|Get save id complete. 
+2022-03-22 09:25:57.9003|ERROR|아이디 또는 비밀번호를 확인하여 주십시요. 

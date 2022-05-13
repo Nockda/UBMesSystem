@@ -1,0 +1,1114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list>
+	<!--
+	프 로 그 램 명	: 자재관리 > 자재 > 자재 입고 처리(ITEM조회)
+	설		명	: 발주 아이템 데이터를 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-04-21
+	주요 변경 로그	:
+	-->
+	<query id="GetMaterialOrderItem" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	d.SEQ
+						,d.POSEQ
+						,d.POSERL
+						,d.PONO
+						--,CONVERT(date, CONVERT(varchar(8), d.DELVDATE), 112) AS DELVDATE
+						,d.DELVDATE
+						,d.DELVSEQ
+						,d.DELVSERL
+						,d.DELVNO
+						,d.ITEMSEQ
+						,d.ITEMNO
+						,i.CONSUMABLEDEFNAME AS ITEMNAME
+						,d.WHSEQ
+						,d.INQTY
+						,u.UNIT AS UNITNAME
+						,d.LOTSIZE
+						,d.DESCRIPTION
+						,d.COMPLETEYN
+				FROM	UL_ORDERDETAIL	d
+						LEFT JOIN SF_CONSUMABLEDEFINITION i ON d.ITEMNO = i.CONSUMABLEDEFID
+						LEFT JOIN CT_UNITDEFINITION u ON i.ERP_UNITID = u.ERP_UNITID
+				WHERE	1=1
+						AND d.POSEQ = '$!{P_POSEQ}'
+						AND d.POSERL = '$!{P_POSERL}'
+						AND d.DELVSEQ = '$!{P_DELVSEQ}'
+						AND d.DELVSERL = '$!{P_DELVSERL}'
+				ORDER BY d.SEQ ASC
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 자재관리 > 자재 > 자재 입고 처리(LOT조회)
+	설		명	: 발주번호, 품목정보를 기반으로 자재LOT 데이터를 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-04-22
+	주요 변경 로그	:
+	-->
+	<query id="GetMaterialLot" version="00001">
+		<statement>
+			<![CDATA[	
+				SELECT	*
+				FROM	
+				(
+					SELECT  l.CONSUMABLELOTID
+							,l.WAREHOUSEID
+							,l.LOCATIONID
+							,(SELECT CELLNAME FROM UL_CELL WHERE CELLID = l.LOCATIONID) AS CELLNAME
+							,l.CREATEDQTY
+							,ROW_NUMBER() OVER(PARTITION BY l.CONSUMABLELOTID ORDER BY l.TXNTIME DESC) AS RN
+					FROM	SF_CONSUMABLELOTHISTORY l
+					WHERE	1=1
+							AND l.TXNID = 'CreateConsumableLot'
+							#if ("$!{P_ORDERSEQ}" != "")
+								AND l.ORDERSEQ = '$!{P_ORDERSEQ}'
+							#end
+				) main	
+				WHERE	main.RN = 1
+				ORDER BY main.CONSUMABLELOTID asc
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명 : 자재관리 > 자재 > 초기자재 LOT생성(LOT조회) 
+	설 		명 : 초기데이터로 입력한 자재LOT 데이터를 조회한다. 
+	작 	성	자 : scmo 
+	작 	성 	일 : 2020-05-26 
+	주요 변경 로그 : 
+	-->
+	<query version="00001" id="GetMaterialLotByInit">
+		<statement>	
+			<![CDATA[	
+				SELECT	log.CONSUMABLELOTID
+						,log.CONSUMABLEDEFID
+						,item.PARTNUMBER
+						,item.CONSUMABLETYPE
+						,log.WAREHOUSEID
+						,log.LOCATIONID
+						,log.CREATEDQTY
+						,UC.USERNAME AS CREATOR
+						,log.CREATEDTIME AS CREATEDTIME
+						,'' AS LOTCREATERULETYPE
+				FROM	UL_MATERIALINIT log
+						LEFT OUTER JOIN SF_CONSUMABLEDEFINITION item ON log.CONSUMABLEDEFID = item.CONSUMABLEDEFID
+						LEFT OUTER JOIN	SF_USER UC ON log.CREATOR = UC.USERID
+				WHERE	1=1
+						#if ("$!{P_WAREHOUSEID}" != "")
+							AND log.WAREHOUSEID = '$!{P_WAREHOUSEID}'
+						#end
+						#if ("$!{P_CONSUMABLEDEFID}" != "")
+							AND log.CONSUMABLEDEFID = '$!{P_CONSUMABLEDEFID}'
+						#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 자재관리 > 자재 > 자재 입고 처리(LOCATION변경)
+	설		명	: LOCATION을 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-04-22
+	주요 변경 로그	: 2020-07-30 (파렛트, 대차 추가)
+	-->
+	<query id="GetCellId" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	c.CELLID AS LOCATIONID
+						,c.CELLNAME
+						,SUM(lot.CONSUMABLELOTQTY) AS QTY
+						,(SELECT PARTNUMBER FROM SF_CONSUMABLEDEFINITION WHERE CONSUMABLEDEFID = c.CONSUMABLEDEFID) AS ITEMID
+				FROM	UL_CELL c
+						LEFT JOIN UL_CELLGROUP g ON c.CELLGROUPID = g.CELLGROUPID
+						LEFT JOIN SF_CONSUMABLELOT lot ON lot.WAREHOUSEID = g.WAREHOUSEID AND lot.LOCATIONID = c.CELLID
+				WHERE	1=1
+						AND g.TYPE IN ('RA', 'RS', 'DC', 'PA')
+						#if ("$!{P_WAREHOUSEID}" != "")
+							AND g.WAREHOUSEID = '$!{P_WAREHOUSEID}'
+						#end
+						#if ("$!{P_TYPE}" != "")
+							AND g.TYPE = '$!{P_TYPE}'
+						#end
+						
+				GROUP BY c.CELLID, c.CELLNAME, c.CONSUMABLEDEFID
+			]]>
+		</statement>
+	</query>
+		
+	<!--
+	프 로 그 램 명	: 자재관리 > 자재 > 자재 출고 처리 팝업(마스터)
+	설		명	: 자재출고처리 팝업에서 요청번호를 기준으로 임시저장데이터를 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-05-25
+	주요 변경 로그	:
+	-->
+	<query id="GetMaterialOutTemp" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT 	temp.SEQ
+						,temp.REQNO
+						,temp.REQSEQ
+						,temp.REQSERL
+						,temp.CONSUMABLEDEFID
+						,item.CONSUMABLEDEFID AS ITEMSEQ
+						,item.CONSUMABLEDEFNAME
+						,item.ERP_UNITID AS UnitSeq
+						,unit.UNITNAME
+						,item.STANDARD AS ITEMSTANDARD
+						,temp.CONSUMABLELOTID
+						,temp.DELIVERYQTY AS CONSUMABLELOTQTY
+				FROM	UL_MATERIALDELIVERYTEMP temp
+						LEFT JOIN SF_CONSUMABLEDEFINITION item ON temp.ITEMSEQ = item.CONSUMABLEDEFID
+						LEFT JOIN SF_CONSUMABLELOT lot ON temp.CONSUMABLELOTID = lot.CONSUMABLELOTID
+						LEFT JOIN CT_UNITDEFINITION unit ON unit.ERP_UNITID = item.ERP_UNITID
+				WHERE 	1=1
+						#if ("$!{P_REQSEQ}" != "")
+							AND temp.REQSEQ = '$!{P_REQSEQ}'
+						#end
+						#if ("$!{P_REQSERL}" != "")
+							AND temp.REQSERL = '$!{P_REQSERL}'
+						#end
+						#if ("$!{P_ITEMSEQ}" != "")
+							AND temp.ITEMSEQ = '$!{P_ITEMSEQ}'
+						#end
+				ORDER BY temp.SEQ ASC
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 자재관리 > 자재 > 자재 출고 처리 팝업(마스터)
+	설		명	: 자재출고처리 팝업에서 요청번호를 기준으로 임시저장데이터를 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-05-25
+	주요 변경 로그	:
+	-->
+	<query id="GetMaterialOutReq" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT 	dv.SEQ
+						,dv.REQSEQ
+						,dv.REQSERL
+						,dv.REQNO
+						,dv.ITEMSEQ AS ITEMSEQ
+						,dv.ITEMNO AS CONSUMABLEDEFID
+						,item.CONSUMABLEDEFNAME
+						,item.STANDARD AS ITEMSTANDARD
+						,item.ERP_UNITID AS UNITSEQ
+						,unit.UNITNAME
+						,dv.OUTWHSEQ
+						,dv.INWHSEQ
+						,dv.CONSUMABLELOTID
+						,dv.OUTQTY
+						,dv.COMPLETEYN
+						,dv.DEPARTMENTID AS DEPTSEQ
+				FROM	UL_MATERIALDELIVERY dv
+						LEFT JOIN SF_CONSUMABLEDEFINITION item ON dv.ITEMSEQ = item.CONSUMABLEDEFID
+						LEFT JOIN CT_UNITDEFINITION unit ON unit.ERP_UNITID = item.ERP_UNITID
+				WHERE 	1=1
+						AND	dv.COMPLETEYN = 'N'
+				ORDER BY dv.SEQ ASC
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 자재관리 > 자재 > 자재 출고 처리 팝업(마스터)
+	설		명	: 출고가능한 Lot목록을 조회한다. (비교용)
+	작	성	자	: scmo
+	작	성	일	: 2020-05-08
+	주요 변경 로그	:
+	-->
+	<query id="GetAvailableConsumableLotByReqNo" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	lot.CONSUMABLELOTID
+						,item.PARTNUMBER AS CONSUMABLEDEFID
+						,item.ERP_CONSUMABLEDEFID AS ITEMSEQ
+						,item.CONSUMABLEDEFNAME
+						,item.ERP_UNITID AS UnitSeq
+						,unit.UNITNAME
+						,item.STANDARD AS ITEMSTANDARD
+						,lot.CONSUMABLELOTQTY AS CONSUMABLELOTQTY
+						,lot.WAREHOUSEID
+						,lot.LOCATIONID AS CELLID
+				FROM	SF_CONSUMABLELOT lot
+						LEFT JOIN SF_CONSUMABLEDEFINITION item ON lot.CONSUMABLEDEFID = item.CONSUMABLEDEFID
+						LEFT JOIN CT_UNITDEFINITION unit ON unit.ERP_UNITID = item.ERP_UNITID
+				WHERE	1=1
+						AND lot.WAREHOUSEID IN (SELECT WAREHOUSEID FROM SF_WAREHOUSE WHERE WAREHOUSETYPE = '0001')
+						AND lot.CONSUMABLESTATE = 'Available'
+						AND item.VALIDSTATE = 'Valid'
+						#if ("$!{P_CONSUMABLEDEFID}" != "")
+							AND lot.CONSUMABLEDEFID = '$!{P_CONSUMABLEDEFID}'
+						#end
+			]]>
+		</statement>
+	</query>
+	
+	
+	
+	<!--
+	프 로 그 램 명	: 자재관리 > 자재 > 자재기타입출고 마스터
+	설		명	: 자재기타입출고 목록을 조회한다. (비교용)
+	작	성	자	: scmo
+	작	성	일	: 2020-05-18
+	주요 변경 로그	:
+	-->
+	<query id="GetMaterialEtcInOut" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	mate.SEQ
+						,mate.PROCESSDATE
+						,mate.INOUTGUBUN
+						,mate.INOUTTYPE
+						,item.PARTNUMBER AS CONSUMABLEDEFID
+						,item.CONSUMABLEDEFNAME
+						,mate.CONSUMABLELOTID
+						,item.CONSUMABLETYPE
+						,mate.WAREHOUSEID
+						,wh.WAREHOUSENAME
+						,mate.LOCATIONID
+						,cell.CELLNAME
+						,mate.PROCESSQTY
+						,item.UNIT
+						,mate.DESCRIPTION
+						,UC.USERNAME AS CREATOR
+						,mate.CREATEDTIME AS CREATEDTIME
+						,UM.USERNAME AS MODIFIER
+						,mate.MODIFIEDTIME AS MODIFIEDTIME
+				FROM	UL_MATERIALETCINOUT	mate
+						LEFT JOIN SF_CONSUMABLEDEFINITION item ON mate.CONSUMABLEDEFID = item.CONSUMABLEDEFID
+						LEFT JOIN SF_WAREHOUSE wh ON mate.WAREHOUSEID = wh.WAREHOUSEID
+						LEFT JOIN UL_CELL cell ON mate.LOCATIONID = cell.CELLID
+						LEFT OUTER JOIN	SF_USER UC ON mate.CREATOR = UC.USERID
+						LEFT OUTER JOIN SF_USER UM ON mate.MODIFIER = UM.USERID
+				WHERE	1=1
+						#if ("$!{P_DATEPERIOD_PERIODFR}" != "" && "$!{P_DATEPERIOD_PERIODTO}" != "")
+							AND CONVERT(varchar(10),mate.CREATEDTIME,120) BETWEEN CONVERT(VARCHAR(10), '$!{P_DATEPERIOD_PERIODFR}', 120) AND CONVERT(VARCHAR(10), '$!{P_DATEPERIOD_PERIODTO}', 120)
+						#end
+						#if ("$!{P_PRODUCTDEFID}" != "")
+							AND item.PARTNUMBER = '$!{P_PRODUCTDEFID}'
+						#end	
+						#if ("$!{P_INOUTDIVISION}" != "" && "$!{P_INOUTDIVISION}" != "*")
+							AND	mate.INOUTGUBUN = '$!{P_INOUTDIVISION}'
+						#end
+						#if ("$!{P_INOUTTYPE}" != "" && "$!{P_INOUTTYPE}" != "*")
+							AND	mate.INOUTTYPE = '$!{P_INOUTTYPE}'
+						#end
+						#if ("$!{P_WAREHOUSE}" != "" && "$!{P_WAREHOUSE}" != "*")
+							AND	mate.WAREHOUSEID = '$!{P_WAREHOUSE}'
+						#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 자재관리 > 자재 > 자재기타출고 마스터
+	설		명	: 자재기타출고 가능한 목록을 조회한다
+	작	성	자	: scmo
+	작	성	일	: 2020-05-19
+	주요 변경 로그	:
+	-->
+	<query id="GetMaterialEtcOutList" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	lot.CONSUMABLELOTID
+						,item.PARTNUMBER AS CONSUMABLEDEFID
+						,item.CONSUMABLEDEFNAME
+						,item.STANDARD
+						,lot.CONSUMABLELOTQTY
+						,lot.WAREHOUSEID
+						,lot.LOCATIONID
+						,(SELECT UNITID FROM CT_UNITDEFINITION WHERE ERP_UNITID = item.ERP_UNITID) AS UNIT
+						,item.CONSUMABLETYPE
+				FROM	SF_CONSUMABLELOT lot
+						LEFT JOIN SF_CONSUMABLEDEFINITION item ON lot.CONSUMABLEDEFID = item.CONSUMABLEDEFID
+				WHERE	1=1
+						AND lot.CONSUMABLESTATE = 'Available'
+						AND item.CONSUMABLETYPE IN ('Material', 'HalfProduct')
+						AND lot.CONSUMABLELOTQTY > 0
+						#if ("$!{P_CONSUMABLELOTID}" != "")
+							AND lot.CONSUMABLELOTID LIKE '%$!{P_CONSUMABLELOTID}%'
+						#end
+						#if ("$!{P_CONSUMABLEDEFID}" != "")
+							AND item.PARTNUMBER LIKE N'%$!{P_CONSUMABLEDEFID}%'
+						#end
+						#if ("$!{P_CONSUMABLEDEFNAME}" != "")
+							AND item.CONSUMABLEDEFNAME LIKE N'%$!{P_CONSUMABLEDEFNAME}%'
+						#end
+						#if ("$!{P_WAREHOUSEID}" != "" && "$!{P_WAREHOUSEID}" != "*")
+							AND lot.WAREHOUSEID = '$!{P_WAREHOUSEID}'
+						#end
+						
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 자재관리 > 자재 > 창고이동
+	설		명	: 창고이동 가능한 목록을 조회한다
+	작	성	자	: scmo
+	작	성	일	: 2020-05-19
+	주요 변경 로그	:
+	-->
+	<!-- <query id="GetMaterialMovable" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	lot.CONSUMABLELOTID
+						,lot.CONSUMABLEDEFID
+						,item.CONSUMABLEDEFNAME
+						,item.STANDARD
+						,lot.CONSUMABLELOTQTY
+						,lot.WAREHOUSEID
+						,lot.LOCATIONID
+						,item.ERP_UNITID AS UNIT
+						,item.CONSUMABLETYPE
+				FROM	SF_CONSUMABLELOT lot
+						LEFT JOIN SF_CONSUMABLEDEFINITION item ON lot.CONSUMABLEDEFID = item.CONSUMABLEDEFID
+				WHERE	1=1
+						AND lot.CONSUMABLESTATE = 'Available'
+						AND lot.CONSUMABLELOTQTY > 0
+						#if ("$!{P_CONSUMABLELOTID}" != "")
+							AND lot.CONSUMABLELOTID LIKE '%$!{P_CONSUMABLELOTID}%'
+						#end
+						#if ("$!{P_CONSUMABLEDEFID}" != "")
+							AND lot.CONSUMABLEDEFID LIKE '%$!{P_CONSUMABLEDEFID}%'
+						#end
+						#if ("$!{P_CONSUMABLEDEFNAME}" != "")
+							AND item.CONSUMABLEDEFNAME LIKE '%$!{P_CONSUMABLEDEFNAME}%'
+						#end
+						#if ("$!{P_WAREHOUSEID}" != "" && "$!{P_WAREHOUSEID}" != "*")
+							AND lot.WAREHOUSEID = '$!{P_WAREHOUSEID}'
+						#end
+						
+			]]>
+		</statement>
+	</query> -->
+	<query id="GetMaterialMovable" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	lot.CONSUMABLELOTID
+						,item.PARTNUMBER AS CONSUMABLEDEFID
+						,item.CONSUMABLEDEFNAME
+						,lot.CONSUMABLELOTQTY
+						,lot.WAREHOUSEID
+						,lot.LOCATIONID AS CELLID
+						,(SELECT UNITID FROM CT_UNITDEFINITION WHERE ERP_UNITID = item.ERP_UNITID) AS UNIT
+						,item.CONSUMABLETYPE
+				FROM	SF_CONSUMABLELOT lot
+						LEFT JOIN SF_CONSUMABLEDEFINITION item ON lot.CONSUMABLEDEFID = item.CONSUMABLEDEFID
+				WHERE	1=1
+						AND lot.CONSUMABLESTATE = 'Available'
+						AND lot.CONSUMABLELOTQTY > 0
+						#if ("$!{P_WAREHOUSEID}" != "" && "$!{P_WAREHOUSEID}" != "*")
+							AND lot.WAREHOUSEID = '$!{P_WAREHOUSEID}'
+						#end
+						
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 자재관리 > 자재 > 창고이동처리
+	설		명	: 창고이동 내역목록을 조회한다
+	작	성	자	: scmo
+	작	성	일	: 2020-06-01
+	주요 변경 로그	:
+	-->
+	<query id="GetMaterialMoveList" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	move.CREATEDTIME
+						,move.CONSUMABLELOTID
+						,(item.PARTNUMBER) AS CONSUMABLEDEFID
+						,item.CONSUMABLEDEFNAME
+						,item.CONSUMABLETYPE
+						,move.MOVEQTY
+						,unit.UNITNAME AS UNIT
+						,move.FROMWAREHOUSEID
+						,move.FROMCELLID
+						,move.TOWAREHOUSEID
+						,move.TOCELLID
+						,move.MOVETYPE
+						,move.DESCRIPTION
+						,UC.USERNAME AS CREATOR
+						,move.CREATEDTIME AS CREATEDTIME
+				FROM	UL_MATERIALMOVE move
+						LEFT JOIN SF_CONSUMABLEDEFINITION item ON move.CONSUMABLEDEFID = item.CONSUMABLEDEFID
+						LEFT OUTER JOIN CT_UNITDEFINITION unit ON item.ERP_UNITID = unit.ERP_UNITID
+						LEFT OUTER JOIN	SF_USER UC ON move.CREATOR = UC.USERID
+				WHERE	1=1
+						#if ("$!{P_DATEPERIOD_PERIODFR}" != "" && "$!{P_DATEPERIOD_PERIODTO}" != "")
+							AND CONVERT(varchar(10),move.CREATEDTIME,120) BETWEEN CONVERT(VARCHAR(10), '$!{P_DATEPERIOD_PERIODFR}', 120) AND CONVERT(VARCHAR(10), '$!{P_DATEPERIOD_PERIODTO}', 120)
+						#end
+						#if ("$!{P_WAREHOUSEFROM}" != "" && "$!{P_WAREHOUSEFROM}" != "*")
+							AND move.FROMWAREHOUSEID = '$!{P_WAREHOUSEFROM}'
+						#end	
+						#if ("$!{P_WAREHOUSETO}" != "" && "$!{P_WAREHOUSETO}" != "*")
+							AND move.TOWAREHOUSEID = '$!{P_WAREHOUSETO}'
+						#end	
+						#if ("$!{P_PRODUCTDEFID}" != "")
+							AND item.PARTNUMBER = '$!{P_PRODUCTDEFID}'
+						#end	
+						#if ("$!{P_ITEMDEFTYPE}" != "" && "$!{P_ITEMDEFTYPE}" != "*")
+							AND item.CONSUMABLETYPE = '$!{P_ITEMDEFTYPE}'
+						#end
+						
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 자재관리 > 자재 > 자재 출고 처리 팝업(Source)
+	설		명	: 자재출고처리 팝업 마스터 그리드에서 품목기준으로 LOT를 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-04-29
+	주요 변경 로그	: Not Use!!! 출고 팝업 변경으로 인함.
+	-->
+	<query id="GetMaterialLotByItemId" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT  l.CONSUMABLELOTID
+						,l.INDATE
+						,l.CONSUMABLELOTQTY AS LOTQTY
+						,(SELECT WAREHOUSEID FROM UL_CELLGROUP WHERE CELLGROUPID = (SELECT CELLGROUPID FROM UL_CELL WHERE CELLID = l.LOCATIONID)) AS WAREHOUSEID
+						,l.LOCATIONID
+						,(SELECT CELLNAME FROM UL_CELL WHERE CELLID = l.LOCATIONID) AS CELLNAME
+				FROM	SF_CONSUMABLELOT l
+				WHERE	1=1
+						#if ("$!{P_CONSUMABLEDEFID}" != "")
+							AND l.CONSUMABLEDEFID = '$!{P_CONSUMABLEDEFID}'
+						#end
+						#if ("$!{P_WAREHOUSEID}" != "")
+							AND l.WAREHOUSEID = '$!{P_WAREHOUSEID}'
+						#end
+						#if ("$!{P_CONSUMABLESTATE}" != "")
+							AND l.CONSUMABLESTATE = '$!{P_CONSUMABLESTATE}'
+						#end
+				ORDER BY l.CONSUMABLELOTID asc
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 자재관리 > 자재 > 자재기타입출고
+	설		명	: 자재기타입출고 내 입출유형 목록
+	작	성	자	: scmo
+	작	성	일	: 2020-05-22
+	주요 변경 로그	: 
+	-->
+	<query id="GetEtcInoutType" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	
+						CD.CODEID
+					,	ISNULL(DIC.DICTIONARYNAME, CD.CODENAME)		AS CODENAME
+					,   CD.DISPLAYSEQUENCE
+				FROM	SF_CODE					CD
+				LEFT OUTER JOIN SF_DICTIONARY	DIC	ON	DIC.DICTIONARYID = CD.DICTIONARYID
+													AND	DIC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE	CD.CODECLASSID IN ('EtcInTypeProd','EtcOutType')
+				AND		CD.VALIDSTATE = 'Valid'
+				ORDER BY CD.DISPLAYSEQUENCE ASC
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 자재관리 > 항목 > 자재Lot보류
+	설		명	: 창고 조회조건 조회
+	작	성	자	: 강유라
+	작	성	일	: 2020-06-09
+	주요 변경 로그	: 
+	-->
+	<query id="GetWarehouseList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- id : GetWarehouseList
+				-- version : 00001
+				SELECT 
+						WH.WAREHOUSEID
+					, 	ISNULL(WHD.DICTIONARYNAME, WH.WAREHOUSENAME) 		AS WAREHOUSENAME
+				FROM 	SF_WAREHOUSE 										WH 
+				LEFT OUTER JOIN SF_DICTIONARY 								WHD ON  WH.DICTIONARYID = WHD.DICTIONARYID
+								 												AND WHD.LANGUAGETYPE ='$!{LANGUAGETYPE}'
+				WHERE 	1 = 1
+				AND 	WH.VALIDSTATE ='Valid'
+				ORDER BY WH.WAREHOUSEID
+			]]>
+		</statement>
+	</query>
+	
+
+	<!--
+	프 로 그 램 명	: 자재관리 > 항목 > 자재Lot보류
+	설		명	: 품목 (자재, 제품) 조회조건 조회
+	작	성	자	: 강유라
+	작	성	일	: 2020-06-09
+	주요 변경 로그	: 2020-07-16 | JLYEE | PARTNUMBER 추가
+	-->
+	<query id="GetConsumProductList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- id : GetConsumProductList
+				-- version : 00001
+				SELECT
+						CS.CONSUMABLEDEFID 										AS ITEMID
+					,	CS.PARTNUMBER 											AS PARTNUMBER
+					, 	ISNULL(CSD.DICTIONARYNAME, CS.CONSUMABLEDEFNAME) 		AS ITEMNAME
+					, 	CS.CONSUMABLEDEFVERSION 								AS ITEMVERSION
+					
+				FROM 	SF_CONSUMABLEDEFINITION 								CS 
+				LEFT OUTER JOIN SF_DICTIONARY 									CSD ON  CS.DICTIONARYID = CSD.DICTIONARYID
+																					AND CSD.LANGUAGETYPE ='$!{LANGUAGETYPE}'
+				WHERE 	1 = 1
+				AND CS.VALIDSTATE = 'Valid'
+
+				#if ("$!{P_ITEMIDNAME}" != "")
+					AND (CS.PARTNUMBER LIKE '%$!{P_ITEMIDNAME}%'
+						OR ISNULL(CSD.DICTIONARYNAME, CS.CONSUMABLEDEFNAME) LIKE '%$!{P_ITEMIDNAME}%')
+				#end
+
+			]]>
+		</statement>
+	</query>
+	
+	
+	<!--
+	프 로 그 램 명	: 자재관리 > 항목 > 자재Lot보류
+	설		명	: 자재Lot보류 대상 조회
+	작	성	자	: 강유라
+	작	성	일	: 2020-06-09
+	주요 변경 로그	: 
+	-->
+	<query id="SelectConsumableLotListHold" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- id : "SelectConsumableLotListHold"
+				-- version : 00001
+				SELECT 
+						CL.CONSUMABLELOTID																		--자재LotId
+					,	A.AREAID																				--작업장Id
+					,	ISNULL(AD.DICTIONARYNAME, A.AREANAME) 							AS AREANAME				--작업장명
+					,	CD.CONSUMABLEDEFID																		--자재Id
+					,	CD.PARTNUMBER
+					,	CD.CONSUMABLEDEFVERSION																	--자재Version
+					,	ISNULL(CDD.DICTIONARYNAME, CD.CONSUMABLEDEFNAME) 				AS CONSUMABLEDEFNAME	--자재명
+					,	CL.LOCATIONID																			--LocationId
+					,	CL.CREATEDQTY																			--CreatedQTY
+					,	CL.CONSUMABLELOTQTY																		--ConsumablelotQTY
+					
+				FROM 	SF_CONSUMABLELOT 												CL
+				LEFT OUTER JOIN SF_AREA 												A   ON  CL.AREAID  = A.AREAID
+				LEFT OUTER JOIN SF_DICTIONARY 											AD  ON  A.DICTIONARYID = AD.DICTIONARYID
+																						    AND AD.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				LEFT OUTER JOIN SF_CONSUMABLEDEFINITION 								CD  ON  CL.CONSUMABLEDEFID = CD.CONSUMABLEDEFID
+																						    AND CL.CONSUMABLEDEFVERSION = CD.CONSUMABLEDEFVERSION
+				LEFT OUTER JOIN SF_DICTIONARY 											CDD ON  CD.DICTIONARYID = CDD.DICTIONARYID
+																							AND CDD.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				WHERE 	1 = 1
+				
+				AND CL.CONSUMABLESTATE = 'Available'
+				
+				--창고
+				AND CL.WAREHOUSEID = '$!{P_WAREHOUSE}'
+
+				--품목
+				#if ("$!{P_ITEMID}" != "")
+					AND (CL.CONSUMABLEDEFID LIKE '%$!{P_ITEMID}%'
+						OR ISNULL(CDD.DICTIONARYNAME, CD.CONSUMABLEDEFNAME) LIKE '%$!{P_ITEMID}%')
+				#end
+				
+				--자재 LOT ID
+				#if ("$!{P_CONSUMABLELOTID}" != "")
+					AND CL.CONSUMABLELOTID LIKE '%$!{P_CONSUMABLELOTID}%'
+				#end
+				
+				--보류 여부
+				AND ISNULL(ISHOLD, 'N') = '$!{P_ISHOLD}'
+
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 자재관리 > 항목 > 자재 Lot 분할
+	설		명	: 자재 Lot 분할 대상 조회쿼리
+	작	성	자	: 유태근
+	작	성	일	: 2020-06-09
+	주요 변경 로그	: 
+	-->
+	<query id="SelectSplitonsumableLotList" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			--id : SelectSplitonsumableLotList
+			--version : 00001
+			SELECT	
+					CL.ENTERPRISEID																		-- 회사 ID
+				,	CL.PLANTID																			-- 공장 ID
+				,	CL.CONSUMABLELOTID																	-- 자재 Lot Id
+				,	CL.CONSUMABLELOTNAME																-- 자재 Lot 명
+				,	CL.WAREHOUSEID																		-- 창고 ID
+				,	W.WAREHOUSENAME																		-- 창고명
+				,	CL.AREAID																			-- 작업장 ID
+				,	A.AREANAME																			-- 작업장명			
+				,	CL.LOCATIONID																		-- 위치 ID
+				,	CL.CONSUMABLEDEFID																	-- 자재 ID
+				,	CD.PARTNUMBER																		-- 품번
+				,	CL.CONSUMABLEDEFVERSION																-- 자재 Version
+				,	ISNULL(CDD.DICTIONARYNAME, CD.CONSUMABLEDEFNAME)			AS	CONSUMABLEDEFNAME	-- 자재명
+				,	CL.CREATEDQTY																		-- 자재생성수량
+				,	CL.CONSUMABLELOTQTY																	-- 자재량
+				,	CL.STATE																			-- 자재상태
+			FROM	SF_CONSUMABLELOT											CL	
+			INNER JOIN SF_WAREHOUSE												W	ON	W.WAREHOUSEID = CL.WAREHOUSEID
+			INNER JOIN SF_CONSUMABLEDEFINITION									CD	ON	CD.CONSUMABLEDEFID = CL.CONSUMABLEDEFID
+			LEFT OUTER JOIN SF_AREA												A	ON	A.AREAID = CL.AREAID
+			LEFT OUTER JOIN SF_DICTIONARY										CDD	ON	CDD.DICTIONARYID = CD.DICTIONARYID
+																					AND CDD.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+			WHERE	1 = 1
+			AND		CL.CONSUMABLESTATE = 'Available'
+			AND		CL.CONSUMABLELOTID NOT IN
+					(
+						SELECT	TMP.LOTID
+						FROM	SF_CONSUMEMATERIALLOTTEMP			TMP
+					)
+					
+			--창고
+			#if ("$!{P_WAREHOUSE}" != "" && "$!{P_WAREHOUSE}" != "*")
+				AND 	CL.WAREHOUSEID = '$!{P_WAREHOUSE}'
+			#end
+	
+			--품목
+			#if ("$!{P_CONSUMABLEDEFIDNAME}" != "")
+				AND		CL.CONSUMABLEDEFID = '$!{P_CONSUMABLEDEFIDNAME}'
+			#end
+			
+			--자재 LOT ID
+			#if ("$!{P_CONSUMABLELOTID}" != "")
+				AND 	CL.CONSUMABLELOTID LIKE '%$!{P_CONSUMABLELOTID}%'
+			#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 자재관리 > 항목 > 자재 Lot 분할
+	설		명	: 자재 Lot의  최상위 자재 Lot No 채번
+	작	성	자	: 유태근
+	작	성	일	: 2020-08-06
+	주요 변경 로그	: 
+	-->
+	<query id="GetRootConsumableLotId" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			--id : GetRootConsumableLotId
+			--version : 00001
+			WITH ROOTCONSUMABLELOT AS
+			(
+				SELECT	
+						PARENTCONSUMABLELOTID
+					,	CONSUMABLELOTID
+				FROM	SF_CONSUMABLELOT
+				WHERE	CONSUMABLELOTID = '$!{CONSUMABLELOTID}'
+			
+				UNION ALL 
+			
+				SELECT 
+						B.PARENTCONSUMABLELOTID
+					,	B.CONSUMABLELOTID
+				FROM	ROOTCONSUMABLELOT			A
+				INNER JOIN SF_CONSUMABLELOT			B	ON	B.CONSUMABLELOTID = A.PARENTCONSUMABLELOTID
+			)
+			SELECT	
+					CONSUMABLELOTID					AS	ROOTCONSUMABLELOTID
+			FROM	ROOTCONSUMABLELOT
+			WHERE	ISNULL(PARENTCONSUMABLELOTID, '') = ''
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 자재관리 > 항목 > 자재Lot보류 해제
+	설		명	: 자재Lot보류 해제 대상 조회
+	작	성	자	: 강유라
+	작	성	일	: 2020-06-10
+	주요 변경 로그	: 2020-07-17 | 이준용 | PARTNUMBER 추가
+	-->
+	<query id="SelectConsumableLotListRelease" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			--id : SelectConsumableLotListRelease
+			--version : 00001
+			
+			SELECT 
+					CL.CONSUMABLELOTID																		--자재LOTID
+				,	CLH.TXNHISTKEY																			--TXNHISTKEY		
+				,	A.AREAID																				--작업장ID
+				,	ISNULL(AD.DICTIONARYNAME, A.AREANAME) 							AS AREANAME				--작업장명
+				,	CD.CONSUMABLEDEFID																		--자재ID
+				,	CD.PARTNUMBER
+				,	CD.CONSUMABLEDEFVERSION																	--자재VERSION
+				,	ISNULL(CDD.DICTIONARYNAME, CD.CONSUMABLEDEFNAME) 				AS CONSUMABLEDEFNAME	--자재명
+				,	CL.LOCATIONID																			--LOCATIONID
+				,	CL.CREATEDQTY																			--CREATEDQTY
+				,	CL.CONSUMABLELOTQTY																		--CONSUMABLELOTQTY
+				,	ISNULL(RC.CODENAME, RCD.DICTIONARYNAME)							AS HOLDREASONCODENAME	--보류사유
+				,	CLH.HOLDCOMMENTS																		--보류코멘트
+				,	CLH.HOLDDATE																			--보류일
+				,	HU.USERNAME														AS HOLDUSERNAME			--보류유저
+			
+			FROM 	CT_CONSUMABLELOTHOLD											CLH
+			INNER JOIN SF_CONSUMABLELOT 											CL	ON  CLH.CONSUMABLELOTID = CL.CONSUMABLELOTID
+			LEFT OUTER JOIN SF_AREA 												A   ON  CL.AREAID  = A.AREAID
+			LEFT OUTER JOIN SF_DICTIONARY 											AD  ON  A.DICTIONARYID = AD.DICTIONARYID
+																						AND AD.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+			LEFT OUTER JOIN SF_CONSUMABLEDEFINITION 								CD  ON  CL.CONSUMABLEDEFID = CD.CONSUMABLEDEFID
+																						AND CL.CONSUMABLEDEFVERSION = CD.CONSUMABLEDEFVERSION
+			LEFT OUTER JOIN SF_DICTIONARY 											CDD ON  CD.DICTIONARYID = CDD.DICTIONARYID
+																						AND CDD.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+			LEFT OUTER JOIN SF_CODE 												RC  ON  CLH.REASONCODEID = RC.CODEID
+																						AND RC.CODECLASSID = 'ConsumLotHoldReason'
+			LEFT OUTER JOIN SF_DICTIONARY 											RCD ON  RC.DICTIONARYID = RCD.DICTIONARYID
+																						AND RCD.LANGUAGETYPE ='$!{_TXNINFO.LANGUAGETYPE}'
+			LEFT OUTER JOIN SF_USER 												HU  ON  CLH.HOLDUSER = HU.USERID
+			
+			WHERE 	1 = 1 
+			AND 	CLH.STATE ='Y'
+			AND 	CL.CONSUMABLESTATE ='Available'
+			
+			--창고
+			AND 	CL.WAREHOUSEID = '$!{P_WAREHOUSE}'
+				
+			--품목
+			#if ("$!{P_ITEMID}" != "")
+				AND (CL.CONSUMABLEDEFID LIKE '%$!{P_ITEMID}%'
+					OR ISNULL(CDD.DICTIONARYNAME, CD.CONSUMABLEDEFNAME) LIKE '%$!{P_ITEMID}%')
+			#end
+			
+			--자재 LOT ID
+			#if ("$!{P_CONSUMABLELOTID}" != "")
+				AND CL.CONSUMABLELOTID LIKE '%$!{P_CONSUMABLELOTID}%'
+			#end
+			]]>
+		</statement>
+	</query>
+	
+	
+	<!--
+	프 로 그 램 명	: 자재관리 > 항목 > 자재Lot보류 해제
+	설		명	: 자재 Lot Hold Count 조회
+	작	성	자	: 강유라
+	작	성	일	: 2020-06-10
+	주요 변경 로그	: 
+	-->
+	<query id="GetConsumableLotHoldCount" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			--id : GetConsumableLotHoldCount
+			--version : 00001
+			SELECT 
+					COUNT(*) 				AS COUNT
+			FROM 	CT_CONSUMABLELOTHOLD
+			
+			WHERE	1 = 1
+			AND 	CONSUMABLELOTID = '$!{CONSUMABLELOTID}'
+			AND 	STATE ='Y'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 자재관리 > 자재현황 > 자재 입출력 이력
+	설		명	: 자재의 입출력 이력을 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-06-17
+	주요 변경 로그	: 2020-07-08 | JYLEE | 정렬순서 변경 cc.CREATEDTIME ASC => DESC
+				  2020-07-29 | JYLEE | 부품출하 추가 cc.TRANSACTIONCODE = 'OS
+				  2021-08-20 | 주시은 | 조회조건 부분 수정 (입출고 창고 한가지만 조회되게)
+	-->
+	<query id="GetMaterialInOutHistory" version="00001">
+		<statement>
+			<![CDATA[
+				--id : "GetMaterialInOutHistory"
+				--version : 00001
+				SELECT	CONVERT(DATE, cc.CREATEDTIME) AS TRANSACTIONDATE
+						,cc.TRANSACTIONTYPE
+						,cc.TRANSACTIONCODE 
+						,sc.PARTNUMBER AS CONSUMABLEDEFID
+						,sc.CONSUMABLEDEFNAME
+						,sc.CONSUMABLETYPE
+						,(
+							CASE WHEN cc.TRANSACTIONCODE = 'OW' THEN cc.WAREHOUSEID
+								WHEN cc.TRANSACTIONCODE = 'IW' THEN NULL
+								WHEN cc.TRANSACTIONCODE = 'IB' THEN NULL
+								WHEN cc.TRANSACTIONCODE = 'IE' THEN NULL
+								WHEN cc.TRANSACTIONCODE = 'OE' THEN cc.WAREHOUSEID
+								WHEN cc.TRANSACTIONCODE = 'OR' THEN cc.WAREHOUSEID
+								WHEN cc.TRANSACTIONCODE = 'IM' AND cc.TRANSACTIONTYPE = 'Out' THEN cc.WAREHOUSEID
+								WHEN cc.TRANSACTIONCODE = 'IM' AND cc.TRANSACTIONTYPE = 'In' THEN NULL
+								WHEN cc.TRANSACTIONCODE = 'II' THEN NULL
+								WHEN cc.TRANSACTIONCODE = 'OKB' THEN cc.WAREHOUSEID
+								WHEN cc.TRANSACTIONCODE = 'OP' THEN cc.WAREHOUSEID
+								WHEN cc.TRANSACTIONCODE = 'OS' THEN cc.WAREHOUSEID
+								WHEN cc.TRANSACTIONCODE = 'IBC' THEN NULL
+							END
+						) AS OUTWAREHOUSEID
+						,(
+							CASE WHEN cc.TRANSACTIONCODE = 'OW' THEN NULL
+								WHEN cc.TRANSACTIONCODE = 'IW' THEN cc.WAREHOUSEID
+								WHEN cc.TRANSACTIONCODE = 'IB' THEN cc.WAREHOUSEID
+								WHEN cc.TRANSACTIONCODE = 'IE' THEN cc.WAREHOUSEID
+								WHEN cc.TRANSACTIONCODE = 'OE' THEN NULL
+								WHEN cc.TRANSACTIONCODE = 'OR' THEN cc.TOWAREHOUSEID
+								WHEN cc.TRANSACTIONCODE = 'IM' AND cc.TRANSACTIONTYPE = 'Out' THEN cc.TOWAREHOUSEID
+								WHEN cc.TRANSACTIONCODE = 'IR' AND cc.TRANSACTIONTYPE = 'In' THEN cc.WAREHOUSEID
+								WHEN cc.TRANSACTIONCODE = 'II' THEN cc.WAREHOUSEID
+								WHEN cc.TRANSACTIONCODE = 'OKB' THEN cc.TOWAREHOUSEID
+								WHEN cc.TRANSACTIONCODE = 'OP' THEN NULL
+								WHEN cc.TRANSACTIONCODE = 'IBC' THEN cc.WAREHOUSEID
+								WHEN cc.TRANSACTIONCODE = 'OSC' THEN cc.WAREHOUSEID
+							END
+						) AS INWAREHOUSEID
+						,cc.CONSUMABLELOTID
+						,cc.QTY
+						,sc.ERP_UNITID AS UNIT
+						,cc.CELLID
+						,cc.REFERENCEKEY
+						,cc.CUSTOMERID
+						--,V.CustName AS CUSTOMERNAME
+						,(SELECT CustName FROM [UCKERP].[$!{DBLINKNAME}].[dbo].[uck_VIEW_Cust] WHERE CUSTSEQ = cc.CUSTOMERID) AS CUSTOMERNAME
+						,cc.TEAMID
+						,cc.TRANSACTIONDETAILCODE
+						,cc.DESCRIPTION
+						,(SELECT USERNAME FROM SF_USER WHERE USERID = cc.CREATOR) AS INOUTUSERNAME
+						,cc.CREATEDTIME AS INOUTTIME
+				FROM	CT_CONSUMABLETRANSACTION cc
+						LEFT OUTER JOIN SF_CONSUMABLEDEFINITION sc ON cc.CONSUMABLEDEFID = sc.CONSUMABLEDEFID
+						--LEFT OUTER JOIN [UCKERP].[$!{DBLINKNAME}].[dbo].[uck_VIEW_Cust] V ON cc.CUSTOMERID = CAST(V.CUSTSEQ AS VARCHAR)
+				WHERE 	1=1
+						#if ("$!{P_DATEPERIOD_PERIODFR}" != "" && "$!{P_DATEPERIOD_PERIODTO}" != "")
+							AND CONVERT(varchar(10),cc.CREATEDTIME,120) BETWEEN CONVERT(VARCHAR(10), '$!{P_DATEPERIOD_PERIODFR}', 120) AND CONVERT(VARCHAR(10), '$!{P_DATEPERIOD_PERIODTO}', 120)
+						#end
+						#if ("$!{P_INOUTDIVISION}" != "" && "$!{P_INOUTDIVISION}" != "*")
+							AND cc.TRANSACTIONTYPE = '$!{P_INOUTDIVISION}'
+						#end
+						#if ("$!{P_TRANSACTIONCODE}" != "" && "$!{P_TRANSACTIONCODE}" != "*")
+							AND cc.TRANSACTIONCODE = '$!{P_TRANSACTIONCODE}'
+						#end
+						#if ("$!{P_WAREHOUSE}" != "" && "$!{P_WAREHOUSE}" != "*")
+							AND ( cc.WAREHOUSEID = '$!{P_WAREHOUSE}' OR cc.TOWAREHOUSEID = '$!{P_WAREHOUSE}' )
+						#end
+				ORDER BY cc.CREATEDTIME DESC, cc.TRANSACTIONTYPE DESC,cc.TRANSACTIONCODE DESC
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 자재관리 > 자재현황 > 자재 입출력 이력 내 기타유형 콤보
+	설		명	: 자재의 입출력 이력을 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-06-17
+	주요 변경 로그	: 
+	-->
+	<query id="GetComboForInOutHistory" version="00001">
+		<statement>
+			<![CDATA[
+				--id : "GetComboForInOutHistory"
+				--version : 00001
+				SELECT  distinct temp.FIELD
+						,temp.TITLE
+				FROM
+				(
+					SELECT  
+						CASE WHEN B.DICTIONARYNAME is Not Null THEN B.DICTIONARYNAME ELSE A.CODENAME END AS TITLE, 
+						A.CODEID AS FIELD
+					FROM    
+						SF_CODE A
+						LEFT JOIN SF_DICTIONARY B ON A.DICTIONARYID = B.DICTIONARYID AND LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+					WHERE   
+						A.VALIDSTATE = 'Valid'
+					AND
+						A.CODECLASSID = 'EtcInTypeMate'
+					UNION ALL
+					SELECT  
+						CASE WHEN B.DICTIONARYNAME is Not Null THEN B.DICTIONARYNAME ELSE A.CODENAME END AS TITLE, 
+						A.CODEID AS FIELD
+					FROM    
+						SF_CODE A
+						LEFT JOIN SF_DICTIONARY B ON A.DICTIONARYID = B.DICTIONARYID AND LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+					WHERE   
+						A.VALIDSTATE = 'Valid'
+					AND
+						A.CODECLASSID = 'EtcInTypeProd'
+					UNION ALL
+					SELECT  
+						CASE WHEN B.DICTIONARYNAME is Not Null THEN B.DICTIONARYNAME ELSE A.CODENAME END AS TITLE, 
+						A.CODEID AS FIELD
+					FROM    
+						SF_CODE A
+						LEFT JOIN SF_DICTIONARY B ON A.DICTIONARYID = B.DICTIONARYID AND LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+					WHERE   
+						A.VALIDSTATE = 'Valid'
+					AND
+						A.CODECLASSID = 'EtcOutType'
+					UNION ALL
+					SELECT  
+						CASE WHEN B.DICTIONARYNAME is Not Null THEN B.DICTIONARYNAME ELSE A.CODENAME END AS TITLE, 
+						A.CODEID AS FIELD
+					FROM    
+						SF_CODE A
+						LEFT JOIN SF_DICTIONARY B ON A.DICTIONARYID = B.DICTIONARYID AND LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+					WHERE   
+						A.VALIDSTATE = 'Valid'
+					AND
+						A.CODECLASSID = 'MoveType'
+				) temp
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 자재관리 > 자재 Lot관리 > 자재 분할/병합이력
+	설		명	: 자재 분할/병합이력 조회
+	작	성	자	: 유태근
+	작	성	일	: 2020-06-30
+	주요 변경 로그	: 2020-07-16 | 이준용 | PARTNUMBER 추가
+	-->
+	<query id="SelectConsumableLotSplitMergeHistory" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			--id : SelectConsumableLotSplitMergeHistory
+			--version : 00001
+			SELECT 
+					CLG.CONSUMABLELOTID																		--	자재 Lot Id
+				,	CLG.CONSUMABLEDEFID											AS	PRODUCTDEFID			--	품목 Id
+				,	CD.PARTNUMBER 												AS  PARTNUMBER 				
+				,	ISNULL(CDD.DICTIONARYNAME, CD.CONSUMABLEDEFNAME)			AS	PRODUCTDEFNAME			--	품목명
+				,	CD.STANDARD																				--	규격
+				,	ISNULL(WD.DICTIONARYNAME, W.WAREHOUSENAME)					AS	WAREHOUSENAME			-- 	창고명
+				,	CLG.ORIGINALQTY												AS	QTY						--	수량
+				,	ISNULL(COD.DICTIONARYNAME, CO.CODENAME)						AS	TYPE					--	분할/병합 구분
+				,	CLG.DESTINATIONLOTID										AS	TARGETCONSUMABLELOTID	--	Target 자재 Lot Id
+				,	CLG.QTY														AS	TARGETQTY				--	대상수량
+				,	U.USERNAME													AS	CREATOR					--	생성자
+				,	CLG.CREATEDTIME												AS	CREATEDTIME				--	생성일시
+			FROM	CT_CONSUMABLELOTGENEAL			CLG		
+			INNER JOIN SF_CONSUMABLELOT				CL	ON	CL.CONSUMABLELOTID = CLG.CONSUMABLELOTID
+			INNER JOIN SF_CONSUMABLEDEFINITION		CD	ON	CD.CONSUMABLEDEFID = CLG.CONSUMABLEDEFID
+			LEFT OUTER JOIN SF_DICTIONARY			CDD	ON	CDD.DICTIONARYID = CD.DICTIONARYID
+														AND	CDD.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+			LEFT OUTER JOIN SF_CODE					CO	ON	CO.CODEID = CLG.TXNTYPE
+														AND CO.CODECLASSID = 'SplitMerge'
+			LEFT OUTER JOIN SF_DICTIONARY			COD	ON	COD.DICTIONARYID = CO.DICTIONARYID
+														AND	COD.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+			LEFT OUTER JOIN SF_WAREHOUSE			W	ON	W.WAREHOUSEID = CL.WAREHOUSEID
+			LEFT OUTER JOIN SF_DICTIONARY			WD	ON	WD.DICTIONARYID = W.DICTIONARYID
+														AND CDD.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+			LEFT OUTER JOIN SF_USER					U	ON	U.USERID = CLG.CREATOR
+			WHERE	1 = 1
+			AND		CONVERT(DATE, CLG.CREATEDTIME)	BETWEEN CONVERT(DATE, '$!{P_DATEPERIOD_PERIODFR}')
+													AND	   	CONVERT(DATE, '$!{P_DATEPERIOD_PERIODTO}')
+			-- 창고
+			#if ("$!{P_WAREHOUSE}" != "" && "$!{P_WAREHOUSE}" != "*")
+				AND		CL.WAREHOUSEID = '$!{P_WAREHOUSE}'
+			#end
+			
+			-- 품목
+			#if ("$!{P_CONSUMABLEDEFID}" != "" && "$!{P_CONSUMABLEDEFID}" != "*")
+				AND		CLG.CONSUMABLEDEFID = '$!{P_CONSUMABLEDEFID}'
+			#end
+			
+			-- 자재
+			#if ("$!{P_CONSUMABLELOTID}" != "" && "$!{P_CONSUMABLELOTID}" != "*")
+				AND		CLG.CONSUMABLELOTID = '$!{P_CONSUMABLELOTID}'
+			#end
+			
+			-- 대상자재
+			#if ("$!{P_TARGETCONSUMABLELOTID}" != "" && "$!{P_TARGETCONSUMABLELOTID}" != "*")
+				AND		CLG.DESTINATIONLOTID = '$!{P_TARGETCONSUMABLELOTID}'
+			#end
+			
+			ORDER BY
+					CLG.CREATEDTIME	DESC;
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 자재관리 > 자재 Lot관리 > 자재 분할/병합이력
+	설		명	: 자재 Lot 리스트를 조회하는 팝업 쿼리
+	작	성	자	: 유태근
+	작	성	일	: 2020-06-30
+	주요 변경 로그	: 
+	-->
+	<query id="GetConsumableLotList" version="00002">
+		<statement>
+			<![CDATA[
+			--
+			--id : GetConsumableLotList
+			--version : 00002
+			SELECT	
+					CL.CONSUMABLELOTID
+				,	CASE WHEN CL.CONSUMABLESTATE = 'Available' THEN ISNULL(AD.DICTIONARYNAME, A.AREANAME) ELSE NULL END 		AS	AREANAME
+				,	CASE WHEN CL.CONSUMABLESTATE = 'Available' THEN ISNULL(WD.DICTIONARYNAME, W.WAREHOUSENAME) ELSE NULL END	AS	WAREHOUSENAME
+				,	CL.LOCATIONID
+			FROM	SF_CONSUMABLELOT			CL	
+			LEFT OUTER JOIN	SF_AREA				A	ON	A.AREAID = CL.AREAID
+			LEFT OUTER JOIN SF_DICTIONARY		AD	ON	AD.DICTIONARYID = A.DICTIONARYID
+													AND	AD.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+			LEFT OUTER JOIN SF_WAREHOUSE		W	ON	W.WAREHOUSEID = CL.WAREHOUSEID
+			LEFT OUTER JOIN SF_DICTIONARY		WD	ON	WD.DICTIONARYID = W.DICTIONARYID
+													AND WD.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+			WHERE	1 = 1
+			#if ("$!{P_CONSUMABLELOTID}" != "" && "$!{P_CONSUMABLELOTID}" != "*")
+				AND	CL.CONSUMABLELOTID = '$!{P_CONSUMABLELOTID}'
+			#end
+			
+			#if ("$!{P_CONSUMABLEDEFID}" != "" && "$!{P_CONSUMABLEDEFID}" != "*")
+				AND	CL.CONSUMABLEDEFID = '$!{P_CONSUMABLEDEFID}'
+			#end
+			
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 자재관리 > 자재 검사 > 자재수입검사
+	설		명	: 검사기준이미지 조회
+	작	성	자	: 정승원
+	작	성	일	: 2020-07-02
+	주요 변경 로그	: 
+	-->
+	<query id="GetStdInspectionImage" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			--id : GetStdInspectionImage
+			--version : 00001
+			
+			SELECT  CD.RECEIVINGINSPSTDFILEID	FILEID
+				,	INF.FILEDATA
+			FROM SF_CONSUMABLEDEFINITION	CD
+			LEFT JOIN SF_INSPECTIONFILE		INF	ON	CD.RECEIVINGINSPSTDFILEID = INF.FILEID
+												AND	INF.INSPECTIONTYPE = 'ReceiptInsp'
+												AND	INF.RESOURCEID = '*'
+			WHERE CD.CONSUMABLEDEFID = '$!{CONSUMABLEDEFID}'
+			AND CD.CONSUMABLEDEFVERSION = '*'
+			
+			]]>
+		</statement>
+	</query>
+</list>

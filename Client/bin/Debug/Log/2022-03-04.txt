@@ -1,0 +1,28 @@
+2022-03-04 09:50:59.1280|INFO|Get language list start. 
+2022-03-04 09:51:02.3208|INFO|Get language list complete. 
+2022-03-04 09:51:02.3218|INFO|Get message list start. 
+2022-03-04 09:51:02.8269|INFO|Get message list complete. 
+2022-03-04 09:51:02.8409|INFO|Get service list start. 
+2022-03-04 09:51:02.8409|INFO|Get service list complete. 
+2022-03-04 09:51:02.9869|INFO|Get langauge type list start. 
+2022-03-04 09:51:03.1260|INFO|Get langauge type list complete. 
+2022-03-04 09:51:03.1260|INFO|Get plant list start. 
+2022-03-04 09:51:03.2580|INFO|Get plant list complete. 
+2022-03-04 09:51:03.2620|INFO|Get save id YN start. 
+2022-03-04 09:51:03.2620|INFO|Get save id YN complete. 
+2022-03-04 09:51:03.2620|INFO|Get save id start. 
+2022-03-04 09:51:03.2620|INFO|Get save id complete. 
+2022-03-04 10:10:21.2232|INFO|Get language list start. 
+2022-03-04 10:10:24.1586|INFO|Get language list complete. 
+2022-03-04 10:10:24.1586|INFO|Get message list start. 
+2022-03-04 10:10:24.6538|INFO|Get message list complete. 
+2022-03-04 10:10:24.6538|INFO|Get service list start. 
+2022-03-04 10:10:24.6538|INFO|Get service list complete. 
+2022-03-04 10:10:24.7738|INFO|Get langauge type list start. 
+2022-03-04 10:10:24.8968|INFO|Get langauge type list complete. 
+2022-03-04 10:10:24.8968|INFO|Get plant list start. 
+2022-03-04 10:10:25.1709|INFO|Get plant list complete. 
+2022-03-04 10:10:25.1709|INFO|Get save id YN start. 
+2022-03-04 10:10:25.1709|INFO|Get save id YN complete. 
+2022-03-04 10:10:25.1709|INFO|Get save id start. 
+2022-03-04 10:10:25.1709|INFO|Get save id complete. 

@@ -1,0 +1,510 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list>
+	<!--
+	프 로 그 램 명	: 설비관리 > 설비점검 > 설비일상점검표 조회
+	설		명	: 기준의 설비일상점검 데이터를 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-05-21
+	주요 변경 로그	:
+	-->
+	<query id="GetEquipCheckDataList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- id : GetEquipCheckDataList
+				-- version : 00001
+				SELECT	cd.EQUIPCHECKID
+						,('DAY' + RIGHT(cd.CHECKDATE,2)) AS CHECKDATE
+						,(	
+							CASE WHEN se.RESULTTYPE = 'ER-001' THEN (CASE WHEN cd.RESULTTYPE01 = 'OKAY' THEN '○'
+																		WHEN cd.RESULTTYPE01 = 'BAD' THEN '×'
+																		WHEN cd.RESULTTYPE01 = 'COMPLETE' THEN 'v'
+																		WHEN cd.RESULTTYPE01 = 'ADJUST' THEN 'r'
+																		ELSE ''
+																	END)
+								WHEN se.RESULTTYPE = 'ER-002' THEN CONVERT(varchar(10),cd.RESULTTYPE02)
+							END
+						) AS RESULT
+				INTO	#TEMP
+				FROM	UL_EQUIPMENTCHECKDATA 		cd
+						LEFT JOIN SF_EQUIPMENTMAINTITEM se ON cd.EQUIPCHECKID = se.MAINTITEMID AND se.EQUIPMENTCLASSID = (SELECT EQUIPMENTCLASSID FROM SF_EQUIPMENT WHERE EQUIPMENTID = '$!{P_EQUIPCODE}')
+						LEFT JOIN SF_MAINTITEM sm ON se.MAINTITEMID = sm.MAINTITEMID
+				WHERE	1=1
+						AND cd.CHECKDATE BETWEEN '$!{P_STARTDATE}' AND '$!{P_ENDDATE}'
+						AND cd.EQUIPMENTID = '$!{P_EQUIPCODE}'
+								
+				SELECT	*
+				INTO	#TEMP2
+				FROM	#TEMP
+				PIVOT	(MAX(RESULT) FOR CHECKDATE IN ([DAY01],[DAY02],[DAY03],[DAY04],[DAY05]
+														,[DAY06],[DAY07],[DAY08],[DAY09],[DAY10]
+														,[DAY11],[DAY12],[DAY13],[DAY14],[DAY15]
+														,[DAY16],[DAY17],[DAY18],[DAY19],[DAY20]
+														,[DAY21],[DAY22],[DAY23],[DAY24],[DAY25]
+														,[DAY26],[DAY27],[DAY28],[DAY29],[DAY30],[DAY31])
+				) AS PVT
+								
+				SELECT	se.MAINTTYPE AS CHECKTYPE
+						,sm.MAINTITEMNAME AS EQUIPCHECKNAME
+						,se.MAINTDURATIONUNIT AS CHECKCYCLE
+						,se.MAINTDURATION AS CHECKCOUNT
+						,se.VALIDATIONTYPE AS CHECKWAY
+						,temp.*
+				FROM	SF_EQUIPMENTMAINTITEM se
+						LEFT JOIN SF_MAINTITEM sm ON se.MAINTITEMID = sm.MAINTITEMID
+						LEFT JOIN #TEMP2 temp ON se.MAINTITEMID = temp.EQUIPCHECKID
+				WHERE	1=1
+						AND se.EQUIPMENTCLASSID = (SELECT EQUIPMENTCLASSID FROM SF_EQUIPMENT WHERE EQUIPMENTID = '$!{P_EQUIPCODE}')
+				ORDER BY CAST(se.MAINTSEQUENCE AS INT) ASC
+								
+				DROP TABLE #TEMP2
+				DROP TABLE #TEMP
+				
+
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	프 로 그 램 명	: 설비관리 > 설비점검 > 설비일상점검표 조회
+	설		명	: 기준의 설비일상점검 데이터를 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-05-21
+	주요 변경 로그	:
+	-->
+	<query id="GetEquipCheckDataDetailList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- id : GetEquipCheckDataDetailList
+				-- version : 00001
+				SELECT	dtl.SEQ
+						,dtl.EQUIPMENTID
+						,dtl.OCCURDATE
+						,dtl.OCCURDESCRIPTION
+						,dtl.ACTIONDATE
+						,dtl.ACTIONDESCRIPTION
+						,UC.USERNAME AS CREATOR
+						,dtl.CREATEDTIME
+						,UM.USERNAME AS MODIFIER
+						,dtl.MODIFIEDTIME
+				FROM	UL_EQUIPMENTCHECKDATADETAIL dtl
+						LEFT OUTER JOIN	SF_USER UC ON dtl.CREATOR = UC.USERID
+						LEFT OUTER JOIN SF_USER UM ON dtl.MODIFIER = UM.USERID
+				WHERE	1=1
+						AND OCCURDATE BETWEEN '$!{P_STARTDATE}' AND '$!{P_ENDDATE}'
+						AND EQUIPMENTID = '$!{P_EQUIPCODE}'
+				UNION 
+				SELECT	dtl.SEQ
+						,dtl.EQUIPMENTID
+						,dtl.OCCURDATE
+						,dtl.OCCURDESCRIPTION
+						,dtl.ACTIONDATE
+						,dtl.ACTIONDESCRIPTION
+						,UC.USERNAME AS CREATOR
+						,dtl.CREATEDTIME
+						,UM.USERNAME AS MODIFIER
+						,dtl.MODIFIEDTIME
+				FROM	UL_EQUIPMENTCHECKDATADETAIL dtl
+						LEFT OUTER JOIN	SF_USER UC ON dtl.CREATOR = UC.USERID
+						LEFT OUTER JOIN SF_USER UM ON dtl.MODIFIER = UM.USERID
+				WHERE	1=1
+						AND dtl.ACTIONDATE IS NULL
+						AND EQUIPMENTID = '$!{P_EQUIPCODE}'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 설비관리 > 설비점검 > 설비일상점검현황 문제점 조회
+	설		명	: 기준의 설비일상점검현황 내 문제점 데이터를 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-07-02
+	주요 변경 로그	:
+	-->
+	<query id="GetEquipCheckDataDetailLog" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- id : GetEquipCheckDataDetailLog
+				-- version : 00001
+				SELECT	dtl.SEQ
+						,dtl.EQUIPMENTID
+						,dtl.OCCURDATE
+						,dtl.OCCURDESCRIPTION
+				FROM	UL_EQUIPMENTCHECKDATADETAIL dtl
+						LEFT OUTER JOIN SF_EQUIPMENT eq ON dtl.EQUIPMENTID = eq.EQUIPMENTID
+				WHERE	1=1
+						AND dtl.ACTIONDATE IS NULL
+						#if ("$!{P_TEAM}" != "" && "$!{P_TEAM}" != "*")
+							AND	eq.DEPARTMENT = '$!{P_TEAM}'
+						#end
+						#if ("$!{P_AREACODE}" != "" && "$!{P_AREACODE}" != "*")
+							AND	eq.AREAID = '$!{P_AREACODE}'
+						#end
+						#if ("$!{P_EQUIPMENTGROUP}" != "" && "$!{P_EQUIPMENTGROUP}" != "*")
+							AND	eq.EQUIPMENTCLASSID = '$!{P_EQUIPMENTGROUP}'
+						#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 설비관리 > 설비점검 > 설비일상점검표 헤더조회
+	설		명	: 기준의 설비일상점검 헤더데이터를 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-05-21
+	주요 변경 로그	:
+	-->
+	<query id="GetEquipCheckDataListheader" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- id : GetEquipCheckDataListheader
+				-- version : 00001
+				SELECT	eq.EQUIPMENTNAME
+						,eq.EQUIPMENTCLASSID
+						,CASE WHEN dic.DICTIONARYNAME IS NULL OR dic.DICTIONARYNAME = '' THEN CASE WHEN grp.EQUIPMENTCLASSNAME IS NULL OR grp.EQUIPMENTCLASSNAME = '' THEN grp.EQUIPMENTCLASSID
+									                                                                    ELSE grp.EQUIPMENTCLASSNAME END 
+							ELSE dic.DICTIONARYNAME END EQUIPMENTGROUPNAME
+				FROM	SF_EQUIPMENT eq
+						LEFT JOIN SF_EQUIPMENTCLASS grp ON grp.EQUIPMENTCLASSID = eq.EQUIPMENTCLASSID 
+						LEFT JOIN SF_DICTIONARY dic ON grp.DICTIONARYID = dic.DICTIONARYID AND dic.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				WHERE		1=1
+						AND eq.EQUIPMENTID = '$!{P_EQUIPCODE}'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 설비관리 > 설비점검 > 설비일상점검(기준데이터)
+	설		명	: 기준의 설비일상점검 데이터를 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-05-20
+	주요 변경 로그	:
+	-->
+	<query id="GetEquipCheckDataStandard" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- id : GetEquipCheckDataStandard
+				-- version : 00001
+				SELECT  se.MAINTITEMID AS EQUIPCHECKID
+						,se.MAINTTYPE AS CHECKTYPE
+						,sm.MAINTITEMNAME AS EQUIPCHECKNAME
+						,se.MAINTDURATIONUNIT AS CHECKCYCLE
+						,se.MAINTDURATION AS CHECKCOUNT
+						,se.VALIDATIONTYPE AS CHECKWAY
+						,se.RESULTTYPE AS RESULTWAY
+						,'' AS RESULTTYPE01
+						,0 AS RESULTTYPE02
+				FROM	SF_EQUIPMENTMAINTITEM se
+						LEFT JOIN SF_MAINTITEM sm ON se.MAINTITEMID = sm.MAINTITEMID
+				WHERE	1=1
+						#if ("$!{P_EQUIPCODE}" != "")
+							AND se.EQUIPMENTCLASSID = (SELECT EQUIPMENTCLASSID FROM SF_EQUIPMENT WHERE EQUIPMENTID = '$!{P_EQUIPCODE}')
+						#end
+				ORDER BY CAST(se.MAINTSEQUENCE AS INT) ASC
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 설비관리 > 설비점검 > 설비일상점검(실데이터)
+	설		명	: 기준의 설비일상점검 데이터를 조회한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-05-20
+	주요 변경 로그	:
+	-->
+	<query id="GetEquipCheckDataReal" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- id : GetEquipCheckDataReal
+				-- version : 00001
+				SELECT	cd.EQUIPCHECKID
+						,se.MAINTTYPE AS CHECKTYPE
+						,sm.MAINTITEMNAME AS EQUIPCHECKNAME
+						,se.MAINTDURATIONUNIT AS CHECKCYCLE
+						,se.MAINTDURATION AS CHECKCOUNT
+						,se.VALIDATIONTYPE AS CHECKWAY
+						,se.RESULTTYPE AS RESULTWAY
+						,cd.RESULTTYPE01 AS RESULTTYPE01
+						,cd.RESULTTYPE02 AS RESULTTYPE02
+						,UC.USERNAME AS CREATOR
+						,cd.CREATEDTIME AS CREATEDTIME
+						,UM.USERNAME AS MODIFIER
+						,cd.MODIFIEDTIME AS MODIFIEDTIME
+				FROM	UL_EQUIPMENTCHECKDATA cd
+						LEFT JOIN SF_EQUIPMENTMAINTITEM se ON cd.EQUIPCHECKID = se.MAINTITEMID AND se.EQUIPMENTCLASSID = (SELECT EQUIPMENTCLASSID FROM SF_EQUIPMENT WHERE EQUIPMENTID = '$!{P_EQUIPCODE}')
+						LEFT JOIN SF_MAINTITEM sm ON se.MAINTITEMID = sm.MAINTITEMID
+						LEFT OUTER JOIN	SF_USER UC ON cd.CREATOR = UC.USERID
+						LEFT OUTER JOIN SF_USER UM ON cd.MODIFIER = UM.USERID
+				WHERE	1=1
+						#if ("$!{P_DATETIME}" != "")
+							AND cd.CHECKDATE = CONVERT(VARCHAR(10), '$!{P_DATETIME}', 120)
+						#end
+						#if ("$!{P_EQUIPCODE}" != "")
+							AND cd.EQUIPMENTID = '$!{P_EQUIPCODE}'
+						#end
+				ORDER BY CAST(se.MAINTSEQUENCE AS INT) ASC
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 설비관리 > 모니터링 > 파라미터모니터링
+	설		명	: 파라미터 이력 데이터를 조회
+	작	성	자	: 유형하
+	작	성	일	: 2020-06-11
+	주요 변경 로그	: 2020-09-14 | 이준용 | 조회기간이 긴 경우, 오류발생(데이터량 多) | DataPeriod => Data 수정
+	-->
+	<query id="GetPatameterHistory" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- id : GetPatameterHistory
+				-- version : 00001
+				SELECT   C.AREAID
+				       , C.EQUIPMENTCLASSID
+					   , A.EQUIPMENTID
+					   , C.EQUIPMENTNAME
+					   , A.DAITEMID AS PARAMETERID
+					   , B.PARAMETERNAME
+					   , A.VALUE
+					   , A.CREATEDTIME
+				FROM SF_DARESULT A
+				INNER JOIN CT_PARAMETERDEFINITION B ON A.DAITEMID = B.PARAMETERID
+				INNER JOIN SF_EQUIPMENT C ON A.EQUIPMENTID = C.EQUIPMENTID
+				INNER JOIN SF_EQUIPMENTCLASS D ON C.EQUIPMENTCLASSID = D.EQUIPMENTCLASSID
+				INNER JOIN SF_AREA E ON C.AREAID = E.AREAID
+				WHERE 1 = 1
+				  AND A.EQUIPMENTID = '$!{P_EQUIPMENT}'
+				  #if("$!{P_DATE}" != "")
+				  	AND 	A.CREATEDTIME >= CONVERT(CHAR(10), '$!{P_DATE}', 21)
+				  #end
+				  --#if("$!{P_DATEPERIOD_PERIODFR}" != "" && "$!{P_DATEPERIOD_PERIODTO}" != "")
+			      --AND 	A.CREATEDTIME BETWEEN CONVERT(CHAR(10), '$!{P_DATEPERIOD_PERIODFR}', 21) AND CONVERT(CHAR(10), '$!{P_DATEPERIOD_PERIODTO}', 21)
+			      --AND A.CREATEDTIME >= '2020-06-10 00:00:00.000000' AND A.CREATEDTIME < '2020-06-20 00:00:00.000000' 
+			      --#end				  
+				  AND D.EQUIPMENTCLASSID = '$!{P_EQUIPMENTGROUP}'
+				#if("$!{PARAMETERID}" != "")
+			      AND EXISTS (
+							SELECT 	VALUE
+							FROM	ufn_selectStringToSplit('$!{PARAMETERID}', ',')	S
+							WHERE	B.PARAMETERID = S.VALUE
+					   )
+			    #end				
+			    ORDER BY A.CREATEDTIME, A.EQUIPMENTID, A.DAITEMID
+
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 설비관리 > 모니터링 > 파라미터모니터링Chart
+	설		명	: 파라미터 이력 데이터를 조회
+	작	성	자	: 유형하
+	작	성	일	: 2020-06-12
+	주요 변경 로그	:
+	-->
+	<query id="GetPatameterHistoryChart" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- id : GetPatameterHistoryChart
+				-- version : 00001
+				SELECT   A.EQUIPMENTID
+					   , A.DAITEMID AS PARAMETERID
+					   , A.VALUE
+					   , A.CREATEDTIME
+				FROM SF_DARESULT A
+				INNER JOIN CT_PARAMETERDEFINITION B ON A.DAITEMID = B.PARAMETERID
+				INNER JOIN SF_EQUIPMENT C ON A.EQUIPMENTID = C.EQUIPMENTID
+				INNER JOIN SF_EQUIPMENTCLASS D ON C.EQUIPMENTCLASSID = D.EQUIPMENTCLASSID
+				INNER JOIN SF_AREA E ON C.AREAID = E.AREAID
+				WHERE 1 = 1
+				  AND A.EQUIPMENTID = '$!{P_EQUIPMENT}'
+				  #if("$!{P_DATEPERIOD_PERIODFR}" != "" && "$!{P_DATEPERIOD_PERIODTO}" != "")
+			      AND 	A.CREATEDTIME BETWEEN CONVERT(CHAR(10), '$!{P_DATEPERIOD_PERIODFR}', 21) AND CONVERT(CHAR(10), '$!{P_DATEPERIOD_PERIODTO}', 21)
+			      #end				  
+				  --AND A.CREATEDTIME >= '2020-06-10 00:00:00.000000' AND A.CREATEDTIME < '2020-06-20 00:00:00.000000' 
+				  AND D.EQUIPMENTCLASSID = '$!{P_EQUIPMENTGROUP}'
+				#if("$!{PARAMETERID}" != "")
+			      AND EXISTS (
+							SELECT 	VALUE
+							FROM	ufn_selectStringToSplit('$!{PARAMETERID}', ',')	S
+							WHERE	B.PARAMETERID = S.VALUE
+					   )
+			    #end				
+			    ORDER BY A.CREATEDTIME, A.EQUIPMENTID, A.DAITEMID
+
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 설비관리 > 모니터링 > 설비가동률 
+	설		명	: 일별 ROW DATA 조회
+	작	성	자	: 정승원
+	작	성	일	: 2020-06-30
+	주요 변경 로그	:
+	-->
+	<query id="SelectEquipmentRuntimeRateRowData" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			-- id : SelectEquipmentRuntimeRateRowData
+			-- version : 00001
+			SET ANSI_WARNINGS OFF
+			SET ARITHIGNORE ON
+			SET ARITHABORT OFF
+			SELECT
+					CR.TXNDATE									OCCURRDATE
+				,	CR.EQUIPMENTID
+				,	ISNULL(DC.DICTIONARYNAME, EQ.EQUIPMENTNAME) EQUIPMENTNAME
+				,	CR.WORKINGTIME
+				,	CR.RUNTIME
+				,	ISNULL(CONVERT(NUMERIC(18,1), (CR.RUNTIME / CR.WORKINGTIME) * 100), 0)	RUNTIMERATE
+			FROM 	CT_EQUIPMENTRUNTIMERATE	CR
+			LEFT JOIN SF_EQUIPMENT			EQ	ON	CR.EQUIPMENTID = EQ.EQUIPMENTID
+			LEFT JOIN SF_DICTIONARY			DC	ON	EQ.DICTIONARYID = DC.DICTIONARYID
+												AND	DC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+			WHERE 1 = 1
+			AND CR.EQUIPMENTID = '$!{P_EQUIPCODE}'
+			AND CR.TXNDATE LIKE '$!{P_YEARMONTH}%'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 설비관리 > 모니터링 > 설비가동률 
+	설		명	: 일별 ROW DATA 설비상태 조회
+	작	성	자	: 정승원
+	작	성	일	: 2020-06-30
+	주요 변경 로그	:
+	-->
+	<query id="SelectEquipmentRunStopState" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			-- id : SelectEquipmentRunStopState
+			-- version : 00001
+			SELECT
+					CONVERT(VARCHAR, SE.TXNTIME, 120) 	OCCURRDATETIME
+			    ,	ISNULL(D.DICTIONARYNAME, SE.STATE) 	STATE 
+			FROM 	SF_EQUIPMENTHISTORY SE
+			LEFT JOIN SF_CODE			C	ON	SE.STATE = C.CODEID
+											AND C.CODECLASSID = 'EquipmentState2'
+			LEFT JOIN SF_DICTIONARY		D	ON	C.DICTIONARYID = D.DICTIONARYID
+											AND D.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+			WHERE 	SE.TXNID  = 'UpdateEquipmetStateTC'
+			AND   	CONVERT(VARCHAR, SE.TXNTIME , 23) = '$!{TXNTIME}'
+			AND   	SE.EQUIPMENTID = '$!{EQUIPMENTID}'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 설비관리 > 모니터링 > 설비모니터링
+	설		명	: 설비상태 체크
+	작	성	자	: 정승원
+	작	성	일	: 2020-07-02
+	주요 변경 로그	:
+	-->
+	<query id="SelectEquipmentState" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			-- id : SelectEquipmentState
+			-- version : 00001
+			SELECT
+					X.EQUIPMENTID
+				,	CASE WHEN X.STATE = 'IDLE' AND X.ALARM = 'RELEASE'  THEN 'IDLE'
+						 WHEN X.STATE = 'RUN'  AND X.ALARM = 'RELEASE'  THEN 'RUN'
+						 WHEN X.STATE = 'DOWN'							THEN 'DOWN'
+						 WHEN X.STATE = 'IDLE' AND X.ALARM = 'OCCURE'	THEN 'IDLEDOWN'
+						 WHEN X.STATE = 'RUN'  AND X.ALARM = 'OCCURE'	THEN 'RUNDOWN'
+					END	EQUIPMENTSTATE
+				,	ISNULL(D.DICTIONARYNAME, X.EQUIPMENTID)	EQUIPMENTNAME
+			FROM
+			(
+				SELECT	E.EQUIPMENTID
+					,		UPPER(E.STATE)	STATE
+					,		UPPER(ISNULL(EA.STATE, 'Release'))	ALARM
+					,		E.DICTIONARYID
+				FROM		SF_EQUIPMENT	E
+				LEFT JOIN CT_EQUIPMENTALARM		EA	ON	E.EQUIPMENTID = EA.EQUIPMENTID 
+																	AND	ISNULL(EA.STATE, 'Release') = 'Occure'
+				WHERE 1 = 1 --E.LASTTXNID = 'UpdateEquipmetStateTC'
+				AND E.IFSTATE =  'Y' --E.EQUIPMENTID IN ('MG17001','MG17002','MG17003','MG17004','MG17005','MG17006','MG17007','MG21001')
+			)X
+			LEFT JOIN SF_DICTIONARY	D	ON	X.DICTIONARYID = D.DICTIONARYID
+										AND D.LANGUAGETYPE = '$!{LANGUAGETYPE}' 
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 설비관리 > 모니터링 > 설비모니터링
+	설		명	: 설비상태 디테일 팝업 조회
+	작	성	자	: 정승원
+	작	성	일	: 2020-07-03
+	주요 변경 로그	:
+	-->
+	<query id="SelectEquipmentStateDetail" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			-- id : SelectEquipmentStateDetail
+			-- version : 00001
+			SELECT TOP 1 
+			       PD.PRODUCTDEFID 
+			    ,  PD.PRODUCTDEFNAME 
+			    ,  PD.PARTNUMBER
+			    ,  PD.STANDARD 
+			    ,  ISNULL(SD.DICTIONARYNAME ,CD.CODENAME ) MODELNAME
+			    ,  LE.TRACKINTIME 
+			    ,  ROUND(DATEDIFF(SECOND,LE.TRACKINTIME,GETDATE())/60.0,2) WORKTIME
+			    ,  ISNULL(DC.DICTIONARYNAME, E.EQUIPMENTNAME) EQUIPMENTNAME
+			FROM   SF_LOTEQUIPMENT 			LE
+			INNER JOIN SF_LOT                L ON  LE.LOTID  = L.LOTID 
+			INNER JOIN SF_PRODUCTDEFINITION PD ON  L.PRODUCTDEFID  = PD.PRODUCTDEFID
+			LEFT  JOIN SF_CODE              CD ON  PD.MODELID  = CD.CODEID 
+			                                   AND CD.CODECLASSID  = 'ModelCode'
+			LEFT  JOIN SF_DICTIONARY        SD ON  CD.DICTIONARYID  = SD.DICTIONARYID 
+			                                   AND SD.LANGUAGETYPE  = '$!{LANGUAGETYPE}'
+			LEFT  JOIN SF_EQUIPMENT			 E ON  LE.EQUIPMENTID = E.EQUIPMENTID
+			LEFT  JOIN SF_DICTIONARY	    DC ON  E.DICTIONARYID = DC.DICTIONARYID
+											   AND DC.LANGUAGETYPE = '$!{LANGUAGETYPE}'                                   
+			WHERE 1 = 1
+			AND   LE.TRACKOUTTIME  IS NULL
+			AND   LE.EQUIPMENTID  = '$!{EQUIPMENTID}'
+			ORDER BY LE.TXNTIME DESC
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 설비관리 > 모니터링 > 설비모니터링
+	설		명	: 설비알람 리스트 조회
+	작	성	자	: 정승원
+	작	성	일	: 2020-07-03
+	주요 변경 로그	:
+	-->
+	<query id="SelectEquipmentAlarmList" version="00001">
+		<statement>
+			<![CDATA[
+			--
+			-- id : SelectEquipmentAlarmList
+			-- version : 00001
+			SELECT ALARMID 
+			    ,  ALARMNAME 
+			    ,  CONVERT(CHAR(19), OCCURETIME, 20) OCCURETIME 
+			FROM   CT_EQUIPMENTALARM CE 
+			WHERE  EQUIPMENTID  = '$!{EQUIPMENTID}'
+			AND    STATE  = 'Occure'
+			]]>
+		</statement>
+	</query>
+</list>

@@ -1,0 +1,1239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list>
+	
+	
+	<query id="GetExcelDocument" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetExcelDocument
+				-- Version : 00001
+				SELECT 
+						FILEID
+					,	FILEDATA
+				FROM	SF_LOTCARD
+				WHERE	FILEID = '$!{FILEID}'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 로그인 화면에서 사용되는 다국어 사전 정보를 조회한다.
+	생	성	자	: 강호윤
+	생	성	일	: 2019-04-01
+	수  정   이  력	: 
+	-->
+	<query id="GetLanguageListOnLogin" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetLanguageListOnLogin
+				-- Version : 00001
+				SELECT	
+						DIC.DICTIONARYID
+					,	DIC.DICTIONARYNAME
+					,	DIC.LANGUAGETYPE
+				FROM	SF_DICTIONARY			DIC
+				WHERE	DIC.VALIDSTATE = 'Valid'
+				AND		(
+							DIC.DICTIONARYID IN (
+													SELECT	UPPER(OBJ.COLUMNNAME) AS DICTIONARYID
+													FROM	SF_OBJECTATTRIBUTE OBJ
+													WHERE	OBJ.OBJECTID = 'User'
+												 )
+				OR			DIC.DICTIONARYCLASSID IN ('COMMON', 'MAINFORM')
+						)
+				OR		DIC.DICTIONARYID = 'DEFAULTLANGUAGETYPE'
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	설		명	: 로그인 화면에서 사용되는 다국어 메세지 정보를 조회한다.
+	생	성	자	: 강호윤
+	생	성	일	: 2019-04-01
+	수  정   이  력	: 
+	-->
+	<query id="GetMessageListOnLogin" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetMessageListOnLogin
+				-- Version : 00001
+				SELECT	
+						MSG.MESSAGEID
+					,	MSG.MESSAGENAME			AS	CAPTION
+					,	MSG.DESCRIPTION			AS	MESSAGE
+					,	MSG.LANGUAGETYPE
+				FROM	SF_MESSAGE				MSG
+				WHERE	MSG.VALIDSTATE = 'Valid'
+				AND		MSG.MESSAGECLASSID = 'MAINFORM'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 로그인 화면에서 사용되는 언어 리스트를 조회한다.
+	생	성	자	: 강호윤
+	생	성	일	: 2019-04-01
+	수  정   이  력	: 
+	-->
+	<query id="GetLanguageTypeListOnLogin" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetLanguageTypeListOnLogin
+				-- Version : 00001
+				SELECT	
+						CD.CODEID
+					,	ISNULL(DIC.DICTIONARYNAME, CD.CODENAME)			AS	CODENAME
+			  	FROM	SF_CODE						CD
+			  	LEFT OUTER JOIN SF_DICTIONARY		DIC	ON	DIC.DICTIONARYID = CD.DICTIONARYID
+			  											AND	DIC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE	CD.CODECLASSID = 'LanguageType'
+				AND		CD.VALIDSTATE = 'Valid'
+				ORDER BY CD.DISPLAYSEQUENCE ASC
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	설		명	: 
+	생	성	자	: 
+	생	성	일	: 
+	수  정   이  력	: 
+	-->
+	<query id="GetColumnDescription" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetColumnDescription
+				-- Version : 00001
+				SELECT B.name
+					 , C.value
+				FROM SYSOBJECTS A
+				INNER JOIN SYSCOLUMNS B ON A.id = B.id
+				INNER JOIN SYS.EXTENDED_PROPERTIES C ON  B.id = C.major_id
+				                                     AND B.colid = C.minor_id
+													 AND C.name = 'MS_Description'
+				#if ("$!{COLUMNID}" != "" && "$!{COLUMNID}" != "*")
+				INNER JOIN string_split('$!{COLUMNID}',',') D ON B.name = D.value
+				#end													 
+				WHERE A.name = '$!{TABLEID}'	
+				
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 로그인 화면에서 사용되는 공장 리스트를 조회한다.
+	생	성	자	: 강호윤
+	생	성	일	: 2019-04-01
+	수  정   이  력	: 
+	-->
+	<query id="GetPlantListOnLogin" version="00001">
+		<statement>
+			<![CDATA[
+				-- Id : GetPlantListOnLogin
+				-- Version : 00001
+				SELECT	
+						PLT.PLANTID
+					 ,	ISNULL(DIC.DICTIONARYNAME, PLT.PLANTNAME)		AS PLANTNAME
+					 --,	TO_CHAR(TO_TIMESTAMP(PLT.WORKTIME, 'HH24:MI'), 'HH24:MI')	AS STARTBUSINESSHOUR
+					 --,	PLT.ISOTIMEZONE
+				FROM	SF_PLANT				PLT
+				LEFT OUTER JOIN SF_DICTIONARY	DIC	ON	PLT.PLANTNAME = DIC.DICTIONARYID
+													AND	DIC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE	PLT.VALIDSTATE = 'Valid'
+				ORDER BY PLT.PLANTID ASC
+			]]>
+		</statement>
+	</query>
+	
+	
+	<!--
+	설		명	: 로그인 화면에서 사용 신청 시 ID 중복 여부를 체크한다.
+	생	성	자	: 강호윤
+	생	성	일	: 2019-04-01
+	수  정   이  력	: 
+	-->
+	<query id="CheckDuplicateIdOnLogin" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : CheckDuplicateIdOnLogin
+				-- Version : 00001
+				SELECT	
+						*
+				FROM	SF_USER					USR
+				WHERE	USR.USERID = '$!{USERID}'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 시스템에서 사용되는 다국어 사전 정보를 조회한다.
+	생	성	자	: 강호윤
+	생	성	일	: 2019-04-01
+	수  정   이  력	: 
+	-->
+	<query id="GetDictionaryList" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetDictionaryList
+				-- Version : 10001
+				SELECT	
+						'MES' AS SERVICEID
+					,	DIC.DICTIONARYID
+					,	DIC.DICTIONARYNAME
+					,	DIC.DICTIONARYCLASSID
+					,	DIC.DESCRIPTION
+					,	DIC.LANGUAGETYPE
+				FROM	SF_DICTIONARY			DIC
+				WHERE	1=1
+				--AND     DIC.DICTIONARYCLASSID NOT IN ('MASTERDICTIONARYCLASS', 'MMDICTIONARYCLASS')
+				AND		DIC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				AND		DIC.VALIDSTATE = '$!{VALIDSTATE}'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 시스템에서 사용되는 다국어 메세지 정보를 조회한다.
+	생	성	자	: 강호윤
+	생	성	일	: 2019-04-01
+	수  정   이  력	: 
+	-->
+	<query id="GetMessageList" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetMessageList
+				-- Version : 10001
+				SELECT	
+						'MES' AS SERVICEID
+					,	MSG.MESSAGEID
+					,	MSG.MESSAGENAME
+					,	MSG.MESSAGECLASSID
+					,	MSG.MESSAGENAME AS TITLE
+					,	MSG.DESCRIPTION AS MESSAGE
+					,	MSG.LANGUAGETYPE 
+				FROM	SF_MESSAGE				MSG
+				WHERE	MSG.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				AND		MSG.VALIDSTATE = '$!{VALIDSTATE}'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 시스템에 로그인 한 사용자에게 권한이 부여된 메뉴 리스트를 조회한다.
+	생	성	자	: 강호윤
+	생	성	일	: 2019-04-01
+	수  정   이  력	: 
+	-->
+	<query id="GetMenuList" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetMenuList
+				-- Version : 10001
+				SELECT	
+						M.UIID
+					,	M.MENUID
+					,	DIC.DICTIONARYNAME AS MENUNAME
+					,	M.DESCRIPTION
+					,	M.PARENTMENUID
+					,	M.MENUTYPE
+					,	M.PROGRAMID
+					,	M.OPTIONS
+					,	CASE
+							WHEN M.DISPLAYSEQUENCE IS NULL	THEN 0
+							ELSE M.DISPLAYSEQUENCE
+						END						AS DISPLAYSEQUENCE
+					,	M.VALIDSTATE
+				FROM    SF_MENU					M
+				LEFT OUTER JOIN SF_DICTIONARY	DIC	ON	M.DICTIONARYID = DIC.DICTIONARYID
+													AND DIC.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				WHERE   EXISTS 
+						(
+							SELECT  1
+							FROM    SF_MENUAUTHORITY	MA
+							INNER JOIN (
+											SELECT  USERCLASSID
+											FROM    SF_USERCLASSUSER
+											WHERE   USERID = '$!{_TXNINFO.USER}'
+											AND     VALIDSTATE = 'Valid'
+									   )				B	ON	MA.USERCLASSID = B.USERCLASSID 
+							WHERE   MA.VALIDSTATE = 'Valid'				                    
+							AND		MA.MENUID = M.MENUID
+							AND		MA.UIID = '$!{_TXNINFO.UIID}'
+						)
+				AND		M.UIID = 'MES'
+				ORDER BY M.DISPLAYSEQUENCE, M.MENUTYPE, M.PARENTMENUID
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 시스템에 로그인 한 사용자에게 권한이 부여된 메뉴 리스트를 조회한다. - Audit 권한 추가
+	생	성	자	: 장선미
+	생	성	일	: 2019-10-31
+	수  정   이  력	: 
+	-->
+	<query id="GetMenuList" version="00002">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetMenuList
+				-- Version : 00002
+				SELECT	
+						M.UIID
+					,	M.MENUID
+					,	DIC.DICTIONARYNAME AS MENUNAME
+					,	M.DESCRIPTION
+					,	M.PARENTMENUID
+					,	M.MENUTYPE
+					,	M.PROGRAMID
+					,	M.OPTIONS
+					,	CASE
+							WHEN M.DISPLAYSEQUENCE IS NULL	THEN 0
+							ELSE M.DISPLAYSEQUENCE
+						END						AS DISPLAYSEQUENCE
+					,	M.VALIDSTATE
+				FROM    SF_MENU					M
+				LEFT OUTER JOIN SF_DICTIONARY	DIC	ON	M.DICTIONARYID = DIC.DICTIONARYID
+													AND DIC.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				WHERE   EXISTS 
+						(
+							SELECT  1
+							FROM    SF_MENUAUTHORITY	MA
+							INNER JOIN (
+											SELECT A.USERCLASSID
+											FROM (
+												SELECT U.USERID, U.PLANTID, U.ISAUDIT AS PLANTAUDIT, UCU.USERCLASSID, UC.ISAUDIT AS USERCLASSAUDIT
+												FROM (	
+													SELECT U.USERID, U.PLANTID, P.ISAUDIT
+													FROM SF_USER U
+													INNER JOIN SF_PLANT P ON U.PLANTID = P.PLANTID
+													WHERE U.USERID = '$!{_TXNINFO.USER}'
+												) U
+												INNER JOIN SF_USERCLASSUSER UCU ON U.USERID = UCU.USERID
+												LEFT OUTER JOIN SF_USERCLASS UC ON UCU.USERCLASSID = UC.USERCLASSID
+											) A
+											LEFT OUTER JOIN 
+											(	SELECT COUNT (*) CNT
+												FROM (	
+													SELECT U.USERID, U.PLANTID, P.ISAUDIT
+													FROM SF_USER U
+													INNER JOIN SF_PLANT P ON U.PLANTID = P.PLANTID
+													WHERE U.USERID = '$!{_TXNINFO.USER}'
+												) U
+												INNER JOIN SF_USERCLASSUSER UCU ON U.USERID = UCU.USERID
+												LEFT OUTER JOIN SF_USERCLASS UC ON UCU.USERCLASSID = UC.USERCLASSID
+												WHERE UC.ISAUDIT = 'Y'
+											) AUDIT ON 1=1
+											WHERE CASE WHEN COALESCE(A.PLANTAUDIT, 'N') = 'Y' AND AUDIT.CNT > 0 THEN COALESCE(A.PLANTAUDIT, 'N') 	 ELSE '' END 
+											    = CASE WHEN COALESCE(A.PLANTAUDIT, 'N') = 'Y' AND AUDIT.CNT > 0 THEN COALESCE(A.USERCLASSAUDIT, 'N') ELSE '' END
+									   )				B	ON	MA.USERCLASSID = B.USERCLASSID 
+							WHERE   MA.VALIDSTATE = 'Valid'				                    
+							AND		MA.MENUID = M.MENUID
+							AND		MA.UIID = '$!{_TXNINFO.UIID}'
+						)
+				AND		M.UIID = 'MES'
+				ORDER BY M.DISPLAYSEQUENCE, M.MENUTYPE, M.PARENTMENUID
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 시스템에 로그인 한 사용자가 즐겨찾기 등록 한 메뉴 리스트를 조회한다.
+	생	성	자	: 강호윤
+	생	성	일	: 2019-04-01
+	수  정   이  력	: 
+	-->
+	<query id="GetFavoriteMenuList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetFavoriteMenuList
+				-- Version : 00001
+				SELECT	
+						FAM.MENUID
+					,	DIC.DICTIONARYNAME		AS MENUNAME
+					,	FAM.DISPLAYSEQUENCE
+					,	FAM.REGTYPE
+					,	FAM.TXNHISTKEY
+					,	FAM.USERID
+				FROM	SF_FAVORITEMENUS		FAM
+				LEFT OUTER JOIN SF_MENU			MI	ON	FAM.MENUID = MI.MENUID
+				LEFT OUTER JOIN SF_DICTIONARY	DIC	ON	DIC.DICTIONARYID = MI.DICTIONARYID
+													AND	DIC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE	FAM.USERID = '$!{USERID}'
+				ORDER BY FAM.DISPLAYSEQUENCE ASC
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 사용자 정보 수정 화면을 오픈 할 때 로그인 한 사용자의 정보를 조회한다.
+	생	성	자	: 강호윤
+	생	성	일	: 2019-04-01
+	수  정   이  력	: 
+	-->
+	<query id="GetLoginUserInfo" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetLoginUserInfo
+				-- Version : 00001
+				SELECT	
+						U.USERID
+					,	U.USERNAME
+					,	U.NICKNAME
+					,	U.DESCRIPTION
+					,	U.DEPARTMENT
+					,	U.POSITION
+					,	U.DUTY
+					,	U.EMAILADDRESS
+					,	U.CELLPHONENUMBER
+					,	U.HOMEADDRESS
+					,	U.LANGUAGETYPE		AS DEFAULTLANGUAGETYPE
+				FROM	SF_USER				U
+				WHERE	U.VALIDSTATE = 'Valid'
+				AND		U.USERID = '$!{USERID}'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 코드그룹ID에 속한 코드 정보 리스트를 조회한다.
+	생	성	자	: 강호윤
+	생	성	일	: 2019-04-01
+	수  정   이  력	: 2020-06-09 정승원 모델기종 조회조건 추가
+				  2020-06-23 정승원 NOTINCODEID 조건 추가
+	-->
+	<query id="GetCodeList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetCodeList
+				-- Version : 00001
+				SELECT	
+						CD.CODEID
+					,	ISNULL(DIC.DICTIONARYNAME, CD.CODENAME)		AS CODENAME
+					,   CD.DISPLAYSEQUENCE
+				FROM	SF_CODE					CD
+				LEFT OUTER JOIN SF_DICTIONARY	DIC	ON	DIC.DICTIONARYID = CD.DICTIONARYID
+													AND	DIC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE	CD.CODECLASSID = '$!{CODECLASSID}'
+				AND		CD.VALIDSTATE = 'Valid'
+				#if("$!{TXTMODELID}" != "")
+				AND 	(CD.CODEID LIKE '%$!{TXTMODELID}%'
+				OR		CD.CODENAME LIKE '%$!{TXTMODELID}%'
+				OR		DIC.DICTIONARYNAME LIKE '%$!{TXTMODELID}%')
+				#end
+				#if("$!{NOTINCODEID}" != "")
+				AND		CD.CODEID NOT IN ('$!{NOTINCODEID}')
+				#end
+				ORDER BY CD.DISPLAYSEQUENCE ASC
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 코드그룹ID에 속한 코드 정보 리스트를 조회한다.
+	생	성	자	: 강호윤
+	생	성	일	: 2019-04-01
+	수  정   이  력	: 
+	-->
+	
+	<query id="GetProcessClassIdList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetProcessClassIdList
+				-- Version : 00001
+				SELECT 	PROCESSCLASSID
+					, PROCESSCLASSNAME
+					, ENTERPRISEID
+					, PLANTID 
+				FROM 	SF_PROCESSCLASS
+				WHERE 	VALIDSTATE = 'Valid'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 메뉴 오픈 시 로그인 한 사용자에게 권한이 부여된 툴바 버튼 정보를 조회한다.
+	생	성	자	: 강호윤
+	생	성	일	: 2019-04-01
+	수  정   이  력	: 
+	-->
+	<query id="GetMenuObjectList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetMenuObjectList
+				-- Version : 00001
+				SELECT	
+						MOJ.DISPLAYSEQUENCE
+					,	MOJ.TOOLBARID
+					,   MOJ.DICTIONARYID
+					,	ISNULL(DIC.DICTIONARYNAME, MOJ.TOOLBARNAME)		AS TOOLBARNAME
+					,	MOJ.MESSAGEID
+					,	MOJ.TOOLBARTYPE
+					,	MOJ.OPTIONS
+				FROM	SF_TOOLBAR				MOJ
+				LEFT OUTER JOIN SF_DICTIONARY	DIC	ON	DIC.DICTIONARYID = MOJ.TOOLBARID
+													AND	DIC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE	EXISTS
+						(
+							SELECT	1
+							FROM	SF_USERCLASSUSER		UCU
+							INNER JOIN SF_TOOLBARAUTHORITY	MOA	ON	UCU.USERCLASSID = MOA.USERCLASSID
+															 	AND	MOA.VALIDSTATE = '$!{VALIDSTATE}'
+							WHERE	UCU.USERID = '$!{USERID}'
+							AND		UCU.VALIDSTATE = '$!{VALIDSTATE}'
+							AND		MOA.MENUID = '$!{MENUID}'
+							AND		MOA.TOOLBARID = MOJ.TOOLBARID
+						)
+				AND		MOJ.VALIDSTATE = '$!{VALIDSTATE}'
+				AND		MOJ.UIID = '$!{UIID}'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 메뉴 오픈 시 로그인 한 사용자에게 권한이 부여된 툴바 버튼 정보를 조회한다. - ISWRITE 컬럼 추가
+	생	성	자	: 장선미
+	생	성	일	: 2019-10-17
+	수  정   이  력	: 
+	-->
+	<query id="GetMenuObjectList" version="00002">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetMenuObjectList
+				-- Version : 00002
+				SELECT	
+						MOJ.DISPLAYSEQUENCE
+					,	MOJ.TOOLBARID
+					,	DIC.DICTIONARYNAME		AS TOOLBARNAME
+					,	MOJ.MESSAGEID
+					,	MOJ.TOOLBARTYPE
+					,	MOJ.OPTIONS
+					,   MOJ.ISWRITE
+				FROM	SF_TOOLBAR				MOJ
+				LEFT OUTER JOIN SF_DICTIONARY	DIC	ON	DIC.DICTIONARYID = MOJ.TOOLBARID
+													AND	DIC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE	EXISTS
+						(
+							SELECT	1
+							FROM	SF_USERCLASSUSER		UCU
+							INNER JOIN SF_TOOLBARAUTHORITY	MOA	ON	UCU.USERCLASSID = MOA.USERCLASSID
+															 	AND	MOA.VALIDSTATE = '$!{VALIDSTATE}'
+							WHERE	UCU.USERID = '$!{USERID}'
+							AND		UCU.VALIDSTATE = '$!{VALIDSTATE}'
+							AND		MOA.MENUID = '$!{MENUID}'
+							AND		MOA.TOOLBARID = MOJ.TOOLBARID
+						)
+				AND		MOJ.VALIDSTATE = '$!{VALIDSTATE}'
+				AND		MOJ.UIID = '$!{UIID}'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 코드그룹 정보 화면에서 상위코드그룹ID 컬럼의 팝업 데이터를 조회한다.
+	생	성	자	: 강호윤
+	생	성	일	: 2019-04-01
+	수  정   이  력	: 
+	-->
+	<query id="GetParentCodeClassId" version="00001">
+		<statement>
+			<![CDATA[
+				-- 
+				-- Id : GetParentCodeClassId
+				-- Version : 00001
+				SELECT	
+						C.CODECLASSID
+    				,	DIC.DICTIONARYNAME		AS CODECLASSNAME
+				FROM	SF_CODECLASS			C
+				LEFT OUTER JOIN SF_DICTIONARY	DIC	ON	DIC.DICTIONARYID = C.DICTIONARYID
+													AND	DIC.LANGUAGETYPE = '$!{LANGUAGETYPE}'					
+				WHERE	1 = 1
+				
+				#if ("$!{CODECLASSID}" != "")
+					AND		NOT CODECLASSID = '$!{CODECLASSID}'
+				#end
+				
+				#if ("$!{TXTCODECLASSIDNAME}" != "")
+					AND		(C.CODECLASSID LIKE '%$!{TXTCODECLASSIDNAME}%'
+					OR		DIC.DICTIONARYNAME LIKE '%$!{TXTCODECLASSIDNAME}%')								
+				#end
+				
+				ORDER BY C.CODECLASSID
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 사용자 그룹 - 사용자 매핑 화면에서 사용자 조회 버튼 클릭 시 팝업의 매핑된 사용자 리스트를 조회한다.
+	생	성	자	: 강호윤
+	생	성	일	: 2019-04-01
+	수  정   이  력	: 
+	-->
+	<query id="GetUserByUserClassId" version="00001">
+		<statement>
+			<![CDATA[
+				-- 
+				-- Id : GetUserByUserClassId
+				-- Version : 00001
+				SELECT	DISTINCT
+						U.USERID
+					,	U.USERNAME
+					,	U.DEPARTMENT
+					,	U.POSITION
+					,	U.EMAILADDRESS
+					,	U.CELLPHONENUMBER
+					,	UCU.USERCLASSID
+					,	U.VALIDSTATE
+				FROM	SF_USER						U
+				LEFT OUTER JOIN SF_USERCLASSUSER	UCU	ON	U.USERID = UCU.USERID
+				WHERE	1 = 1
+				AND		UCU.VALIDSTATE = 'Valid'
+				AND		UCU.USERCLASSID = '$!{USERCLASSID}'
+				
+				#if ("$!{USERID}" != "")
+					AND		EXISTS
+							(
+								SELECT	1
+								FROM	ufn_selectStringToSplit('$!{USERID}', ',')		MAP
+								WHERE	U.USERID = MAP.VALUE
+							)
+				#end
+				
+				ORDER BY U.USERID
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 사용자 그룹 - 사용자 매핑 화면에서 사용자 조회 버튼 클릭 시 팝업의 사용자 리스트를 조회한다.
+	생	성	자	: 강호윤
+	생	성	일	: 2019-04-01
+	수  정   이  력	: 2020-06-10 정승원 USERIDNAME 조건 추가 
+	-->
+	<query id="GetUser" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetUser
+				-- Version : 00001
+				SELECT	DISTINCT
+						U.USERID
+					,	U.USERNAME
+					,	U.DEPARTMENT
+					,	U.POSITION
+					,	U.CELLPHONENUMBER
+					,	U.EMAILADDRESS
+					,	U.VALIDSTATE
+				FROM	SF_USER				U
+				WHERE	1 = 1
+				AND		U.VALIDSTATE = 'Valid'
+				
+				#if ("$!{CONDALLCOND}" == "*" && "$!{TXTALLCOND}" != "")
+					AND		(U.USERID LIKE '%$!{TXTALLCOND}%'
+					OR		U.USERNAME LIKE '%$!{TXTALLCOND}%'
+					OR		U.DEPARTMENT LIKE '%$!{TXTALLCOND}%'
+					OR		U.POSITION LIKE '%$!{TXTALLCOND}%'
+					OR		U.DUTY LIKE '%$!{TXTALLCOND}%'
+					OR		U.CELLPHONENUMBER LIKE '%$!{TXTALLCOND}%'
+					OR		U.EMAILADDRESS LIKE '%$!{TXTALLCOND}%')
+				#end
+				
+				#if ("$!{CONDALLCOND}" == "UserId")
+					AND		U.USERID LIKE '%$!{TXTALLCOND}%'
+				#end
+				
+				#if ("$!{CONDALLCOND}" == "UserId")
+					AND		U.USERNAME LIKE '%$!{TXTALLCOND}%'
+				#end
+				
+				#if ("$!{CONDALLCOND}" == "UserId")
+					AND		U.DEPARTMENT LIKE '%$!{TXTALLCOND}%'
+				#end
+				
+				#if ("$!{CONDALLCOND}" == "UserId")
+					AND		U.POSITION LIKE '%$!{TXTALLCOND}%'
+				#end
+				
+				#if ("$!{CONDALLCOND}" == "UserId")
+					AND		U.DUTY LIKE '%$!{TXTALLCOND}%'
+				#end
+				
+				#if ("$!{CONDALLCOND}" == "UserId")
+					AND		U.CELLPHONENUMBER LIKE '%$!{TXTALLCOND}%'
+				#end
+				
+				#if ("$!{CONDALLCOND}" == "UserId")
+					AND		U.EMAILADDRESS LIKE '%$!{TXTALLCOND}%'
+				#end
+				#if("$!{USERIDNAME}" != "")
+				AND	(U.USERID LIKE '%$!{USERIDNAME}%'
+				OR	 U.USERNAME LIKE '%$!{USERIDNAME}%')
+				#end
+				ORDER BY U.USERID
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 메뉴 정보 화면에서 상위메뉴ID 컬럼의 트리 리스트를 조회한다. 
+	생	성	자	: 강호윤
+	생	성	일	: 2019-04-01
+	수  정   이  력	: 
+	-->
+	<query id="GetParentMenuId" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetParentMenuId
+				-- Version : 00001
+				WITH MENU_CTE AS
+				(
+					SELECT	
+							M.MENUID
+						,	M.PARENTMENUID
+						,	M.DICTIONARYID
+						,	M.DISPLAYSEQUENCE
+					FROM	SF_MENU					M
+					WHERE	M.VALIDSTATE = 'Valid'
+					AND		M.UIID = 'MES'
+					AND		ISNULL(M.PARENTMENUID, '') = ''
+					
+					UNION ALL
+					
+					SELECT	
+							M.MENUID
+						,	M.PARENTMENUID
+						,	M.DICTIONARYID
+						,	M.DISPLAYSEQUENCE
+					FROM	SF_MENU					M
+					INNER JOIN MENU_CTE				T	ON	M.PARENTMENUID = T.MENUID
+					WHERE	M.VALIDSTATE = 'Valid'
+					AND		M.UIID = 'MES'
+					AND		M.MENUTYPE = 'Folder'
+				)
+				SELECT	
+						PM.MENUID
+					,	PM.PARENTMENUID
+					,	DIC.DICTIONARYNAME			AS MENUNAME 
+					,	PM.DISPLAYSEQUENCE
+				FROM	MENU_CTE					PM
+				LEFT OUTER JOIN SF_DICTIONARY	DIC	ON	DIC.DICTIONARYID = PM.DICTIONARYID
+													AND DIC.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 코드 정보 화면에서 상위코드ID 컬럼의 코드 리스트를 조회한다. 
+	생	성	자	: 강호윤
+	생	성	일	: 2019-04-01
+	수  정   이  력	: 
+	-->
+	<query id="GetParentCodeId" version="10001">
+		<statement>
+			<![CDATA[
+				-- 
+				-- Id : GetParentCodeId
+				-- Version : 10001
+				SELECT
+						CC.PARENTCODECLASSID
+					,	CC.CODECLASSID
+					,	CD.CODEID
+					,	DIC.DICTIONARYNAME		AS CODENAME
+				FROM	SF_CODE					CD
+				LEFT OUTER JOIN SF_CODECLASS	CC	ON	CD.CODECLASSID = CC.PARENTCODECLASSID
+				LEFT OUTER JOIN SF_DICTIONARY	DIC	ON	CD.DICTIONARYID = DIC.DICTIONARYID
+													AND DIC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE	CD.VALIDSTATE = 'Valid'
+				ORDER BY CD.CODECLASSID ASC, CD.DISPLAYSEQUENCE ASC
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 코드 정보 화면에서 표시순서 컬럼의 중복 여부를 조회한다. 
+	생	성	자	: 강호윤
+	생	성	일	: 2019-04-01
+	수  정   이  력	: 
+	-->
+	<query id="GetDuplicatedDisplaySequence" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetDuplicatedDisplaySequence
+				-- Version : 10001
+				SELECT
+						C.CODECLASSID
+					,	C.CODEID
+					,	C.DISPLAYSEQUENCE
+				FROM	SF_CODE	C
+				WHERE	1 = 1
+				
+				#if ($!{P_MODIFIEDORDELETEDCODEID.length()} > 0)
+					AND		NOT EXISTS
+							(
+								SELECT	1
+								FROM	ufn_selectStringToSplit('$!{P_MODIFIEDORDELETEDCODEID}', ';')	S
+								WHERE	S.VALUE = C.CODEID
+							)
+				#end
+				
+				#if ($!{P_MODIFIEDORDELETEDCODEID.length()} <= 0)
+					AND		EXISTS
+							(
+								SELECT	1
+								FROM	ufn_selectStringToSplit(NULL, ';')	S
+								WHERE	S.VALUE = C.CODEID
+							)
+				#end
+				
+				#if ($!{P_ADDEDORMODIFIEDDISPLAYSEQUENCE.length()} > 0)
+					AND		EXISTS
+							(
+								SELECT	1
+								FROM	ufn_selectStringToSplit('$!{P_ADDEDORMODIFIEDDISPLAYSEQUENCE}', ';')	S
+								WHERE	S.VALUE = CONVERT(VARCHAR, C.DISPLAYSEQUENCE)
+							)
+				#end
+				
+				#if ($!{P_ADDEDORMODIFIEDDISPLAYSEQUENCE.length()} <= 0)
+					AND		EXISTS
+							(
+								SELECT	1
+								FROM	ufn_selectStringToSplit(NULL, ';')	S
+								WHERE	S.VALUE = CONVERT(VARCHAR, C.DISPLAYSEQUENCE)
+							)
+				#end
+				
+				AND		C.CODECLASSID = '$!{P_CODECLASSID}'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 메뉴 정보 화면에서 표시순서 컬럼의 중복 여부를 조회한다. 
+	생	성	자	: 강호윤
+	생	성	일	: 2019-04-01
+	수  정   이  력	: 
+	-->
+	<query id="GetDuplicatedMenuDisplaySequence" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetDuplicatedMenuDisplaySequence
+				-- Version : 10001
+				SELECT
+						M.PARENTMENUID
+					,	M.MENUID
+					,	M.DISPLAYSEQUENCE
+				FROM	SF_MENU		M
+				WHERE	1 = 1
+				AND		M.UIID = 'MES'
+				
+				#if ($!{P_MODIFIEDORDELETEDMENUID.length()} > 0)
+					AND		NOT EXISTS
+							(
+								SELECT	1
+								FROM	ufn_selectStringToSplit('$!{P_MODIFIEDORDELETEDMENUID}', ';')	S
+								WHERE	S.VALUE = M.MENUID
+							)
+				#end
+				
+				#if ($!{P_MODIFIEDORDELETEDMENUID.length()} <= 0)
+					AND		EXISTS
+							(
+								SELECT	1
+								FROM	ufn_selectStringToSplit(NULL, ';')	S
+								WHERE	S.VALUE = M.MENUID
+							)
+				#end
+				
+				#if ($!{P_ADDEDORMODIFIEDDISPLAYSEQUENCE.length()} > 0)
+					AND		EXISTS
+							(
+								SELECT	1
+								FROM	ufn_selectStringToSplit('$!{P_ADDEDORMODIFIEDDISPLAYSEQUENCE}', ';')	S
+								WHERE	S.VALUE = CONVERT(varchar, M.DISPLAYSEQUENCE)
+							)
+				#end
+				
+				#if ($!{P_ADDEDORMODIFIEDDISPLAYSEQUENCE.length()} <= 0)
+					AND		EXISTS
+							(
+								SELECT	1
+								FROM	ufn_selectStringToSplit(NULL, ';')	S
+								WHERE	S.VALUE = CONVERT(varchar, M.DISPLAYSEQUENCE)
+							)
+				#end
+				
+				AND		M.PARENTMENUID = '$!{P_PARENTMENUID}'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 툴바 정보 화면에서 표시순서 컬럼의 중복 여부를 조회한다. 
+	생	성	자	: 강호윤
+	생	성	일	: 2019-04-01
+	수  정   이  력	: 
+	-->
+	<query id="GetDuplicatedToolbarDisplaySequence" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetDuplicatedToolbarDisplaySequence
+				-- Version : 10001
+				SELECT
+						T.TOOLBARID
+					,	T.DISPLAYSEQUENCE
+				FROM	SF_TOOLBAR		T
+				WHERE	1 = 1
+				
+				#if ($!{P_MODIFIEDORDELETEDTOOLBARID.length()} > 0)
+					AND		NOT EXISTS
+							(
+								SELECT	1
+								FROM	ufn_selectStringToSplit('$!{P_MODIFIEDORDELETEDTOOLBARID}', ';')	S
+								WHERE	S.VALUE = T.TOOLBARID
+							)
+				#end
+				
+				#if ($!{P_MODIFIEDORDELETEDTOOLBARID.length()} <= 0)
+					AND		EXISTS
+							(
+								SELECT	1
+								FROM	ufn_selectStringToSplit(NULL, ';')	S
+								WHERE	S.VALUE = T.TOOLBARID
+							)
+				#end
+				
+				#if ($!{P_ADDEDORMODIFIEDDISPLAYSEQUENCE.length()} > 0)
+					AND		EXISTS
+							(
+								SELECT	1
+								FROM	ufn_selectStringToSplit('$!{P_ADDEDORMODIFIEDDISPLAYSEQUENCE}', ';')	S
+								WHERE	S.VALUE = CONVERT(VARCHAR, T.DISPLAYSEQUENCE)
+							)
+				#end
+				
+				#if ($!{P_ADDEDORMODIFIEDDISPLAYSEQUENCE.length()} <= 0)
+					AND		EXISTS
+							(
+								SELECT	1
+								FROM	ufn_selectStringToSplit(NULL, ';')	S
+								WHERE	S.VALUE = CONVERT(VARCHAR, T.DISPLAYSEQUENCE)
+							)
+				#end
+				
+				AND		T.VALIDSTATE = 'Valid'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 메뉴 정보 화면에서 표시순서 컬럼의 값을 생성한다. 
+	생	성	자	: 강호윤
+	생	성	일	: 2019-04-01
+	수  정   이  력	: 
+	-->
+	<query id="GetMenuDisplaySequence" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetMenuDisplaySequence
+				-- Version : 10001
+				SELECT
+						COALESCE(MAX(M.DISPLAYSEQUENCE), 0)	AS DISPLAYSEQUENCE
+				FROM	SF_MENU		M
+				WHERE	M.PARENTMENUID = '$!{P_PARENTMENUID}'
+				AND		M.UIID = 'MES'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 메뉴 - 조회조건 항목 맵핑 화면에서 메뉴 리스트를 조회한다. 
+	생	성	자	: 강호윤
+	생	성	일	: 2019-04-01
+	수  정   이  력	: 
+	-->
+	<query id="GetMenuConditionItemMappingMenu" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetMenuConditionItemMappingMenu
+				-- Version : 10001
+				SELECT
+						M.UIID
+					,	M.MENUID
+					,	M.MENUNAME
+					,	M.MENUID						AS MENUID_COPY
+					,	M.PARENTMENUID
+					,	M.PARENTMENUID					AS MENUSEQ
+					,	M.MENUTYPE
+					,	M.DISPLAYSEQUENCE
+				FROM
+				(
+					SELECT
+							M.UIID
+						,	M.MENUID
+						,	MN.DICTIONARYNAME			AS MENUNAME
+						,	M.PARENTMENUID
+						,	M.MENUTYPE
+						,	M.DISPLAYSEQUENCE
+					FROM	SF_MENU						M
+					INNER JOIN
+					(
+						SELECT
+								MA.UIID
+							,	MA.MENUID
+						FROM	SF_MENUAUTHORITY		MA
+						INNER JOIN
+						(
+							SELECT
+									UCU.USERCLASSID
+							FROM	SF_USERCLASSUSER	UCU
+							WHERE	UCU.USERID = '$!{P_USERID}'
+							AND		UCU.VALIDSTATE = '$!{P_VALIDSTATE}'
+						)								UCU	ON	MA.USERCLASSID = UCU.USERCLASSID
+						WHERE	MA.VALIDSTATE = '$!{P_VALIDSTATE}'
+						AND		MA.UIID = 'MES'
+						GROUP BY MA.UIID, MA.MENUID
+					)									MA	ON	M.MENUID = MA.MENUID
+					LEFT OUTER JOIN SF_DICTIONARY		MN	ON	M.DICTIONARYID = MN.DICTIONARYID
+															AND	MN.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+					WHERE	1 = 1
+					AND		M.VALIDSTATE = '$!{P_VALIDSTATE}'
+					AND		M.UIID = 'MES'
+				)										M
+				ORDER BY M.PARENTMENUID ASC, M.DISPLAYSEQUENCE ASC
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 요청 정보의 SRNO에 따른 COMMENTS 그리드를 조회한다.
+	생	성	자	: 한주석
+	생	성	일	: 2019-10-22
+	수  정   이  력	: 
+	-->
+	<query id="GetRequestSrComment" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetRequestSrComment
+				-- Version : 10001
+				SELECT 
+						SC.SRNO
+					,	SC.SEQUENCE
+					,	SC.COMMENTS
+				FROM 	CT_SERVICESRCOMMENTS		  	SC
+				WHERE 	1 = 1
+				AND 	SC.SRNO = '$!{SRNO}'
+				ORDER BY SC.SEQUENCE
+			]]>
+		</statement>
+	</query>
+	
+		<!--
+	설		명	: 요청 정보 화면에서 메뉴 정보 버튼 클릭시 메뉴 정보 그리드 팝업 조회
+	생	성	자	: 한주석
+	생	성	일	: 2019-10-22
+	수  정   이  력	: 
+	-->
+	<query id="GetMenuInfo" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetMenuInfo
+				-- Version : 10001
+				SELECT 
+						M.MENUID
+					,	COALESCE(MD.DICTIONARYNAME, M.MENUNAME) AS MENUNAME
+					,	M.PARENTMENUID
+				FROM 	SF_MENU		  	M
+				LEFT OUTER JOIN SF_DICTIONARY 			MD 	ON  MD.DICTIONARYID = M.DICTIONARYID
+				        									AND LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE 	1 = 1
+				AND 	M.MENUID = '$!{MENUID}'
+			]]>
+		</statement>
+	</query>
+	
+	
+	
+	<!--
+	설		명	: ResourceType 과 ResourceId에 따른 파일 정보를 조회한다
+	생	성	자	: 한주석
+	생	성	일	: 2019-10-23
+	수  정   이  력	: 
+	-->
+	<query id="GetRequestFile" version="10001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetRequestFile
+				-- Version : 10001
+				SELECT 
+						F.FILEID
+					,	F.FILENAME
+					,	F.FILEEXT
+					, 	F.FILEPATH
+					,	'' AS SAFEFILENAME
+					,	F.FILESIZE
+					,	M.SEQUENCE
+					,	'' AS LOCALFILEPATH
+					,	M.RESOURCETYPE
+					,	M.RESOURCEID
+					,	M.RESOURCEVERSION
+					,	C.COMMENTS
+				FROM 	SF_OBJECTFILEMAP		  		M
+				INNER JOIN SF_OBJECTFILE 	  			F 	ON 	F.FILEID = M.FILEID
+				LEFT OUTER JOIN CT_OBJECTFILECOMMENTS 	C 	ON 	C.FILEID = F.FILEID
+				WHERE 	1 = 1
+				AND 	M.RESOURCEID = '$!{RESOURCEID}'
+				AND 	M.RESOURCETYPE = 'SR'
+			]]>
+		</statement>
+	</query>
+
+
+	<!--
+	설		명	: 공장정보 조회
+	생	성	자	: 윤성원
+	생	성	일	: 2019-07-05
+	수  정   이  력	: 
+	-->	
+	<query id="GetPlantList" version="10001">
+		<statement>
+			<![CDATA[
+				--
+			    -- GetPlantList
+			    -- Version:10001
+			    
+				SELECT	A.PLANTID
+					, 	CASE
+					 		WHEN DIC.DICTIONARYNAME IS NULL	THEN A.PLANTID
+					 		ELSE DIC.DICTIONARYNAME END 	AS PLANTNAME
+					--,	'08:30' AS STARTBUSINESSHOUR
+					  ,  A.DBLINKNAME
+				FROM 	SF_PLANT A			
+				LEFT JOIN SF_DICTIONARY 					DIC	ON DIC.DICTIONARYID  = A.PLANTNAME
+																AND DIC.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE 	1 = 1
+				#if("$!{ENTERPRISEID}" != "*" && "$!{ENTERPRISEID}" != "")
+					AND		A.ENTERPRISEID = '$!{ENTERPRISEID}'
+				#end
+				
+				#if("$!{PLANTID}" != "*" && "$!{PLANTID}" != "")
+					AND		UPPER(A.PLANTID) ILIKE UPPER('%$!{PLANTID}%')
+				#end
+				
+				AND 	A.VALIDSTATE = 'Valid'
+				ORDER BY A.PLANTID ASC;
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: MES 테이블 리스트를 조회한다.
+	생	성	자	: 유태근
+	생	성	일	: 2020-07-10
+	수  정   이  력	: 
+	-->
+	<query id="GetTableList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetTableList
+				-- Version : 00001
+				SELECT 
+						A.NAME						AS	TABLEID
+					,	B.VALUE						AS	TABLENAME
+				FROM	SYS.objects					A
+				LEFT JOIN SYS.EXTENDED_PROPERTIES	B	ON	A.object_id = B.major_id AND B.minor_id = 0 
+														AND B.NAME = 'MS_Description'
+				WHERE	TYPE = 'U'
+				AND		A.NAME NOT LIKE  '%HISTORY'
+				AND		A.NAME NOT LIKE  '%_BACK'
+				AND		A.NAME NOT LIKE  '%_TEMP'
+				
+				#if ("$!{TABLEIDNAME}" != "*" && "$!{TABLEIDNAME}" != "")
+					AND		(CONVERT(VARCHAR, A.NAME) LIKE '%$!{TABLEIDNAME}%' OR CONVERT(VARCHAR, B.VALUE) LIKE '%$!{TABLEIDNAME}%')
+				#end
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: MES 테이블의 컬럼 리스트를 조회한다.
+	생	성	자	: 유태근
+	생	성	일	: 2020-07-10
+	수  정   이  력	: 
+	-->
+	<query id="GetTableColumnList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetTableColumnList
+				-- Version : 00001
+				SELECT 
+						A.NAME													AS TABLEID		-- 테이블 ID
+					,	CONVERT(VARCHAR(MAX),	
+						(	SELECT	TOP 1 VALUE 
+							FROM	SYS.EXTENDED_PROPERTIES 
+							WHERE	MAJOR_ID = A.OBJECT_ID 
+							AND		MINOR_ID = 0 
+							AND		NAME = 'MS_DESCRIPTION'	))					AS TABLENAME	-- 테이블명
+					,	B.NAME													AS COLUMNID		-- 컬럼 ID
+					,	CONVERT(VARCHAR(2000),
+						(	SELECT TOP 1 VALUE 
+							FROM	SYS.EXTENDED_PROPERTIES 
+							WHERE	MAJOR_ID = A.OBJECT_ID 
+							AND		MINOR_ID = B.COLUMN_ID 
+							AND		NAME = 'MS_DESCRIPTION' ))					AS COLUMNNAME	-- 컬럼명
+					,	C.NAME													AS DATATYPE		-- 컬럼타입
+					,	CASE B.MAX_LENGTH WHEN -1 
+						THEN 'MAX' 
+						ELSE CONVERT(VARCHAR(100),B.MAX_LENGTH) END				AS LENGTH		-- 컬럼길이
+				FROM	SYS.OBJECTS				A
+				INNER JOIN	SYS.COLUMNS			B	ON	A.OBJECT_ID = B.OBJECT_ID
+				INNER JOIN	SYS.TYPES			C	ON	B.USER_TYPE_ID = C.USER_TYPE_ID
+				WHERE	A.TYPE = 'U'  
+				
+				-- 테이블 릴레이션
+				#if ("$!{P_TABLEID}" != "*" && "$!{P_TABLEID}" != "")
+					AND		A.NAME = '$!{P_TABLEID}'
+				#end
+				
+				#if ("$!{COLUMNIDNAME}" != "*" && "$!{COLUMNIDNAME}" != "")
+					AND		(CONVERT(VARCHAR, B.NAME) LIKE '%$!{COLUMNIDNAME}%' OR CONVERT(VARCHAR, (SELECT	TOP 1 VALUE 
+																									 FROM	SYS.EXTENDED_PROPERTIES 
+																									 WHERE	MAJOR_ID = A.OBJECT_ID 
+																									 AND	MINOR_ID = B.COLUMN_ID 
+																									 AND	NAME = 'MS_DESCRIPTION')) LIKE '%$!{COLUMNIDNAME}%')
+				#end
+				
+				ORDER BY 
+						A.OBJECT_ID
+					,	COLUMN_ID
+			]]>
+		</statement>
+	</query>
+	
+</list>

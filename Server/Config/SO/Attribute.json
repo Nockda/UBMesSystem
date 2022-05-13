@@ -1,0 +1,31 @@
+{
+	"Name": "SF_OBJECTATTRIBUTE",
+	"Keys": [
+		"ObjectID",
+		"ObjectAttributeID"
+	],
+	"Types": {
+		"TxnHistKey": "ignore"
+	},
+	"Attributes": {
+		"ObjectID" : "OBJECTID",
+		"ObjectAttributeID" : "OBJECTATTRIBUTEID",
+		"LastTxnHistKey": "LASTTXNHISTKEY",
+		"TxnHistKey": "TXNHISTKEY",
+		"UIDependentAttributeID" : "UIDEPENDENTATTRIBUTEID", 
+		"ValidState" : "VALIDSTATE",
+		"DataFormat" : "DATAFORMAT",
+		"ObjectColumnName" : "OBJECTCOLUMNNAME",
+		"IsPrimaryKey" : "ISPRIMARYKEY",
+		"DefaultValue" : "DEFAULTVALUE",
+		"Sequence" : "SEQUENCE",
+		"ColumnName" : "COLUMNNAME",
+		"AttributeType" : "ATTRIBUTETYPE",
+		"Description" : "DESCRIPTION",
+		"UIControlType" : "UICONTROLTYPE",
+		"IsNullable" : "ISNULLABLE",
+		"UICaption" : "UICAPTION",
+		"ObjectAttributeName" : "OBJECTATTRIBUTENAME",
+		"DataType" : "DATATYPE"
+	}
+}

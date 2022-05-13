@@ -1,0 +1,14 @@
+2022-05-11 12:47:47.0603|INFO|Get language list start. 
+2022-05-11 12:47:50.8167|INFO|Get language list complete. 
+2022-05-11 12:47:50.8167|INFO|Get message list start. 
+2022-05-11 12:47:51.3247|INFO|Get message list complete. 
+2022-05-11 12:47:51.3397|INFO|Get service list start. 
+2022-05-11 12:47:51.3397|INFO|Get service list complete. 
+2022-05-11 12:47:51.4937|INFO|Get langauge type list start. 
+2022-05-11 12:47:51.6797|INFO|Get langauge type list complete. 
+2022-05-11 12:47:51.6797|INFO|Get plant list start. 
+2022-05-11 12:47:51.8517|INFO|Get plant list complete. 
+2022-05-11 12:47:51.8517|INFO|Get save id YN start. 
+2022-05-11 12:47:51.8517|INFO|Get save id YN complete. 
+2022-05-11 12:47:51.8607|INFO|Get save id start. 
+2022-05-11 12:47:51.8607|INFO|Get save id complete. 

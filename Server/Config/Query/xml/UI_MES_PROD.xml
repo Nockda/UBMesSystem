@@ -1,0 +1,1397 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list>
+	<!--
+	프 로 그 램 명	: 생산관리 > 생산관리 > 생산효율 
+	설		명	: 생산효율 데이터를 조회 및 수정한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-04-13
+	주요 변경 로그	: 2020-06-08 | scmo
+	-->
+	<query id="GetProdEfficiency" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	ef.WORKDATE
+						,ef.TEAMID
+						,ef.WORKYEAR
+						,ef.WORKMONTH
+						,ef.WEEKNUMBER
+						,ef.DAYOFWEEK
+						,ef.WORKDATETYPE
+						,ef.STANDWORKHOUR
+						,ef.STANDTRANSHOUR
+						,ef.STANDWORKERCNT
+						,ef.WORKHOUR
+						,ef.TRANSHOUR
+						,ef.APPHOUR
+						,ef.SUPPORTHOUR
+						,ef.EXTENDHOUR
+						,ef.HOLIDAYHOUR
+						,ef.EDUCATIONHOUR
+						,ef.TRAININGHOUR
+						,ef.DISPATCHHOUR
+						,ef.DESCRIPTION
+						,ef.TOTALWORKHOUR
+						,ef.TOTALAVAILABLEHOUR
+						,UC.USERNAME AS CREATOR
+						,ef.CREATEDTIME
+						,UM.USERNAME AS MODIFIER
+						,ef.MODIFIEDTIME
+				FROM	UL_PRODEFFICIENCY ef
+						LEFT OUTER JOIN	SF_USER UC ON ef.CREATOR = UC.USERID
+						LEFT OUTER JOIN SF_USER UM ON ef.MODIFIER = UM.USERID
+				WHERE	1=1
+						#if ("$!{P_YEAR}" != "")
+							AND ef.WORKYEAR = '$!{P_YEAR}'
+						#end
+						#if ("$!{P_MONTH}" != "")
+							AND ef.WORKMONTH = '$!{P_MONTH}'
+						#end
+						#if ("$!{P_TEAM}" != "" && "$!{P_TEAM}" != "*")
+							AND ef.TEAMID = '$!{P_TEAM}'
+						#end
+				ORDER BY ef.WORKDATE ASC
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	프 로 그 램 명	: 생산관리 > 생산관리 > 생산효율 > 작업일팝업
+	설		명	: 작업일 팝업에서 평일/휴일/주차 등을 조회 및 수정한다.
+	작	성	자	: scmo
+	작	성	일	: 2020-04-13
+	주요 변경 로그	:
+	-->
+	<query id="GetWorkingDay" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT	wd.WORKDATE
+						,wd.WORKDAY
+						,wd.WORKWEEK
+						,wd.WORKDATETYPE
+						,UC.USERNAME AS CREATOR
+						,wd.CREATEDTIME
+						,UM.USERNAME AS MODIFIER
+						,wd.MODIFIEDTIME
+				FROM	UL_WORKINGDAY wd
+						LEFT OUTER JOIN	SF_USER UC ON wd.CREATOR = UC.USERID
+						LEFT OUTER JOIN SF_USER UM ON wd.MODIFIER = UM.USERID
+				WHERE	1=1
+						#if ("$!{P_YEAR}" != "")
+						AND wd.WORKYEAR = '$!{P_YEAR}'
+						#end
+						#if ("$!{P_MONTH}" != "")
+						AND wd.WORKMONTH = '$!{P_MONTH}'
+						#end
+				ORDER BY wd.WORKDATE ASC
+			]]>
+		</statement>
+	</query>
+	
+		<!--
+	프 로 그 램 명	: 생산관리 > 재공조회
+	설		명	: 재공정보를 조회한다.
+	작	성	자	: jylee
+	작	성	일	: 2020-04-30
+	주요 변경 로그	: 더미데이터
+	-->
+	<query id="GetWipList" version="00001">
+		<statement>
+		<![CDATA[
+			SELECT
+				PLANT,
+				AREA,
+				TEAM,
+				ITEMID,
+				MODEL,
+				DRAWINGNUM,
+				QTY,
+				VALIDSTATE
+			FROM UL_TEMP_WIP
+				WHERE 1=1
+					#if ("$!{P_TEAM}" != "" && "$!{P_TEAM}" != "*")
+						AND	TEAM = '$!{P_TEAM}'
+					#end
+		]]>
+		</statement>
+	</query>
+
+		<!--
+	프 로 그 램 명	: 생산관리 > 재공조회
+	설		명	: 
+	작	성	자	: 
+	작	성	일	: 
+	주요 변경 로그	: 
+	-->
+	<query id="SelectProcessClass" version="00001">
+		<statement>
+		<![CDATA[
+			SELECT PROCESSCLASSID
+			    ,  PROCESSCLASSNAME
+			FROM SF_PROCESSCLASS
+			WHERE 1=1
+			AND   VALIDSTATE = 'Valid';
+		]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 생산관리 > 생산계획 > 작업지시조회
+	설		명	: 작업지시번호 진행 수량 체크 
+	작	성	자	: 강성택
+	작	성	일	: 2022-01-24
+	주요 변경 로그	: 
+	-->
+	<query id="GetWorkOrderProcessQTY" version="00001">
+		<statement>
+		<![CDATA[
+			--
+			-- Id : GetWorkOrderProcessQTY
+			-- Version : 00001			
+			SELECT 
+				ISNULL(SUM(QTY),0) AS PROCESSQTY 
+			FROM SF_WORKORDER SW
+				LEFT  JOIN SF_LOT L ON  SW.WORKORDERID  = L.WORKORDERID  AND SW.PRODUCTIONORDERID  = L.PRODUCTIONORDERID 
+			WHERE SW.WORKORDERID = '$!{WORKORDERID}' 
+		]]>
+		</statement>
+	</query>
+
+		<!--
+	프 로 그 램 명	: 생산관리 > 재공조회
+	설		명	: 
+	작	성	자	: 
+	작	성	일	: 
+	주요 변경 로그	: 
+	-->
+	<query id="SelectLotListByWorkOrder" version="00001">
+		<statement>
+		<![CDATA[
+			--
+			-- SelectLotListByWorkOrder
+			-- 00001
+			SELECT L.LOTID
+			    ,  L.PRODUCTDEFID
+			    ,  PD.PARTNUMBER
+				,  PD.PRODUCTDEFNAME
+				,  L.PROCESSSEGMENTID
+				,  ISNULL(PSD.DICTIONARYNAME, P.DICTIONARYID) AS PROCESSSEGMENTNAME
+				,  L.LOTSTATE
+				,  L.PROCESSSTATE
+				,  L.QTY
+				,  '' PRINTLABEL
+			FROM SF_LOT L
+			INNER JOIN SF_PROCESSSEGMENT	P	ON	L.PROCESSSEGMENTID = P.PROCESSSEGMENTID
+			INNER JOIN SF_PRODUCTDEFINITION	PD	ON	L.PRODUCTDEFID = PD.PRODUCTDEFID
+			LEFT JOIN SF_DICTIONARY			PSD	ON	PSD.DICTIONARYID = P.DICTIONARYID
+												AND	PSD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+			WHERE 1 = 1
+			AND  L.WORKORDERID = '$!{WORKORDERID}'
+		]]>
+		</statement>
+	</query>
+	
+	
+	<!--
+	프 로 그 램 명	: 생산관리 > 작업지시
+	설		명	: LN2 채번 마지막 시리얼 가져오기
+	작	성	자	: 이현석
+	작	성	일	: 2021-07-26
+	주요 변경 로그	: 
+	-->
+	<query id="checkCylinderLotNoPrefix" version="00001">
+		<statement>
+		<![CDATA[
+			--
+			-- SelectLN2CheckLastSerial
+			-- 00001
+				SELECT 	IDCLASSID, PREFIX
+						, REPLACE(PREFIX, ' ' , '') AS PREFIX2
+				FROM 	SF_IDCLASSSERIAL
+				WHERE 	IDCLASSID = '$!{IDCLASSID}'
+				AND 	REPLACE(PREFIX, ' ' , '') = '$!{SUBSB}'
+		]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 생산관리 > 작업지시
+	설		명	: 세부공정 삭제
+	작	성	자	: 황인혁
+	작	성	일	: 2021-07-26
+	주요 변경 로그	: 
+	-->
+	<query id="checkprocessworkresult" version="00001">
+		<statement>
+		<![CDATA[
+			--
+			-- checkprocessworkresult
+			-- 00001
+				SELECT 	TXNHISTKEY
+				FROM 	UL_PROCESSWORKRESULT
+				WHERE 	LOTID = '$!{LOTID}'
+		]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 생산관리 > 작업지시
+	설		명	: 세부공정 삭제
+	작	성	자	: 황인혁
+	작	성	일	: 2021-07-26
+	주요 변경 로그	: 
+	-->
+	<query id="checksubprocessworkresult" version="00001">
+		<statement>
+		<![CDATA[
+			--
+			-- checksubprocessworkresult
+			-- 00001
+				SELECT 	TXNHISTKEY
+				FROM 	UL_SUBPROCESSWORKRESULT
+				WHERE 	LOTID = '$!{LOTID}'
+		]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 생산관리 > 작업지시
+	설		명	: 세부공정 삭제
+	작	성	자	: 황인혁
+	작	성	일	: 2021-07-26
+	주요 변경 로그	: 
+	-->
+	<query id="checksubprocessworkresultdetail" version="00001">
+		<statement>
+		<![CDATA[
+			--
+			-- checksubprocessworkresult
+			-- 00001
+				SELECT 	WORKRESULTHISTKEY
+				FROM 	UL_SUBPROCESSWORKRESULTDETAIL
+				WHERE 	WORKRESULTHISTKEY = '$!{WORKRESULTHISTKEY}'
+		]]>
+		</statement>
+	</query>
+	
+		<!--
+	프 로 그 램 명	: 생산관리 > 작업지시
+	설		명	: LN2 채번 마지막 시리얼 가져오기
+	작	성	자	: 황인혁
+	작	성	일	: 2021-07-26
+	주요 변경 로그	: 
+	-->
+	<query id="SelectLN2CheckLastSerial" version="00001">
+		<statement>
+		<![CDATA[
+			--
+			-- SelectLN2CheckLastSerial
+			-- 00001
+			SELECT  CASE WHEN LASTSERIALNO  = CONVERT(BIGINT, REPLICATE('9',LENGTH)) THEN 'Y'
+			        ELSE 'N'
+			        END ISLAST
+			     ,  SUBSTRING(REPLACE(CONVERT(VARCHAR,GETDATE(),23),'-',''),3,2)
+			      + SUBSTRING(REPLACE(CONVERT(VARCHAR,GETDATE(),23),'-',''),5,2) AS CURRENTDATE 
+			     ,  LASTSERIALNO
+			     ,  LENGTH        
+			     ,  REPLICATE('0',LENGTH)  AS INITSERIAL  			        
+			FROM SF_IDCLASSSERIAL A
+			INNER JOIN SF_IDDEFINITION  B ON  A.IDCLASSID  = B.IDCLASSID 
+			                              AND B.IDDEFID ='Serial'
+			WHERE A.IDCLASSID  = '$!{IDCLASSID}'
+			AND   A.PREFIX  = ''
+		]]>
+		</statement>
+	</query>	
+
+		<!--
+	프 로 그 램 명	: 생산관리 > 작업지시
+	설		명	: LOT 채번 마지막 시리얼 가져오기(PREFIX가 null이 아닌 경우만)
+	작	성	자	: 이현석
+	작	성	일	: 2021-07-26
+	주요 변경 로그	: 
+	-->
+	<query id="CheckMBSCLastSerialNoForLotCancel" version="00001">
+		<statement>
+		<![CDATA[
+			--
+			-- CheckMBSCLastSerialNoForLotCancel
+			-- 00001
+			SELECT  PREFIX
+			     ,  SUBSTRING(REPLACE(CONVERT(VARCHAR,GETDATE(),23),'-',''),3,2)
+			      + SUBSTRING(REPLACE(CONVERT(VARCHAR,GETDATE(),23),'-',''),5,2) AS CURRENTDATE 
+			     ,  REPLICATE('0', 4 - LEN(LASTSERIALNO)) + LASTSERIALNO AS LASTSERIALNO			        
+			FROM SF_IDCLASSSERIAL A
+			INNER JOIN SF_IDDEFINITION  B ON  A.IDCLASSID  = B.IDCLASSID 
+			                              AND B.IDDEFID ='Serial'
+			WHERE A.IDCLASSID  = '$!{IDCLASSID}'
+			AND   A.PREFIX  != ''
+			AND PREFIX = SUBSTRING(REPLACE(CONVERT(VARCHAR,GETDATE(),23),'-',''),3,2)
+			      + SUBSTRING(REPLACE(CONVERT(VARCHAR,GETDATE(),23),'-',''),5,2)
+		]]>
+		</statement>
+	</query>	
+
+
+		<!--
+	프 로 그 램 명	: 생산관리 > 작업지시
+	설		명	: LOT 채번 마지막 시리얼 가져오기(PREFIX가 null이 아닌 경우만)
+	작	성	자	: 이현석
+	작	성	일	: 2021-07-26
+	주요 변경 로그	: 
+	-->
+	<query id="CheckPLotNoLastSerialNoForLotCancel" version="00001">
+		<statement>
+		<![CDATA[
+			--
+			-- CheckMBSCLastSerialNoForLotCancel
+			-- 00001
+			SELECT  PREFIX
+			     ,  SUBSTRING(REPLACE(CONVERT(VARCHAR,GETDATE(),23),'-',''),3,2)
+			      + SUBSTRING(REPLACE(CONVERT(VARCHAR,GETDATE(),23),'-',''),5,2) AS CURRENTDATE 
+			     ,  LASTSERIALNO			        
+			FROM SF_IDCLASSSERIAL A
+			INNER JOIN SF_IDDEFINITION  B ON  A.IDCLASSID  = B.IDCLASSID 
+			                              AND B.IDDEFID ='Serial'
+			WHERE A.IDCLASSID  = '$!{IDCLASSID}'
+			AND   A.PREFIX  != ''
+			AND PREFIX = 'P' + SUBSTRING(REPLACE(CONVERT(VARCHAR,GETDATE(),23),'-',''),3,2)
+			      + SUBSTRING(REPLACE(CONVERT(VARCHAR,GETDATE(),23),'-',''),5,2)
+		]]>
+		</statement>
+	</query>		
+	
+	
+	<!--
+	프 로 그 램 명	: 생산관리 > 작업지시
+	설		명	: LOT 채번 마지막 시리얼 가져오기(PREFIX가 null이 아닌 경우만)
+	작	성	자	: 이현석
+	작	성	일	: 2021-07-26
+	주요 변경 로그	: 
+	-->
+	<query id="CheckPumpLotLastSerialNoForLotCancel" version="00001">
+		<statement>
+		<![CDATA[
+			--
+			-- CheckPumpLotLastSerialNoForLotCancel
+			-- 00001
+			SELECT  PREFIX
+			     ,  SUBSTRING(REPLACE(CONVERT(VARCHAR,GETDATE(),23),'-',''),3,2)
+			      + SUBSTRING(REPLACE(CONVERT(VARCHAR,GETDATE(),23),'-',''),5,2) AS CURRENTDATE 
+			     ,  REPLICATE('0', 3 - LEN(LASTSERIALNO)) + LASTSERIALNO AS LASTSERIALNO			        
+			FROM SF_IDCLASSSERIAL A
+			INNER JOIN SF_IDDEFINITION  B ON  A.IDCLASSID  = B.IDCLASSID 
+			                              AND B.IDDEFID ='Serial'
+			WHERE A.IDCLASSID  = '$!{IDCLASSID}'
+			AND   A.PREFIX  != ''
+			AND PREFIX = SUBSTRING(REPLACE(CONVERT(VARCHAR,GETDATE(),23),'-',''),3,2)
+			      + SUBSTRING(REPLACE(CONVERT(VARCHAR,GETDATE(),23),'-',''),5,2)
+		]]>
+		</statement>
+	</query>	
+
+
+		<!--
+	프 로 그 램 명	: 생산관리 > 작업지시
+	설		명	: 냉동기 채번 시리얼 가져오기
+	작	성	자	: 배선용
+	작	성	일	: 
+	주요 변경 로그	: 
+	-->
+	<query id="SelectPumpMBSCCheckLastSerial" version="00001">
+		<statement>
+		<![CDATA[
+			--
+			-- SelectPumpMBSCCheckLastSerial
+			-- 00001
+			SELECT  CASE WHEN LASTSERIALNO  = CONVERT(BIGINT, REPLICATE('9',LENGTH)) THEN 'Y'
+			        ELSE 'N'
+			        END ISLAST
+			     ,  SUBSTRING(REPLACE(CONVERT(VARCHAR,GETDATE(),23),'-',''),1,2)
+			      + SUBSTRING(REPLACE(CONVERT(VARCHAR,GETDATE(),23),'-',''),5,2) 
+			      + REPLICATE('0',LENGTH - LEN('1')) +'1' AS LOTID        
+			     ,  REPLICATE('0',LENGTH - LEN('1')) +'1' AS INITSERIAL 			        
+			FROM SF_IDCLASSSERIAL A
+			INNER JOIN SF_IDDEFINITION  B ON  A.IDCLASSID  = B.IDCLASSID 
+			                              AND B.IDDEFID ='Serial'
+			WHERE A.IDCLASSID  = '$!{IDCLASSID}'
+			AND   A.PREFIX  = ''
+		]]>
+		</statement>
+	</query>			
+		<!--
+	프 로 그 램 명	: 생산관리 > 작업지시
+	설		명	: 냉동기 채번 시리얼 가져오기
+	작	성	자	: 배선용
+	작	성	일	: 
+	주요 변경 로그	: 
+	-->
+	<query id="SelectlotSerialForRep" version="00001">
+		<statement>
+		<![CDATA[
+			--
+			-- SelectlotSerialForRep
+			-- 00001
+			SELECT CASE WHEN LASTSERIALNO = CONVERT(BIGINT, REPLICATE('9',LENGTH)) THEN CASE WHEN CALVALUEASCII ='32' THEN CHAR('66') 
+			                                                                                 ELSE CHAR(CALVALUEASCII+1)
+			                                                                                 END
+			            ELSE CHAR(CALVALUEASCII)
+						END CALVALUE
+			     , LASTSERIALNO
+			FROM
+			(
+				SELECT ROW_NUMBER()OVER(ORDER BY CALVALUEASCII DESC) RN
+				    ,  CALVALUEASCII
+					,  LASTSERIALNO
+					,  LENGTH
+				FROM
+				(
+					SELECT ASCII(RIGHT(PREFIX,1) ) CALVALUEASCII
+						 , LASTSERIALNO 
+						 , PREFIX
+						 , ID.LENGTH
+					FROM SF_IDCLASSSERIAL SI
+					INNER JOIN SF_IDDEFINITION  ID ON  SI.IDCLASSID  = ID.IDCLASSID 
+					                               AND ID.IDDEFID  = 'Serial'					
+					WHERE 1=1
+					AND  SI.IDCLASSID = '$!{IDCLASSID}'
+					-- AND   REPLACE(REPLACE(PREFIX,RIGHT (PREFIX,1),''),' ','')  = '$!{STANDARD}'
+					AND  REPLACE(CASE WHEN RIGHT(PREFIX, 1) <> ' ' THEN LEFT(PREFIX, LEN(PREFIX) - 1) ELSE PREFIX END, ' ', '') = '$!{STANDARD}'
+				)X
+			)Y
+			WHERE RN =1
+		]]>
+		</statement>
+	</query>
+			
+	<!--
+	프 로 그 램 명	: 생산관리 > 작업지시표
+	설		명	: 작업지시 정보 조회한다.
+	작	성	자	: 
+	작	성	일	: 2020-05-19
+	주요 변경 로그	: 
+	-->
+	<query id="SelectWorkOrderList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- SelectWorkOrderList
+				-- 00001
+				
+				SELECT WORKORDERID
+				    ,  PRODUCTIONORDERID
+				    ,  WORKORDERDATE
+				    ,  DEPTSEQ
+					,  ISNULL(DPD.DICTIONARYNAME, DP.DEPARTMENTNAME) AS DEPARTMENTNAME
+				    ,  WORKCENTERSEQ
+				    ,  PRODUCTDEFID
+				    ,  PRODUCTDEFNAME
+				    ,  PARTNUMBER
+				    ,  ISNULL(PTD.DICTIONARYNAME, X.PRODUCTDEFTYPE) AS PRODUCTDEFTYPE
+				    ,  STANDARD
+				    ,  UNIT
+				    ,  PLANQTY
+				    ,  ORDERQTY
+				    ,  PROCESSQTY
+				    ,  CONVERT(VARCHAR,PLANENDTIME,23)  PLANENDTIME
+				    ,  ISNULL(WSD.DICTIONARYNAME, X.STATE) AS STATE
+				    ,  ISHOLD
+				    ,  LOTSIZE
+				    ,  X.PROCESSDEFID
+				    ,  PROCESSCLASSID
+				    ,  ORDERQTY - ISNULL(PROCESSQTY,0) NOTPROCESSQTY
+				    ,  CASE WHEN ORDERQTY <= PROCESSQTY THEN 'N' ELSE 'Y' END CHECKQTY
+				    ,  PP.PROCESSSEGMENTID
+				    ,  ISNULL(PS.ISUSEUSERLOTSERIAL,'N') ISUSEUSERLOTSERIAL
+				    ,  USERLOTSERIAL
+				    ,  PS.PROCESSSEGMENTCLASSID 
+				    ,  ISNULL(SD.DICTIONARYNAME ,PS.PROCESSSEGMENTNAME) PROCESSSEGMENTNAME
+				    ,  X.AREAID
+				    ,  ISNULL(SD1.DICTIONARYNAME ,SA.AREANAME )         AREANAME
+				    ,  ISNULL(SD2.DICTIONARYNAME ,T.TEAMNAME )          TEAMNAME		   
+				    ,  SPECDEFID 
+				    ,  ISNULL(VSD.DICTIONARYNAME, X.VALIDSTATE)			VALIDSTATE
+				FROM 
+				(
+					SELECT MAX(SW.WORKORDERID)        WORKORDERID          -- 작업지시번호(WORKORDERID)
+					    ,  MAX(SW.PRODUCTIONORDERID)  PRODUCTIONORDERID    -- 생산계획번호 (PRODUCTIONORDERID)
+					    ,  MAX(SW.WORKORDERDATE)      WORKORDERDATE        -- 작업지시일  (WORKORDERDATE)
+					    ,  MAX(SW.DEPTSEQ)            DEPTSEQ              -- 생산부서 (PRODUCTDEPT)
+					    ,  MAX(SW.WORKCENTERSEQ)      WORKCENTERSEQ        -- 워크센터 (WORKCENTOR)
+					    ,  MAX(PD.AREAID)             AREAID               -- 작업장
+					    ,  MAX(SW.PRODUCTDEFID)       PRODUCTDEFID         -- 제품번호
+					    ,  MAX(PD.PRODUCTDEFNAME)     PRODUCTDEFNAME       -- 재품명
+					    ,  MAX(PD.PARTNUMBER)         PARTNUMBER       -- 재품명  
+					    ,  MAX(PD.PRODUCTDEFTYPE)     PRODUCTDEFTYPE       -- 제품타입  
+					    ,  MAX(PD.STANDARD)           STANDARD             -- 규격 (SPECIFICATION)
+					    ,  MAX(PD.UNIT)               UNIT                 -- 단위
+					    ,  MAX(SW.PLANQTY)            PLANQTY              -- 계획수량
+					    ,  MAX(SW.ORDERQTY)           ORDERQTY             -- 지시수량
+					    ,  MAX(PD.LOTSIZE)            LOTSIZE 
+					    ,  ISNULL(SUM(L.QTY),0)       PROCESSQTY           -- 진행수량       
+					    ,  MAX(SW.PLANENDTIME)        PLANENDTIME          -- 작업일(EXPECTWORKDAY)	
+						,  MAX(PS.PROCESSDEFID)       PROCESSDEFID
+						,  MAX(PS.PROCESSCLASSID)     PROCESSCLASSID
+					    ,  MAX(SW.STATE)              STATE
+					    ,  MAX(ISNULL(SW.ISHOLD,'N')) ISHOLD  
+					    ,  MAX(SW.USERLOTSERIAL )     USERLOTSERIAL  	
+					    ,  MAX(PD.TEAMID )            TEAMID		
+					    ,  MAX(PD.SPECDEFID )         SPECDEFID		    	
+					    ,  MAX(SW.VALIDSTATE)		  VALIDSTATE			    
+					FROM SF_WORKORDER SW
+					INNER JOIN SF_PRODUCTDEFINITION  PD ON  SW.PRODUCTDEFID  = PD.PRODUCTDEFID
+					LEFT  JOIN SF_PROCESSDEFINITION  PS ON  PD.PROCESSDEFID = PS.PROCESSDEFID
+					                                    AND PD.PROCESSDEFVERSION = PS.PROCESSDEFVERSION			
+					LEFT  JOIN SF_LOT                 L ON  SW.WORKORDERID  = L.WORKORDERID 
+					                                    AND SW.PRODUCTIONORDERID  = L.PRODUCTIONORDERID
+					WHERE 1=1
+					AND   SW.PLANENDTIME BETWEEN '$!{P_DATEPERIOD_PERIODFR}' AND '$!{P_DATEPERIOD_PERIODTO}'
+		
+					#if ("$!{P_TEAM}" != "" && "$!{P_TEAM}" != "*")
+						AND	PD.TEAMID = '$!{P_TEAM}'
+					#end	
+					#if ("$!{P_AREACODE}" != "" && "$!{P_AREACODE}" != "*")
+						AND	PD.AREAID = '$!{P_AREACODE}'
+					#end						
+					#if ("$!{P_PRODUCTDEFID}" != "" && "$!{P_PRODUCTDEFID}" != "*")
+						AND	SW.PRODUCTDEFID = '$!{P_PRODUCTDEFID}'
+					#end		
+					#if ("$!{P_PROCESSCLASS}" != "" && "$!{P_PROCESSCLASS}" != "*")
+						AND	PS.PROCESSCLASSID = '$!{P_PROCESSCLASS}'
+					#end		
+					#if ("$!{P_WORKORDERNUM}" != "" && "$!{P_WORKORDERNUM}" != "*")
+						AND	SW.WORKORDERID like '%$!{P_WORKORDERNUM}%' 
+					#end														                                    
+					#if ("$!{P_WORKORDERSTATE}" != "" && "$!{P_WORKORDERSTATE}" != "*")
+						AND	SW.STATE = '$!{P_WORKORDERSTATE}' 
+					#end														                                    
+					#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+						AND	SW.VALIDSTATE = '$!{P_VALIDSTATE}' 
+					#end														                                    
+					GROUP BY SW.WORKORDERID 
+				) X
+				LEFT JOIN SF_CODE		    PT ON PT.CODECLASSID = 'ProductDefType'
+											   AND PT.CODEID = X.PRODUCTDEFTYPE
+				LEFT JOIN SF_DICTIONARY	   PTD ON  PTD.DICTIONARYID = PT.DICTIONARYID
+											   AND PTD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN SF_CODE		    WS ON  WS.CODECLASSID = 'WorkOrderState'
+											   AND WS.CODEID = X.STATE
+				LEFT JOIN SF_DICTIONARY	   WSD ON  WSD.DICTIONARYID = WS.DICTIONARYID
+											   AND WSD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN SF_PROCESSPATH    PP ON  X.PROCESSDEFID = PP.PROCESSDEFID 
+				                               AND PP.PROCESSDEFVERSION  = '*'
+				                               AND PP.PATHTYPE LIKE 'Start%'	
+		        LEFT JOIN SF_PROCESSSEGMENT PS ON  PP.PROCESSSEGMENTID = PS.PROCESSSEGMENTID
+				                               AND PS.PROCESSSEGMENTVERSION = '*'	
+		       	LEFT JOIN SF_DICTIONARY     SD ON  PS.DICTIONARYID  = SD.DICTIONARYID 
+		       	                               AND SD.LANGUAGETYPE  = '$!{LANGUAGETYPE}'
+		        LEFT JOIN SF_AREA           SA ON  X.AREAID = SA.AREAID 
+		       	LEFT JOIN SF_DICTIONARY    SD1 ON  SA.DICTIONARYID  = SD1.DICTIONARYID 
+		       	                               AND SD1.LANGUAGETYPE  = '$!{LANGUAGETYPE}'  
+		        LEFT JOIN CT_TEAM            T ON  X.TEAMID = T.TEAMID 
+		       	LEFT JOIN SF_DICTIONARY    SD2 ON  T.DICTIONARYID  = SD2.DICTIONARYID 
+		       	                               AND SD2.LANGUAGETYPE  = '$!{LANGUAGETYPE}'    
+				LEFT JOIN CT_DEPARTMENT		DP ON  DP.DEPARTMENTID = X.DEPTSEQ
+				LEFT JOIN SF_DICTIONARY	   DPD ON  DPD.DICTIONARYID = DP.DICTIONARYID
+											   AND DPD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN SF_CODE		   VS  ON  VS.CODECLASSID = 'VALIDSTATE'
+											   AND VS.CODEID = X.VALIDSTATE
+				LEFT JOIN SF_DICTIONARY	   VSD ON  VSD.DICTIONARYID = VS.DICTIONARYID
+											   AND VSD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE 1=1
+				#if ("$!{P_PROCESSCODE}" != "" && "$!{P_PROCESSCODE}" != "*")
+					AND	PS.PROCESSSEGMENTID = '$!{P_PROCESSCODE}'
+				#end		    
+				ORDER BY PLANENDTIME DESC   	                                  		                               	                            								
+				;   
+			]]>
+		</statement>
+	</query>
+		
+	<!--
+	프 로 그 램 명	: 생산관리 > 작업지시표
+	설		명	: 작업지시 정보 조회한다.
+	작	성	자	: jylee
+	작	성	일	: 2020-05-01
+	주요 변경 로그	: 더미 데이터
+	-->
+	<query id="GetWorkOrderGrid" version="00001">
+		<statement>
+		<![CDATA[
+			SELECT
+				*
+			FROM UL_TEMP_WORKORDERGRID
+		]]>
+		</statement>
+	</query>
+	
+	
+	
+		<!--
+	프 로 그 램 명	: 생산관리 > 작업효율 > 작업효율현황
+	설		명	: 작업효율현황을 조회한다
+	작	성	자	: 한주석
+	작	성	일	: 2020-06-12
+	주요 변경 로그	: 
+	-->
+	<query id="SelectKPIState" version="00001">
+		<statement>
+		<![CDATA[
+	--
+				-- Id : SelectKPIState
+				-- Version : 00001	
+							WITH WORKINFO AS (
+	
+									SELECT 
+											EF.STANDWORKERCNT
+										,	EF.EXTENDHOUR
+										,	EF.WORKMONTH
+										,	EF.TRAININGHOUR
+										,	EF.HOLIDAYHOUR
+										,	EF.EDUCATIONHOUR
+										,	EF.TOTALWORKHOUR
+										,	EF.TOTALAVAILABLEHOUR
+										,	EF.WORKHOUR
+										,	EF.WORKDATE
+										,	CD.CODEID
+										,	L.TRACKINTIME
+										,	L.TRACKOUTTIME
+										,	L.LOTSTATE
+										,	L.LOTID
+									FROM 	UL_PRODEFFICIENCY 					EF
+									INNER JOIN	SF_PRODUCTDEFINITION			PD	ON	EF.TEAMID	= PD.TEAMID
+									INNER JOIN	SF_LOT							L	ON	PD.PRODUCTDEFID = L.PRODUCTDEFID
+																					AND	PD.PRODUCTDEFVERSION = L.PRODUCTDEFVERSION
+									LEFT OUTER JOIN SF_CODE 					CD  ON  CD.CODECLASSID ='KPIType'
+									LEFT OUTER JOIN SF_DICTIONARY 				CDD ON  CD.DICTIONARYID = CDD.DICTIONARYID
+													  								AND CDD.LANGUAGETYPE ='$!{LANGUAGETYPE}'
+									WHERE 	1 =1 
+									AND EF.TEAMID = '$!{P_TEAM}'
+									AND (EF.DAYOFWEEK  <> 'Sat'
+									AND	EF.DAYOFWEEK  <> 'Sun'	)
+									AND EF.WORKYEAR =    DATEPART(YEAR,'$!{P_YEAR}')   
+									AND (EF.WORKMONTH <'13' 
+									AND EF.WORKMONTH>'0')
+									GROUP BY 
+										EF.STANDWORKERCNT
+										,	EF.EXTENDHOUR
+										,	EF.WORKMONTH
+										,	EF.TRAININGHOUR
+										,	EF.HOLIDAYHOUR
+										,	EF.EDUCATIONHOUR
+										,	EF.TOTALWORKHOUR
+										,	EF.TOTALAVAILABLEHOUR
+										,	EF.WORKHOUR
+										,	EF.WORKDATE
+										,	CD.CODEID
+										,	L.TRACKINTIME
+										,	L.TRACKOUTTIME
+										,	L.LOTSTATE
+										,	L.LOTID										
+								  ),
+
+				WORKPEOPLE AS
+							(
+						SELECT 
+								WI.WORKMONTH
+						,	    WI.CODEID
+						,		SUM(WI.STANDWORKERCNT)/COUNT(DISTINCT (WI.LOTID))			AS WORKERNUMBER
+						FROM 	WORKINFO		WI
+						WHERE 	1 =1 
+						AND WI.CODEID ='b'
+						GROUP BY WI.WORKMONTH, WI.CODEID
+									
+							),
+			   WORKDAY AS
+							(
+
+						SELECT 
+
+								WI.WORKMONTH
+							,	WI.CODEID
+							,	COUNT(*)/COUNT(DISTINCT (WI.LOTID))						AS WORKDAY
+						FROM 	WORKINFO		WI
+						WHERE 	1 =1 
+						AND WI.CODEID ='a'
+						GROUP BY WI.WORKMONTH, WI.CODEID
+
+							),
+
+				EXTENDHOUR AS
+							(
+
+						SELECT 
+
+						WI.WORKMONTH
+					,	WI.CODEID
+					,	SUM(WI.EXTENDHOUR)/COUNT(DISTINCT (WI.LOTID))				AS EXTENDHOUR
+						FROM 	WORKINFO		WI
+						WHERE 	1 =1 
+						AND WI.CODEID ='c'
+						GROUP BY WI.WORKMONTH, WI.CODEID
+							),
+
+				HOLETIME AS
+					(
+
+						SELECT 
+						WI.WORKMONTH
+					,   WI.CODEID
+					,   (SUM(WI.TRAININGHOUR) + SUM(WI.HOLIDAYHOUR)+ SUM(WI.EDUCATIONHOUR))/COUNT(DISTINCT (WI.LOTID))		AS HOLETIME
+						FROM 	WORKINFO		WI
+						WHERE 	1 =1 
+						AND WI.CODEID ='d'
+						GROUP BY WI.WORKMONTH, WI.CODEID
+
+					),
+
+					TOTALWORKLTIME AS
+					(
+						SELECT 
+						WI.WORKMONTH
+					,	WI.CODEID
+					,	SUM(WI.TOTALWORKHOUR)/COUNT(DISTINCT (WI.LOTID))  AS TOTALWORKHOUR
+						FROM 	WORKINFO		WI
+						WHERE 	1 =1 
+						AND WI.CODEID ='e'
+						GROUP BY WI.WORKMONTH, WI.CODEID
+
+					),TOTALAVAILABLTIME AS
+					(
+
+					SELECT 
+						WI.WORKMONTH
+					,	WI.CODEID
+					,SUM(WI.TOTALAVAILABLEHOUR)/COUNT(DISTINCT (WI.LOTID)) AS TOTALAVAILABLEHOUR
+					FROM 	WORKINFO		WI
+					WHERE 	1 =1 
+					AND WI.CODEID ='f'
+					GROUP BY WI.WORKMONTH, WI.CODEID
+
+					),
+
+
+
+
+					WORKTIME AS
+					(
+
+					 
+					SELECT 
+						WI.WORKMONTH
+					,	WI.CODEID
+					,	ISNULL((DATEDIFF ( hour ,WI.TRACKINTIME , WI.TRACKOUTTIME)),0)  AS WORKWHOUR
+					FROM 	WORKINFO		WI
+					WHERE 	1 =1 
+					AND WI.LOTSTATE ='Finished'
+					AND WI.WORKMONTH = DATEPART(MONTH,WI.TRACKOUTTIME)
+					AND WI.CODEID ='g'
+					GROUP BY WI.WORKMONTH, WI.CODEID,ISNULL((DATEDIFF ( hour ,WI.TRACKINTIME , WI.TRACKOUTTIME)),0)    
+
+
+						
+					),
+
+					WORKTIME2 AS
+					(
+
+					 
+					SELECT 
+						WI.WORKMONTH
+					,	WI.CODEID
+					,	SUM(WI.WORKWHOUR)  AS WORKWHOUR
+					FROM 	WORKTIME		WI
+					WHERE 	1 =1 
+					GROUP BY WI.WORKMONTH, WI.CODEID
+						
+					),
+					WORKTIME3 AS
+					(
+
+					SELECT 
+						WI.WORKMONTH
+					,	WI.CODEID
+					,	ISNULL(WT.WORKWHOUR, 0)  AS WORKWHOUR
+					FROM 	WORKINFO		WI
+					LEFT OUTER JOIN WORKTIME2	WT ON  WI.WORKMONTH = WT.WORKMONTH
+												   
+					WHERE 	1 =1 
+					AND WI.CODEID = 'g'
+					GROUP BY WI.WORKMONTH, WI.CODEID,	ISNULL(WT.WORKWHOUR, 0)   
+
+
+					),
+
+					WORKTIMECAL AS
+					(
+
+					SELECT 
+						WI.WORKMONTH
+					,	WI.CODEID
+					,	ISNULL((DATEDIFF ( hour ,WI.TRACKINTIME , WI.TRACKOUTTIME)),0)  AS WORKWHOUR
+					,	ISNULL(SUM(WI.TOTALAVAILABLEHOUR) /COUNT(DISTINCT (WI.LOTID)),0) AS TOTALAVAILABLEHOUR
+					,	ISNULL(SUM(WI.TOTALWORKHOUR) /COUNT(DISTINCT (WI.LOTID)),0) AS TOTALWORKHOUR
+					,	WI.LOTID
+					FROM 	WORKINFO		WI
+					WHERE 	1 =1 
+					AND WI.LOTSTATE ='Finished'
+					AND WI.WORKMONTH = DATEPART(MONTH,WI.TRACKOUTTIME)
+					GROUP BY WI.WORKMONTH, WI.CODEID , ISNULL((DATEDIFF ( hour ,WI.TRACKINTIME , WI.TRACKOUTTIME)),0)  , WI.LOTID
+					),
+					
+					WORKTIMECAL2 AS
+					(
+
+						SELECT 
+						WI.WORKMONTH
+					,	WI.CODEID
+					,	SUM(WI.WORKWHOUR)  AS WORKWHOUR
+					,	WI.TOTALAVAILABLEHOUR
+					,	WI.TOTALWORKHOUR
+					FROM 	WORKTIMECAL		WI
+					WHERE 	1 =1 
+					GROUP BY WI.WORKMONTH, WI.CODEID,	WI.TOTALAVAILABLEHOUR,	WI.TOTALWORKHOUR
+					),
+
+				WORKEFFICIENCY AS
+				( 
+					SELECT 
+						WI.WORKMONTH
+					,	WI.CODEID
+					,   ISNULL(ROUND(WI.WORKWHOUR/SUM(WI.TOTALAVAILABLEHOUR) * 100,1),0) AS WORKEFFICIENCY
+					FROM 	WORKTIMECAL2		WI
+					WHERE 	1 =1 
+					AND WI.CODEID ='h'
+					GROUP BY WI.WORKMONTH, WI.CODEID,WI.WORKWHOUR
+								
+				),
+				WORKRECOVERYRATE AS
+				(
+					SELECT 
+						WI.WORKMONTH
+					,	WI.CODEID
+					,   ISNULL(ROUND(WI.WORKWHOUR/SUM(WI.TOTALWORKHOUR) * 100,1),0) AS WORKRECOVERYRATE
+					FROM 	WORKTIMECAL2		WI
+					WHERE 	1 =1 
+					AND WI.CODEID ='i'
+					GROUP BY WI.WORKMONTH, WI.CODEID,WI.WORKWHOUR
+				
+		
+				),
+
+					PIVOTDT AS (
+									SELECT * FROM 						 
+									(
+-- 근무 인원수
+										SELECT 
+												DISTINCT 
+												WI.CODEID			AS TYPE
+											,	WI.WORKERNUMBER 			AS COUNT
+											,   'MONTH'+ CONVERT(CHAR,WI.WORKMONTH) 								AS WORKMONTH
+										FROM 	WORKPEOPLE 								WI		
+										WHERE 	 1 =1
+											GROUP BY WI.WORKMONTH, WI.CODEID, WI.WORKERNUMBER
+																				
+									UNION ALL
+										
+										SELECT 
+												DISTINCT	
+												WI.CODEID			AS TYPE
+											,	WI.WORKDAY	 			AS COUNT
+											,	'MONTH'+  CONVERT(CHAR,WI.WORKMONTH)							AS WORKMONTH
+										FROM 	WORKDAY 								WI
+									
+										WHERE 	 1 =1		
+										GROUP BY WI.WORKMONTH, WI.CODEID, WI.WORKDAY
+					
+
+						UNION ALL
+--연장 근무시간						
+										SELECT 
+												DISTINCT 
+												WI.CODEID			AS TYPE
+											,	WI.EXTENDHOUR	 			AS COUNT
+											,	'MONTH'+  CONVERT(CHAR,WI.WORKMONTH)								AS WORKMONTH
+										FROM 	EXTENDHOUR 								WI
+									
+										WHERE 	 1 =1																		
+										GROUP BY WI.WORKMONTH, WI.CODEID, WI.EXTENDHOUR
+
+										UNION ALL
+--휴가/교육/훈련
+
+											SELECT 
+												DISTINCT 
+												WI.CODEID			AS TYPE
+											,	WI.HOLETIME	 			AS COUNT
+											,	'MONTH'+  CONVERT(CHAR,WI.WORKMONTH)								AS WORKMONTH
+										FROM 	HOLETIME 								WI
+										WHERE 	 1 =1		
+										GROUP BY  WI.WORKMONTH, WI.CODEID, WI.HOLETIME	
+
+
+
+											UNION ALL
+--총 직접작업시간
+
+																				SELECT 
+												DISTINCT 
+												WI.CODEID			AS TYPE
+											,	WI.TOTALWORKHOUR	 			AS COUNT
+											,	'MONTH'+  CONVERT(CHAR,WI.WORKMONTH)								AS WORKMONTH
+										FROM 	TOTALWORKLTIME 							WI
+									
+										WHERE 	 1 =1
+										GROUP BY WI.WORKMONTH, WI.CODEID, WI.TOTALWORKHOUR
+									
+										UNION ALL
+--총 가용작업시간
+
+																				SELECT 
+												DISTINCT 
+												WI.CODEID			AS TYPE
+											,	WI.TOTALAVAILABLEHOUR	 			AS COUNT
+											,	'MONTH'+  CONVERT(CHAR,WI.WORKMONTH)								AS WORKMONTH
+										FROM 	TOTALAVAILABLTIME 								WI
+									
+										WHERE 	 1 =1															
+										GROUP BY WI.WORKMONTH, WI.CODEID, WI.TOTALAVAILABLEHOUR
+
+
+										
+										UNION ALL
+--작업시간
+				
+					
+										SELECT 
+												DISTINCT 
+												WI.CODEID					AS TYPE
+											,	WI.WORKWHOUR	 			AS COUNT
+											,	'MONTH'+  CONVERT(CHAR,WI.WORKMONTH)								AS WORKMONTH
+										FROM 	WORKTIME3 								WI
+										WHERE 	 1 =1
+										GROUP BY WI.WORKMONTH, WI.CODEID, WI.WORKWHOUR
+			
+		
+
+
+										UNION ALL
+--작업효율
+
+											SELECT 
+												DISTINCT 
+												WI.CODEID				AS TYPE
+											,	WI.WORKEFFICIENCY	 			AS COUNT
+											,	'MONTH' + CONVERT(CHAR,WI.WORKMONTH)								AS WORKMONTH
+										FROM 	WORKEFFICIENCY 								WI
+									
+										WHERE 	 1 =1																
+										GROUP BY WI.WORKMONTH, WI.CODEID, WI.WORKEFFICIENCY
+										UNION ALL
+
+--회수율
+									SELECT 
+												DISTINCT 
+												WI.CODEID				AS TYPE
+											,	WI.WORKRECOVERYRATE	 			AS COUNT
+											,	'MONTH' +  CONVERT(CHAR,WI.WORKMONTH)									AS WORKMONTH
+										FROM 	WORKRECOVERYRATE 								WI
+										WHERE 	 1 =1	
+										GROUP BY WI.WORKMONTH, WI.CODEID, WI.WORKRECOVERYRATE
+
+									) A								
+									PIVOT
+									(
+									
+										MAX(COUNT) 
+										FOR A.WORKMONTH IN (MONTH1, MONTH2,MONTH3, MONTH4, MONTH5, MONTH6,MONTH7, MONTH8, MONTH9, MONTH10,MONTH11, MONTH12)
+			
+										
+										
+									)AS PV
+							
+								)
+						SELECT 
+							SC.CODEID									AS TYPE
+						,	ISNULL(D.DICTIONARYNAME, SC.CODENAME)		AS TYPENAME
+						,	ISNULL(MAX(CP.MONTH1),0) 				   	AS MONTH1
+						,	ISNULL(MAX(CP.MONTH2),0) 				   	AS MONTH2
+						,	ISNULL(MAX(CP.MONTH3),0) 				   	AS MONTH3
+						,	ISNULL(MAX(CP.MONTH4),0) 				   	AS MONTH4
+						,	ISNULL(MAX(CP.MONTH5),0) 				   	AS MONTH5
+						,	ISNULL(MAX(CP.MONTH6),0) 				   	AS MONTH6
+						,	ISNULL(MAX(CP.MONTH7),0) 				   	AS MONTH7
+						,	ISNULL(MAX(CP.MONTH8),0) 				   	AS MONTH8
+						,	ISNULL(MAX(CP.MONTH9),0) 				   	AS MONTH9
+						,	ISNULL(MAX(CP.MONTH10),0) 				   	AS MONTH10
+						,	ISNULL(MAX(CP.MONTH11),0) 				   	AS MONTH11
+						,	ISNULL(MAX(CP.MONTH12),0) 				   	AS MONTH12
+						,	ISNULL(MAX(CP.MONTH1),0) + ISNULL(MAX(CP.MONTH2),0)+ ISNULL(MAX(CP.MONTH3),0) + ISNULL(MAX(CP.MONTH4),0) + ISNULL(MAX(CP.MONTH5),0) + ISNULL(MAX(CP.MONTH6),0)
+						+ ISNULL(MAX(CP.MONTH7),0) + ISNULL(MAX(CP.MONTH8),0)  + ISNULL(MAX(CP.MONTH9),0) + ISNULL(MAX(CP.MONTH10),0) + ISNULL(MAX(CP.MONTH11),0) + ISNULL(MAX(CP.MONTH12),0)
+						AS SUM
+						FROM SF_CODE SC  
+						left join PIVOTDT         CP ON SC.CODEID = CP.TYPE																						
+						LEFT OUTER JOIN SF_DICTIONARY																			D	ON	SC.DICTIONARYID = D.DICTIONARYID
+																																	AND D.LANGUAGETYPE = 'ko-KR'
+						where sc.CODECLASSID = 'KPIType'
+						GROUP BY	sc.CODEID,	ISNULL(D.DICTIONARYNAME, sc.CODENAME)
+						ORDER BY sc.CODEID						
+
+/*						
+						FROM PIVOTDT																							CP
+						LEFT OUTER JOIN SF_CODE 																				CD  ON  CD.CODECLASSID ='KPIType'
+																																	AND	CP.TYPE = CD.CODEID
+						LEFT OUTER JOIN SF_DICTIONARY																			D	ON	CD.DICTIONARYID = D.DICTIONARYID
+																																	AND D.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+
+						GROUP BY	CD.CODEID,	ISNULL(D.DICTIONARYNAME, CD.CODENAME)
+						ORDER BY CD.CODEID
+*/						
+			
+		]]>
+		</statement>
+	</query>
+	
+
+		<!--
+	프 로 그 램 명	: 
+	설		명	: 
+	작	성	자	: 
+	작	성	일	: 
+	주요 변경 로그	: 
+	-->
+	<query id="SelectKPIState" version="00002">
+		<statement>
+		<![CDATA[
+				--
+				-- Id : SelectKPIState
+				-- Version : 00002	
+				WITH WORK_TIME AS
+				(
+					SELECT WORKMONTH
+						,  SUM(WORKDAY)            WORKDAY  
+						,  SUM(STANDWORKERCNT)     WORKMANCOUNT
+						,  SUM(EXTENDHOUR)         DELAYWORKHOUR
+						,  SUM(ETCHOUR)            ETCWORKHOUR
+						,  SUM(TOTALWORKHOUR)      TOTALWORKHOUR
+						,  SUM(TOTALAVAILABLEHOUR) TOTALAVALIABLEWOKHOUR
+					FROM
+					(
+						SELECT WORKMONTH
+							,  CASE WHEN TOTALWORKHOUR = 0 THEN 0 ELSE 1 END WORKDAY -- 작업일
+							,  STANDWORKERCNT                                        -- 근무인원수
+							,  EXTENDHOUR                                            -- 연장근무 
+							,  HOLIDAYHOUR + EDUCATIONHOUR +TRAININGHOUR ETCHOUR  -- 휴가/교육/훈련 
+							,  TOTALWORKHOUR
+							,  TOTALAVAILABLEHOUR
+						FROM UL_PRODEFFICIENCY
+						WHERE 1=1
+							AND   WORKYEAR = DATEPART(YEAR,'$!{P_YEAR}')   
+						#if ("$!{P_TEAM}" != "" && "$!{P_TEAM}" != "*")
+							AND TEAMID = '$!{P_TEAM}'
+						#end
+					)X
+					GROUP BY WORKMONTH
+				),
+				WORK_RESULT AS
+				(
+					SELECT WORKMONTH
+						,  SUM(WORKTIME) WORKTIME
+					FROM
+					(
+						SELECT (COALESCE(WR.STANDARDTIME, PD.STANDARDTIME, 0) * L.QTY) / 60.0 WORKTIME
+							,  DATEPART(MONTH, TRACKOUTTIME) WORKMONTH
+						FROM SF_LOT L
+						INNER JOIN SF_PRODUCTDEFINITION PD ON L.PRODUCTDEFID = PD.PRODUCTDEFID
+						INNER JOIN UL_PROCESSWORKRESULT WR ON WR.LOTID = L.LOTID
+						WHERE DATEPART(YEAR,TRACKOUTTIME) = DATEPART(YEAR,'$!{P_YEAR}')
+						#if ("$!{P_TEAM}" != "" && "$!{P_TEAM}" != "*")
+							AND	PD.TEAMID = '$!{P_TEAM}'	
+						#end
+						AND	  L.LOTSTATE = 'Finished'
+					)X
+					GROUP BY WORKMONTH
+				),
+				PVT_DATA AS
+				(
+					SELECT PVT.*
+					FROM
+					(
+						SELECT WORKMONTH
+							,  DIVISION
+							,  CONVERT(DECIMAL(18,1),VALUE) VALUE
+						FROM
+						(
+						SELECT 'MONTH' + CONVERT(VARCHAR,WT.WORKMONTH)                              WORKMONTH   
+							,  CONVERT(DECIMAL(18,1),WT.WORKDAY)                                    WORKDAY 
+							,  CONVERT(DECIMAL(18,1),WT.WORKMANCOUNT)                               WORKMANCOUNT
+							,  CONVERT(DECIMAL(18,1),WT.DELAYWORKHOUR)                              DELAYWORKHOUR
+							,  CONVERT(DECIMAL(18,1),WT.ETCWORKHOUR)                                ETCWORKHOUR
+							,  CONVERT(DECIMAL(18,1),WT.TOTALWORKHOUR)                              TOTALWORKHOUR
+							,  CONVERT(DECIMAL(18,1),WT.TOTALAVALIABLEWOKHOUR)                      TOTALAVALIABLEWOKHOUR
+							,  CONVERT(DECIMAL(18,1),WR.WORKTIME)                                   RETRIEVEHOUR
+							,  CONVERT(DECIMAL(18,1),ROUND(WR.WORKTIME/WT.TOTALAVALIABLEWOKHOUR*100,1)) WORKAFFECT 
+							,  CONVERT(DECIMAL(18,1),ROUND(WR.WORKTIME/TOTALWORKHOUR*100,1))            RETRIEVERATE
+						FROM (
+								SELECT * FROM WORK_TIME 
+								UNION 
+								SELECT '1', NULL, NULL, NULL, NULL, NULL, NULL
+								UNION
+								SELECT '2', NULL, NULL, NULL, NULL, NULL, NULL
+								UNION
+								SELECT '3', NULL, NULL, NULL, NULL, NULL, NULL
+								UNION
+								SELECT '4', NULL, NULL, NULL, NULL, NULL, NULL
+								UNION
+								SELECT '5', NULL, NULL, NULL, NULL, NULL, NULL
+								UNION
+								SELECT '6', NULL, NULL, NULL, NULL, NULL, NULL
+								UNION
+								SELECT '7', NULL, NULL, NULL, NULL, NULL, NULL
+								UNION
+								SELECT '8', NULL, NULL, NULL, NULL, NULL, NULL
+								UNION
+								SELECT '9', NULL, NULL, NULL, NULL, NULL, NULL
+								UNION
+								SELECT '10', NULL, NULL, NULL, NULL, NULL, NULL
+								UNION
+								SELECT '11', NULL, NULL, NULL, NULL, NULL, NULL
+								UNION
+								SELECT '12', NULL, NULL, NULL, NULL, NULL, NULL
+							 ) WT
+						LEFT JOIN WORK_RESULT WR ON WT.WORKMONTH = WR.WORKMONTH
+						)X
+						UNPIVOT
+						(
+							VALUE FOR DIVISION IN (X.WORKDAY,X.WORKMANCOUNT,X.DELAYWORKHOUR,X.ETCWORKHOUR,X.TOTALWORKHOUR,X.TOTALAVALIABLEWOKHOUR,X.RETRIEVEHOUR,WORKAFFECT,RETRIEVERATE)
+						)AS UNPVT
+					)Y
+					PIVOT
+					(
+						MAX(VALUE) 
+						FOR Y.WORKMONTH IN (MONTH1, MONTH2,MONTH3, MONTH4, MONTH5, MONTH6,MONTH7, MONTH8, MONTH9, MONTH10,MONTH11, MONTH12)								
+					)AS PVT
+				)
+				SELECT SC.CODEID TYPE
+				    ,  ISNULL(SD.DICTIONARYNAME,SC.CODENAME) TYPENAME
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH1,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH1,0) , '0.#')
+						END AS MONTH1
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH2,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH2,0) , '0.#')
+						END AS MONTH2
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH3,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH3,0) , '0.#')
+						END AS MONTH3
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH4,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH4,0) , '0.#')
+						END AS MONTH4
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH5,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH5,0) , '0.#')
+						END AS MONTH5
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH6,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH6,0) , '0.#')
+						END AS MONTH6
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH7,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH7,0) , '0.#')
+						END AS MONTH7
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH8,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH8,0) , '0.#')
+						END AS MONTH8
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH9,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH9,0) , '0.#')
+						END AS MONTH9
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH10,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH10,0) , '0.#')
+						END AS MONTH10
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH11,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH11,0) , '0.#')
+						END AS MONTH11
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH12,0), '0.0')
+							ELSE FORMAT(ISNULL(MONTH12,0) , '0.#')
+						END AS MONTH12
+
+					,  CASE WHEN SC.CODEID IN ('DelayWorkHour', 'ETCWorkHour', 'TotalWorkHour', 'TotalAvaliableWokHour', 'RetrieveHour')
+								THEN FORMAT(ISNULL(MONTH1,0) + ISNULL(MONTH2,0) + ISNULL(MONTH3,0) + ISNULL(MONTH4,0) + ISNULL(MONTH5,0) + ISNULL(MONTH6,0)   
+											+ ISNULL(MONTH7,0) + ISNULL(MONTH8,0) + ISNULL(MONTH9,0) + ISNULL(MONTH10,0) + ISNULL(MONTH11,0) + ISNULL(MONTH12,0)
+									, '0.0')
+							ELSE FORMAT((ISNULL(MONTH1,0) + ISNULL(MONTH2,0) + ISNULL(MONTH3,0) + ISNULL(MONTH4,0) + ISNULL(MONTH5,0) + ISNULL(MONTH6,0)   
+											+ ISNULL(MONTH7,0) + ISNULL(MONTH8,0) + ISNULL(MONTH9,0) + ISNULL(MONTH10,0) + ISNULL(MONTH11,0) + ISNULL(MONTH12,0))/12
+									, '0.#')
+						END AS SUM
+				FROM SF_CODE SC
+				LEFT JOIN PVT_DATA PD ON SC.CODEID = PD.DIVISION
+				LEFT JOIN SF_DICTIONARY SD ON  SC.DICTIONARYID = SD.DICTIONARYID
+				                           AND SD.LANGUAGETYPE = '$!{LANGUAGETYPE}'   
+				WHERE 1=1
+				AND   SC.CODECLASSID = 'WorkAffectDiv'
+				ORDER BY SC.DISPLAYSEQUENCE							
+			]]>
+		</statement>
+	</query>
+		
+	<!--
+	프 로 그 램 명	: 기준정보  > 생산관리  > 작업효율현황 
+	설		명	: 월을 조회한다
+	작	성	자	: 한주석
+	작	성	일	: 2020-06-18
+	주요 변경 로그	: 
+	-->
+	<query id="GetMonth" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				--id : GetMonth
+				--version : 00001
+				SELECT
+						C.CODEID
+					,	ISNULL(D.DICTIONARYNAME, C.CODENAME)		AS CODENAME
+					
+				FROM SF_CODE 			C
+				LEFT JOIN SF_DICTIONARY		D	ON	C.DICTIONARYID = D.DICTIONARYID
+												AND	D.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE C.CODECLASSID = 'Month'
+				ORDER BY C.CODEID
+				
+			]]>
+		</statement>
+	</query>
+	
+	
+	<!--
+	프 로 그 램 명	: 생산관리 > 생산계획 > 생산계획대비실적
+	설		명	: 생산계획대비실적 조회
+	작	성	자	: 강유라
+	작	성	일	: 2020-06-18
+	주요 변경 로그	: 2020-08-24 | scmo | 실적부분 로직 변경
+				  2020-09-10 | 이준용  | 작업지시취소 건 실적수량 제외 => L.LOTSTATE <>'Terminated' 조건 추가
+	-->
+	<query id="SelectWorkOrderPerformanceList" version="00001">
+		<statement>
+		<![CDATA[
+			--
+			-- Id : SelectWorkOrderPerformanceList
+			-- Version : 00001
+			
+			WITH LOTQTYSUM AS
+			(
+				SELECT 
+						L.WORKORDERID
+					,	SUM(L.QTY)  		AS LOTQTY
+				FROM 	SF_LOT 				L
+				WHERE	1=1
+						AND	(L.LOTSTATE <> 'InProduction') AND (L.LOTSTATE <> 'Terminated') 
+				GROUP BY 
+						L.WORKORDERID
+			
+			)
+			
+			SELECT 
+					WO.WORKORDERID
+				,	WO.PRODUCTIONORDERID
+				,	PR.TEAMID
+				,	ISNULL(CTD.DICTIONARYNAME, CT.TEAMNAME) 										AS TEAMNAME
+				,	PR.AREAID
+				,	ISNULL(AD.DICTIONARYNAME, A.AREANAME) 											AS AREANAME
+				,	ISNULL(PSD.DICTIONARYNAME, PS.PROCESSSEGMENTNAME) 								AS PROCESSSEGMENTNAME
+				,	ISNULL(PR.PARTNUMBER,PR.PRODUCTDEFID)                                           AS PRODUCTDEFID
+				,	ISNULL(PRD.DICTIONARYNAME, PR.PRODUCTDEFNAME) 									AS PRODUCTDEFNAME
+				,	TCD.DICTIONARYNAME AS PRODUCTDEFTYPENAME
+				,	WO.PLANENDTIME
+				,	WO.PLANQTY
+				,	IIF(L.LOTQTY IS NULL, 0, L.LOTQTY) 												AS LOTQTY
+				,	CASE WHEN ISNULL(WO.PLANQTY, 0) != 0 
+							THEN ROUND(IIF(L.LOTQTY IS NULL, 0, L.LOTQTY)/CONVERT(NUMERIC, WO.PLANQTY)*100,2)
+							ELSE NULL 
+					END 																			AS COMPLETERATE
+			
+			FROM	SF_WORKORDER 																	WO
+			
+			 --품목
+			LEFT OUTER JOIN SF_PRODUCTDEFINITION 													PR  ON  WO.PRODUCTDEFID = PR.PRODUCTDEFID
+																										AND WO.PRODUCTDEFVERSION = PR.PRODUCTDEFVERSION
+			LEFT OUTER JOIN SF_DICTIONARY 															PRD ON  PR.DICTIONARYID = PRD.DICTIONARYID
+																										AND PRD.LANGUAGETYPE ='$!{_TXNINFO.LANGUAGETYPE}'
+			--품목구분
+			LEFT OUTER JOIN SF_CODE 																TC  ON  PR.PRODUCTDEFTYPE = TC.CODEID
+																										AND TC.CODECLASSID ='ProductDefType'
+			LEFT OUTER JOIN SF_DICTIONARY 															TCD ON  TC.DICTIONARYID = TCD.DICTIONARYID
+																										AND TCD.LANGUAGETYPE ='$!{_TXNINFO.LANGUAGETYPE}'
+			--팀
+			LEFT OUTER JOIN CT_TEAM 																CT  ON  PR.TEAMID = CT.TEAMID
+			LEFT OUTER JOIN SF_DICTIONARY 															CTD ON  CT.DICTIONARYID = CTD.DICTIONARYID
+																										AND CTD.LANGUAGETYPE ='$!{_TXNINFO.LANGUAGETYPE}'
+			--작업장
+			LEFT OUTER JOIN SF_AREA																 	A   ON  PR.AREAID = A.AREAID
+			LEFT OUTER JOIN SF_DICTIONARY 															AD  ON  A.DICTIONARYID = AD.DICTIONARYID
+																										AND AD.LANGUAGETYPE ='$!{_TXNINFO.LANGUAGETYPE}'
+			--라우터
+			LEFT OUTER JOIN SF_PROCESSDEFINITION 													PC  ON  PR.PROCESSDEFID  = PC.PROCESSDEFID
+																										AND PR.PROCESSDEFVERSION = PC.PROCESSDEFVERSION
+			LEFT OUTER JOIN SF_PROCESSPATH 															PP  ON  PC.PROCESSDEFID = PP.PROCESSDEFID
+																										AND PC.PROCESSDEFVERSION = PP.PROCESSDEFVERSION
+			--공정
+			LEFT OUTER JOIN SF_PROCESSSEGMENT 														PS  ON  PP.PROCESSSEGMENTID = PS.PROCESSSEGMENTID
+																										AND PS.PROCESSSEGMENTVERSION = PP.PROCESSSEGMENTVERSION
+			LEFT OUTER JOIN SF_DICTIONARY 															PSD ON  PS.DICTIONARYID = PSD.DICTIONARYID
+																										AND PSD.LANGUAGETYPE ='$!{_TXNINFO.LANGUAGETYPE}'
+			LEFT OUTER JOIN LOTQTYSUM																L   ON  L.WORKORDERID = WO.WORKORDERID
+
+			WHERE	1 = 1
+			AND 	('$!{P_DATEPERIOD_PERIODFR}' <= WO.PLANENDTIME 
+			AND		WO.PLANENDTIME < '$!{P_DATEPERIOD_PERIODTO}')
+			AND		WO.VALIDSTATE = 'Valid'
+			
+			#if ("$!{P_TEAM}" != "" && "$!{P_TEAM}" != "*")
+				AND	PR.TEAMID = '$!{P_TEAM}'
+			#end	
+			
+			#if ("$!{P_AREACODE}" != "" && "$!{P_AREACODE}" != "*")
+				AND	PR.AREAID = '$!{P_AREACODE}'
+			#end
+			
+			#if ("$!{P_PROCESSCODE}" != "" && "$!{P_PROCESSCODE}" != "*")
+				AND	PS.PROCESSSEGMENTID = '$!{P_PROCESSCODE}'
+			#end
+			
+			ORDER BY WO.PLANENDTIME
+		]]>
+		</statement>
+	</query>
+		<!--
+	프 로 그 램 명	: 생산관리 > 생산계획 > 작업지시조회
+	설		명	: PumpLot생성시 Serial 체크
+	작	성	자	: 이준용
+	작	성	일	: 2020-09-16
+	주요 변경 로그	: checkPumpLotSerial999
+	-->
+	<query id="SelectPumpLotCurrentSerial" version="00001">
+		<statement>
+		<![CDATA[
+			--
+			-- Id : SelectPumpLotCurrentSerial
+			-- Version : 00001
+			
+			SELECT 
+					*  
+			FROM SF_IDCLASSSERIAL 
+			WHERE 1=1
+				AND IDCLASSID  = '$!{IDCLASSID}' 
+				AND PREFIX = SUBSTRING(REPLACE(CONVERT(VARCHAR,GETDATE(),23),'-',''),3,2) 
+					+ SUBSTRING(REPLACE(CONVERT(VARCHAR,GETDATE(),23),'-',''),5,2)
+		]]>
+		</statement>
+	</query>
+	
+</list>

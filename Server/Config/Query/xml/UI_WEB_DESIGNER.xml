@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list>
+	
+	<query id="GETUXPROJECT" version="00001">
+		<statement>
+			<![CDATA[
+			SELECT
+				PROJECTID,
+				PROJECTNAME,
+				PROJECTALIAS
+			FROM
+				UX_PROJECT
+			WHERE 1=1
+			AND VALIDSTATE = 'Valid' 
+			
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETUXPROJECTFILE" version="00001">
+		<statement>
+			<![CDATA[
+			SELECT
+				FILEID,
+				FILENAME,
+				FILEALIAS,
+				FILETYPE,
+				FILECHARSET,
+				PROJECTID,
+				DESCRIPTION,
+				PARENTFILEID,
+				USERID,	
+				STATE,
+				OPTIONS
+			FROM
+				UX_PROJECTFILE
+			WHERE 1=1
+			AND VALIDSTATE = 'Valid'
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GET_UXPROJECT_AND_PROJECTFILE" version="00001">
+		<statement>
+			<![CDATA[
+			SELECT 
+				PROJECTID AS 'FILEID',
+				PROJECTNAME AS 'FILENAME',
+				PROJECTALIAS AS 'FILEALIAS',
+				'FOLDER' AS 'FILETYPE',
+				NULL AS 'PROJECTID',
+			    NULL AS 'PARENTFILEID'
+			FROM UX_PROJECT
+			WHERE 1=1
+			AND VALIDSTATE = 'Valid'
+			UNION ALL
+			SELECT
+				FILEID,
+				FILENAME,
+				FILEALIAS,
+				FILETYPE,
+				PROJECTID,
+				PARENTFILEID
+			FROM
+				UX_PROJECTFILE
+			WHERE 1=1
+			AND VALIDSTATE = 'Valid'
+			]]>
+		</statement>
+	</query>
+	
+	<query id="DESIGNER_FONTFAMILY_COMBO" version="00001">
+		<statement>
+			<![CDATA[
+			SELECT 
+				CODEID AS VALUE,
+				CODENAME AS TEXT
+			FROM SF_CODE 
+			WHERE 1=1
+			AND	CODECLASSID ='DesignerFontfamily'
+			AND VALIDSTATE = 'Valid'
+			]]>
+		</statement>
+	</query>
+
+	<query id="GETUXQUERYLIST" version="00001" >
+		<statement>
+			<![CDATA[
+				SELECT 
+					DISTINCT 
+					CASE WHEN DESCRIPTION='' THEN QUERYID ELSE DESCRIPTION END AS "TEXT", 
+					QUERYID AS "VALUE", 
+					DESCRIPTION 
+				FROM 
+					SF_QUERY 
+				WHERE 
+					VALIDSTATE='Valid' 
+				ORDER BY 
+					TEXT ASC
+			]]>
+		</statement>
+	</query>
+
+	<query id="GETUXQUERYIDLIST" version="00001" >
+		<statement>
+			<![CDATA[
+				SELECT 
+					DISTINCT 
+					CASE WHEN DESCRIPTION='' THEN QUERYID ELSE DESCRIPTION END AS "TEXT", 
+					QUERYID AS "VALUE", 
+					DESCRIPTION 
+				FROM 
+					SF_QUERY 
+				WHERE 
+					VALIDSTATE='Valid' 
+				ORDER BY 
+					TEXT ASC
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETUXQUERYVERLIST" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT 
+					DISTINCT 
+					VERSION AS "TEXT", 
+					VERSION AS "VALUE", 
+					QUERY_ID AS "QUERYID" 
+				FROM 
+					SF_QUERY 
+				WHERE 
+					VALIDSTATE='Valid' 
+				ORDER BY 
+					TEXT ASC
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETUXUSEREMAILLIST" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT 
+					USERID AS "VALUE", 
+					USERNAME AS "TEXT" 
+				FROM 
+					SF_USER 
+				WHERE 
+					VALIDSTATE='Valid'
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETUXUSEREMAILLIST" version="00001" dbms="POSTGRESQL">
+		<statement>
+			<![CDATA[
+				SELECT 
+					"USERID" AS "VALUE", 
+					"USERNAME" AS "TEXT" 
+				FROM 
+					"SF_USER" 
+				WHERE 
+					"VALIDSTATE"='Valid'
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETUXMESSAGE" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT MESSAGEID, MESSAGENAME, DESCRIPTION, MESSAGECLASSID, LANGUAGETYPE FROM SF_MESSAGE WHERE VALIDSTATE='Valid' AND MESSAGECLASSID like 'SUX_%' AND LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETUXDICTIONARY" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT DICTIONARYID, DICTIONARYCLASSID, DICTIONARYNAME, DESCRIPTION, LANGUAGETYPE FROM SF_DICTIONARY WHERE VALIDSTATE = 'Valid' AND DICTIONARYCLASSID like 'SUX_%' AND LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETUXDICTIONARY" version="00001" dbms="POSTGRESQL">
+		<statement>
+			<![CDATA[
+				SELECT "DICTIONARYID", "DICTIONARYCLASSID", "DICTIONARYNAME", "DESCRIPTION", "DICTIONARYTYPE" FROM "SF_DICTIONARY" WHERE "VALIDSTATE" = 'Valid'
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETUXLANGTYPE" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT CODEID AS "VALUE", CODENAME AS "TEXT" FROM SF_CODE WHERE VALIDSTATE='Valid' AND CODECLASSID = 'LANGUAGETYPE' ORDER BY DISPLAYSEQUENCE ASC
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETUXMENU" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT  C.STATE AS STATE, C.MENUID AS MENUID
+				        , CASE WHEN D.DICTIONARYNAME IS NULL THEN CASE WHEN C.MENUNAME IS NULL THEN C.MENUID
+                                                                       ELSE C.MENUNAME END
+				               ELSE D.DICTIONARYNAME
+				          END MENUNAME
+				        , C.DESCRIPTION AS DESCRIPTION, C.PARENTMENUID AS PARENTMENUID, C.MENUTYPE AS MENUTYPE
+				        , C.PROGRAMID AS PROGRAMID, C.OPTIONS AS OPTIONS
+				        , C.DICTIONARYID AS LCODE
+				FROM    (
+							SELECT  A.STATE, A.MENUID, A.MENUNAME
+				                    , A.DESCRIPTION, A.PARENTMENUID, A.MENUTYPE
+				                    , A.PROGRAMID, A.OPTIONS, A.DICTIONARYID, A.DISPLAYSEQUENCE
+				            FROM    SF_MENU A
+				                    INNER JOIN  (
+				                                    SELECT  A.MENUID
+				                                    FROM    SF_MENUAUTHORITY A
+				                                            INNER JOIN (
+				                                                            SELECT  USERCLASSID
+				                                                            FROM    SF_USERCLASSUSER
+				                                                            WHERE   USERID = '$!{_TXNINFO.USER}'
+				                                                            AND     VALIDSTATE = 'Valid'
+				                                                       ) B
+				                                                ON A.USERCLASSID = B.USERCLASSID 
+				                                    WHERE   A.VALIDSTATE = 'Valid'
+				                                    GROUP BY A.MENUID
+				                                ) B
+				                        ON  A.MENUID = B.MENUID
+				            WHERE   1=1
+				            AND     A.VALIDSTATE = 'Valid'
+				            AND     A.UIID = '$!{_TXNINFO.UIID}'
+				        ) C
+				        LEFT OUTER JOIN SF_DICTIONARY D
+				            ON  C.DICTIONARYID = D.DICTIONARYID
+				            AND	D.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				ORDER BY C.DISPLAYSEQUENCE, C.MENUTYPE, C.PARENTMENUID, C.MENUID
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETUXMENU" version="00001" dbms="POSTGRESQL">
+		<statement>
+			<![CDATA[
+				SELECT 
+					STATE, MENUID, MENUNAME, DESCRIPTION, PARENTMENUID, MENUTYPE, PROGRAMID, OPTIONS
+				FROM 
+					SF_MENU 
+				WHERE 
+					MENUTYPE IN ( 'FOLDER', 'SCREEN', 'POPUP', 'LINK' ) 
+					AND VALIDSTATE='Valid' 
+					AND UIID=:UIID 
+				ORDER BY 
+					DISPLAYSEQUENCE, MENUTYPE, PARENTMENUID, MENUNAME ASC
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETUXRELVIEW" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT PROGRAMID AS "VALUE", MENUNAME AS "TEXT" FROM SF_MENU WHERE VALIDSTATE='Valid' AND MENUTYPE IN ('SCREEN', 'POPUP', 'LINK')
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETUXNEWSEQ" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT (MAX(DISPLAYSEQUENCE) + 100) NEWSEQUENCE FROM SF_MENU WHERE UIID = '$!{_TXNINFO.UIID}' AND PARENTMENUID = :PARENTMENUID
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETUXCONDITION" version="00001" dbms="ORACLE">
+		<statement>
+			<![CDATA[
+				SELECT QUERYID || '|' || VERSION AS "VALUE", CASE WHEN DESCRIPTION='' THEN QUERYID ELSE DESCRIPTION END AS "TEXT" FROM SF_QUERY WHERE VALIDSTATE = 'Valid'
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETUXCONDITION" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT QUERYID + '|' + VERSION AS "VALUE", CASE WHEN DESCRIPTION='' THEN QUERYID ELSE DESCRIPTION END AS "TEXT" FROM SF_QUERY WHERE VALIDSTATE = 'Valid'
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETUXUSER" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT * FROM SF_USER WHERE USERID = :USERID AND PASSWORD = :PASSWORD AND VALIDSTATE = 'Valid'
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETUXUSER" version="00001" dbms="POSTGRESQL">
+		<statement>
+			<![CDATA[
+				SELECT * FROM "SF_USER" WHERE "USERID" = :USERID AND "PASSWORD" = :PASSWORD AND "VALIDSTATE" = 'Valid'
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETUSERSALT" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT SALT FROM SF_USER WHERE VALIDSTATE = 'Valid'
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETUXUIID" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT UIID AS "VALUE", CASE WHEN UINAME IS NULL OR UINAME = '' THEN UIID ELSE UINAME END AS "TEXT" FROM SF_UI WHERE VALIDSTATE = 'Valid'
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETUXUIID" version="00001" dbms="POSTGRESQL">
+		<statement>
+			<![CDATA[
+				SELECT "UIID" AS "VALUE", CASE WHEN "UINAME" IS NULL OR "UINAME" = '' THEN "UIID" ELSE "UINAME" END AS "TEXT" FROM "SF_UI" WHERE "VALIDSTATE" = 'Valid'
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETUXPARENTMENULIST" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT MENUID AS "VALUE", MENUNAME AS "TEXT" FROM SF_MENU
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETFACTORYLASTLOTDEFECT" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT * FROM (SELECT * FROM SFLOTDEFECT  WITH (NOLOCK) WHERE LOTID = :LOTID" ORDER BY HISTKEY DESC) WHERE ROWNUM = 1
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETLOTHISTORYDATA" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT * FROM SFLOTHISTORY WHERE LOTID <> :LOTID AND GROUPHISTKEY=:GROUPHISTKEY AND SERVICENAME=:SERVICENAME
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETSUBLOTHISTORYDATA" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT 
+					* 
+				FROM 
+					SFLOTHISTORY 
+				WHERE 
+					LOTID IN (:LOTID1,:LOTID2)  
+					AND GROUPHISTKEY=:GROUPHISTKEY 
+					AND SERVICENAME=:SERVICENAME
+			]]>
+		</statement>
+	</query>
+	
+	<query id="GETLANGUAGEINFO" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT  A.CODEID
+				        , CASE WHEN B.DICTIONARYNAME IS NULL THEN A.CODENAME
+				               ELSE B.DICTIONARYNAME
+				          END CODENAME 
+				FROM    SF_CODE A
+				        LEFT OUTER JOIN SF_DICTIONARY B
+				            ON  A.DICTIONARYID = B.DICTIONARYID
+				            AND B.VALIDSTATE = 'Valid'
+				            AND B.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				WHERE   A.CODECLASSID = 'LANGUAGETYPE'
+				AND     A.VALIDSTATE = 'Valid'
+			]]>
+		</statement>
+	</query>
+</list>

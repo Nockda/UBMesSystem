@@ -1,0 +1,469 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{038CE6D1-EF79-4EB8-85B3-2773A0E6EE18}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Micube.SmartMES.Material</RootNamespace>
+    <AssemblyName>Micube.SmartMES.Material</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\..\bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\..\bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="DevExpress.Charts.v18.1.Core, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Charts.v18.1.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.CodeParser.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.CodeParser.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Data.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Data.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Diagram.v18.1.Core, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Diagram.v18.1.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Office.v18.1.Core, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Office.v18.1.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.PivotGrid.v18.1.Core, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.PivotGrid.v18.1.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Printing.v18.1.Core, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Printing.v18.1.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.RichEdit.v18.1.Core, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.RichEdit.v18.1.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Sparkline.v18.1.Core, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Sparkline.v18.1.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Spreadsheet.v18.1.Core, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Spreadsheet.v18.1.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Utils.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Utils.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Utils.v18.1.UI, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Utils.v18.1.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraBars.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraBars.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraCharts.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraCharts.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraDiagram.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraDiagram.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraEditors.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraEditors.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraGrid.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraGrid.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraLayout.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraLayout.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraNavBar.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraNavBar.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraPivotGrid.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraPivotGrid.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraPrinting.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraPrinting.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraReports.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraReports.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraReports.v18.1.Extensions, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraRichEdit.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraRichEdit.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraTreeList.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraTreeList.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraVerticalGrid.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraVerticalGrid.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Office.Interop.Excel, Version=12.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c">
+      <SpecificVersion>False</SpecificVersion>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <HintPath>..\..\..\lib\Microsoft.Office.Interop.Excel.dll</HintPath>
+    </Reference>
+    <Reference Include="Micube.Framework, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\Micube.Framework.dll</HintPath>
+    </Reference>
+    <Reference Include="Micube.Framework.Net, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\Micube.Framework.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="Micube.Framework.SmartControls, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\Micube.Framework.SmartControls.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ConditionHelper.cs" />
+    <Compile Include="ConsumableLotHoldRelease.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ConsumableLotHoldRelease.designer.cs">
+      <DependentUpon>ConsumableLotHoldRelease.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ConsumableLotSplit.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ConsumableLotSplit.designer.cs">
+      <DependentUpon>ConsumableLotSplit.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ConsumableLotSplitMergeHistory.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ConsumableLotSplitMergeHistory.Designer.cs">
+      <DependentUpon>ConsumableLotSplitMergeHistory.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Etc\EtcInOut.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Etc\EtcInOut.Designer.cs">
+      <DependentUpon>EtcInOut.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Etc\EtcInPopup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Etc\EtcInPopup.Designer.cs">
+      <DependentUpon>EtcInPopup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Etc\EtcInPopup_Grid.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Etc\EtcInPopup_Grid.Designer.cs">
+      <DependentUpon>EtcInPopup_Grid.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Etc\EtcOutPopup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Etc\EtcOutPopup.Designer.cs">
+      <DependentUpon>EtcOutPopup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Etc\EtcOutPopup_Grid.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Etc\EtcOutPopup_Grid.Designer.cs">
+      <DependentUpon>EtcOutPopup_Grid.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MaterialShipment.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MaterialShipment.Designer.cs">
+      <DependentUpon>MaterialShipment.cs</DependentUpon>
+    </Compile>
+    <Compile Include="InOutHistory.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="InOutHistory.Designer.cs">
+      <DependentUpon>InOutHistory.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Kanban\KanbanResPopup2.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Kanban\KanbanResPopup2.Designer.cs">
+      <DependentUpon>KanbanResPopup2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Kanban\KanbanReqPopup2.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Kanban\KanbanReqPopup2.Designer.cs">
+      <DependentUpon>KanbanReqPopup2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Kanban\KanbanConduct.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Kanban\KanbanConduct.designer.cs">
+      <DependentUpon>KanbanConduct.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ConsumableLotHold.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ConsumableLotHold.designer.cs">
+      <DependentUpon>ConsumableLotHold.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ConsumableLotMerge.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ConsumableLotMerge.designer.cs">
+      <DependentUpon>ConsumableLotMerge.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Material\MaterialInByScanPopup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Material\MaterialInByScanPopup.Designer.cs">
+      <DependentUpon>MaterialInByScanPopup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Material\MaterialInit.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Material\MaterialInit.designer.cs">
+      <DependentUpon>MaterialInit.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Material\MaterialOutByScanPopup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Material\MaterialOutByScanPopup.Designer.cs">
+      <DependentUpon>MaterialOutByScanPopup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Material\MaterialOutPopup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Material\MaterialOutPopup.Designer.cs">
+      <DependentUpon>MaterialOutPopup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Material\ReceiverRegPopup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Material\ReceiverRegPopup.Designer.cs">
+      <DependentUpon>ReceiverRegPopup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CellStatus.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CellStatus.Designer.cs">
+      <DependentUpon>CellStatus.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TestPagePopup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TestPagePopup.Designer.cs">
+      <DependentUpon>TestPagePopup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TestPage.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TestPage.Designer.cs">
+      <DependentUpon>TestPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MaterialStock2.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MaterialStock2.Designer.cs">
+      <DependentUpon>MaterialStock2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forwarding.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forwarding.Designer.cs">
+      <DependentUpon>Forwarding.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Outsourcing.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Outsourcing.Designer.cs">
+      <DependentUpon>Outsourcing.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WarehouseMove\WarehouseMove.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WarehouseMove\WarehouseMove.Designer.cs">
+      <DependentUpon>WarehouseMove.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Material\MaterialIn.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Material\MaterialIn.Designer.cs">
+      <DependentUpon>MaterialIn.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Material\MaterialOut.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Material\MaterialOut.Designer.cs">
+      <DependentUpon>MaterialOut.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Material\MaterialStock.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Material\MaterialStock.Designer.cs">
+      <DependentUpon>MaterialStock.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WarehouseMove\WarehouseMovePopup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WarehouseMove\WarehouseMovePopup.Designer.cs">
+      <DependentUpon>WarehouseMovePopup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WarehouseStock.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WarehouseStock.Designer.cs">
+      <DependentUpon>WarehouseStock.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\02.Common\Micube.SmartMES.Commons.Controls\Micube.SmartMES.Commons.Controls.csproj">
+      <Project>{6c8616d8-4620-477e-a1ac-2a02a94d4984}</Project>
+      <Name>Micube.SmartMES.Commons.Controls</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\02.Common\Micube.SmartMES.Commons\Micube.SmartMES.Commons.csproj">
+      <Project>{1b6a2eb9-f134-49fc-80fa-982418d6490f}</Project>
+      <Name>Micube.SmartMES.Commons</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ConsumableLotHoldRelease.resx">
+      <DependentUpon>ConsumableLotHoldRelease.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ConsumableLotSplit.resx">
+      <DependentUpon>ConsumableLotSplit.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ConsumableLotSplitMergeHistory.resx">
+      <DependentUpon>ConsumableLotSplitMergeHistory.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Etc\EtcInOut.resx">
+      <DependentUpon>EtcInOut.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Etc\EtcInPopup.resx">
+      <DependentUpon>EtcInPopup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Etc\EtcInPopup_Grid.resx">
+      <DependentUpon>EtcInPopup_Grid.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Etc\EtcOutPopup.resx">
+      <DependentUpon>EtcOutPopup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Etc\EtcOutPopup_Grid.resx">
+      <DependentUpon>EtcOutPopup_Grid.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="InOutHistory.resx">
+      <DependentUpon>InOutHistory.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Kanban\KanbanReqPopup2.resx">
+      <DependentUpon>KanbanReqPopup2.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forwarding.resx">
+      <DependentUpon>Forwarding.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Kanban\KanbanConduct.resx">
+      <DependentUpon>KanbanConduct.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ConsumableLotHold.resx">
+      <DependentUpon>ConsumableLotHold.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ConsumableLotMerge.resx">
+      <DependentUpon>ConsumableLotMerge.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Kanban\KanbanResPopup2.resx">
+      <DependentUpon>KanbanResPopup2.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MaterialShipment.resx">
+      <DependentUpon>MaterialShipment.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MaterialStock2.resx">
+      <DependentUpon>MaterialStock2.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Material\MaterialInit.resx">
+      <DependentUpon>MaterialInit.cs</DependentUpon>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>MaterialInit1.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Material\MaterialOutByScanPopup.resx">
+      <DependentUpon>MaterialOutByScanPopup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Material\MaterialOutPopup.resx">
+      <DependentUpon>MaterialOutPopup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Material\ReceiverRegPopup.resx">
+      <DependentUpon>ReceiverRegPopup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Outsourcing.resx">
+      <DependentUpon>Outsourcing.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Material\MaterialIn.resx">
+      <DependentUpon>MaterialIn.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Material\MaterialOut.resx">
+      <DependentUpon>MaterialOut.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Material\MaterialStock.resx">
+      <DependentUpon>MaterialStock.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CellStatus.resx">
+      <DependentUpon>CellStatus.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TestPage.resx">
+      <DependentUpon>TestPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TestPagePopup.resx">
+      <DependentUpon>TestPagePopup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WarehouseMove\WarehouseMove.resx">
+      <DependentUpon>WarehouseMove.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WarehouseMove\WarehouseMovePopup.resx">
+      <DependentUpon>WarehouseMovePopup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WarehouseStock.resx">
+      <DependentUpon>WarehouseStock.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 30초마다 설정 파일의 변경을 확인한다. 파일이 변경되면 다시 로딩한다 -->
+<configuration scan="true" scanPeriod="30 seconds">
+
+ 	<!-- <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener" /> -->
+ 	
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+        	<charset>UTF-8</charset>
+            <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}]%msg\n</pattern>
+        </encoder>
+    </appender>
+    
+    <appender name="BASIC_ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${sf.server.home}/Log/${sf.server.name}/${sf.server.mode}-${sf.server.name}.${sf.server.sequence}.log</file>
+        <append>true</append>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 파일이 하루에 한개씩 생성된다. (확장자가 zip이나 gz이면 자동 압축) -->
+            <!-- aux는 해당 폴더가 날자 처리 기준이 아님을 명시하는 설정입니다. -->
+            <fileNamePattern>${sf.server.home}/Log/${sf.server.name}/%d{yyyy-MM, aux}/${sf.server.mode}-${sf.server.name}.${sf.server.sequence}.%d{yyyy-MM-dd}.%i.log.zip</fileNamePattern>
+			
+	        <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+		      	<!-- or whenever the file size reaches 100MB -->
+		      	<maxFileSize>512MB</maxFileSize>
+		    </timeBasedFileNamingAndTriggeringPolicy>
+			
+            <!-- 90개가 넘어가면 이전 파일부터 삭제가 된다. (일단위이므로 90일이 지난 파일이 대상이됨) -->
+            <maxHistory>90</maxHistory>
+        </rollingPolicy>
+        
+        <encoder>
+        	<charset>UTF-8</charset>
+            <!-- <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%thread] [%-5level] [%logger{35}] %msg%n</pattern> -->
+            <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}]%msg\n</pattern>
+        </encoder>
+    </appender>
+    
+    <appender name="HTTP_ACCESS_ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${sf.server.home}/Log/${sf.server.name}/http-access.log</file>
+        <append>true</append>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 파일이 하루에 한개씩 생성된다. (확장자가 zip이나 gz이면 자동 압축) -->
+            <!-- aux는 해당 폴더가 날자 처리 기준이 아님을 명시하는 설정입니다. -->
+            <fileNamePattern>${sf.server.home}/Log/${sf.server.name}/%d{yyyy-MM, aux}/http-access-.%d{yyyy-MM-dd}.%i.log.zip</fileNamePattern>
+			
+	        <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+		      	<!-- or whenever the file size reaches 100MB -->
+		      	<maxFileSize>512MB</maxFileSize>
+		    </timeBasedFileNamingAndTriggeringPolicy>
+			
+            <!-- 90개가 넘어가면 이전 파일부터 삭제가 된다. (일단위이므로 90일이 지난 파일이 대상이됨) -->
+            <maxHistory>90</maxHistory>
+        </rollingPolicy>
+        
+        <encoder>
+        	<charset>UTF-8</charset>
+            <!-- <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%thread] [%-5level] [%logger{35}] %msg%n</pattern> -->
+            <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}]%msg\n</pattern>
+        </encoder>
+    </appender>
+    
+    <appender name="MONITOR_ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${sf.server.home}/Log/${sf.server.name}/monitor-service-dump.log</file>
+        <append>true</append>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 파일이 하루에 한개씩 생성된다. (확장자가 zip이나 gz이면 자동 압축) -->
+            <!-- aux는 해당 폴더가 날자 처리 기준이 아님을 명시하는 설정입니다. -->
+            <fileNamePattern>${sf.server.home}/Log/${sf.server.name}/%d{yyyy-MM, aux}/monitor-service-dump.%d{yyyy-MM-dd}.%i.log.zip</fileNamePattern>
+			
+	        <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+		      	<!-- or whenever the file size reaches 100MB -->
+		      	<maxFileSize>512MB</maxFileSize>
+		    </timeBasedFileNamingAndTriggeringPolicy>
+			
+            <!-- 90개가 넘어가면 이전 파일부터 삭제가 된다. (일단위이므로 90일이 지난 파일이 대상이됨) -->
+            <maxHistory>90</maxHistory>
+        </rollingPolicy>
+        
+        <encoder>
+        	<charset>UTF-8</charset>
+            <!-- <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%thread] [%-5level] [%logger{35}] %msg%n</pattern> -->
+            <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}]%msg\n</pattern>
+        </encoder>
+    </appender>
+    
+    <!-- Log의 출력 Level을 설정 한다. (DEBUG, ERROR, INFO ...) --> 
+    <logger name="Basic.Log"  level="INFO" additivity="true">
+        <appender-ref ref="BASIC_ROLLING" />
+        <appender-ref ref="STDOUT" />
+    </logger>
+    
+    <logger name="Web.Log"  level="INFO" additivity="false">
+        <appender-ref ref="HTTP_ACCESS_ROLLING" />
+    </logger>
+    
+    <logger name="Monitor.Log"  level="INFO" additivity="false">
+        <appender-ref ref="MONITOR_ROLLING" />
+    </logger>
+    
+    <!-- Log의 출력 Level을 설정 한다. (DEBUG, ERROR, INFO ...) -->
+    <!--
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+    </root>
+    -->
+    
+</configuration>

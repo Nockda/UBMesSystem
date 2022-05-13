@@ -1,0 +1,14 @@
+C:\Users\user\Documents\sources\UlbacNew\Client\bin\Debug\Micube.SmartMES.Status.dll
+C:\Users\user\Documents\sources\UlbacNew\Client\bin\Debug\Micube.SmartMES.Status.pdb
+C:\Users\user\Documents\sources\UlbacNew\Client\src\03.SmartMES\Micube.SmartMES.Status\obj\Debug\Micube.SmartMES.Status.ERP.resources
+C:\Users\user\Documents\sources\UlbacNew\Client\src\03.SmartMES\Micube.SmartMES.Status\obj\Debug\Micube.SmartMES.Status.ResultAssy.resources
+C:\Users\user\Documents\sources\UlbacNew\Client\src\03.SmartMES\Micube.SmartMES.Status\obj\Debug\Micube.SmartMES.Status.ProductEfficiencyStatus.resources
+C:\Users\user\Documents\sources\UlbacNew\Client\src\03.SmartMES\Micube.SmartMES.Status\obj\Debug\Micube.SmartMES.Status.Properties.Resources.resources
+C:\Users\user\Documents\sources\UlbacNew\Client\src\03.SmartMES\Micube.SmartMES.Status\obj\Debug\Micube.SmartMES.Status.RepairManage.resources
+C:\Users\user\Documents\sources\UlbacNew\Client\src\03.SmartMES\Micube.SmartMES.Status\obj\Debug\Micube.SmartMES.Status.SystemUsing.resources
+C:\Users\user\Documents\sources\UlbacNew\Client\src\03.SmartMES\Micube.SmartMES.Status\obj\Debug\Micube.SmartMES.Status.csproj.GenerateResource.cache
+C:\Users\user\Documents\sources\UlbacNew\Client\src\03.SmartMES\Micube.SmartMES.Status\obj\Debug\Micube.SmartMES.Status.csproj.CoreCompileInputs.cache
+C:\Users\user\Documents\sources\UlbacNew\Client\src\03.SmartMES\Micube.SmartMES.Status\obj\Debug\Micube.SmartMES.Status.csproj.CopyComplete
+C:\Users\user\Documents\sources\UlbacNew\Client\src\03.SmartMES\Micube.SmartMES.Status\obj\Debug\Micube.SmartMES.Status.dll
+C:\Users\user\Documents\sources\UlbacNew\Client\src\03.SmartMES\Micube.SmartMES.Status\obj\Debug\Micube.SmartMES.Status.pdb
+C:\Users\user\Documents\sources\UlbacNew\Client\src\03.SmartMES\Micube.SmartMES.Status\obj\Debug\Micube.SmartMES.Status.csprojAssemblyReference.cache

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list>
+	<query id="CODE_VALIDSTATE_COMBO" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT  CASE WHEN B.DICTIONARYNAME IS NOT NULL THEN A.CODEID || ' (' || B.DICTIONARYNAME || ')'
+				             ELSE A.CODEID || ' (' || A.CODENAME || ')'
+				        END AS TEXT
+				        , A.CODEID AS VALUE
+				FROM    SF_CODE A
+				        LEFT JOIN SF_DICTIONARY B
+				            ON A.DICTIONARYID = B.DICTIONARYID 
+				            AND LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				WHERE   A.CODECLASSID = 'VALIDSTATE'
+				AND     A.VALIDSTATE = 'Valid'
+				ORDER BY A.DISPLAYSEQUENCE
+			]]>
+		</statement>
+	</query>
+	
+	<query id="CODE_VALIDSTATE_COMBO" version="00001" dbms="MSSQL">
+		<statement>
+			<![CDATA[
+				SELECT  CASE WHEN B.DICTIONARYNAME IS NOT NULL THEN A.CODEID + ' (' + B.DICTIONARYNAME + ')'
+				             ELSE A.CODEID + ' (' + A.CODENAME + ')'
+				        END AS TEXT
+				        , A.CODEID AS VALUE
+				FROM    SF_CODE A
+				        LEFT JOIN SF_DICTIONARY B
+				            ON A.DICTIONARYID = B.DICTIONARYID 
+				            AND LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				WHERE   A.CODECLASSID = 'VALIDSTATE'
+				AND     A.VALIDSTATE = 'Valid'
+				ORDER BY A.DISPLAYSEQUENCE
+				
+			]]>
+		</statement>
+	</query>
+	
+	<query id="CODE_LANGUAGETYPE_COMBO" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT  CASE WHEN (B.DICTIONARYNAME IS NULL OR B.DICTIONARYNAME = '') THEN CASE WHEN (A.CODENAME IS NULL OR A.CODENAME = '') THEN A.CODEID + ' (' + A.CODEID + ')'
+				                                                     ELSE A.CODEID + ' (' + A.CODENAME + ')' END
+				             ELSE A.CODEID + ' (' + B.DICTIONARYNAME + ')'
+				        END AS TEXT
+				        , A.CODEID AS VALUE
+				FROM    SF_CODE A
+				        LEFT JOIN SF_DICTIONARY B
+				            ON  A.DICTIONARYID = B.DICTIONARYID
+				            AND B.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				WHERE   A.CODECLASSID = 'LanguageType'
+				AND     A.VALIDSTATE = 'Valid'
+				ORDER BY A.DISPLAYSEQUENCE
+			]]>
+		</statement>
+	</query>
+	
+	<query id="CODE_LANGUAGETYPE_COMBO" version="00001" >
+		<statement>
+			<![CDATA[
+				SELECT  CASE WHEN (B.DICTIONARYNAME IS NULL OR B.DICTIONARYNAME = '') THEN CASE WHEN (A.CODENAME IS NULL OR A.CODENAME = '') THEN A.CODEID || ' (' || A.CODEID || ')'
+				                                                     ELSE A.CODEID || ' (' || A.CODENAME || ')' END
+				             ELSE A.CODEID || ' (' || B.DICTIONARYNAME || ')'
+				        END AS TEXT
+				        , A.CODEID AS VALUE
+				FROM    SF_CODE A
+				        LEFT JOIN SF_DICTIONARY B
+				            ON  A.DICTIONARYID = B.DICTIONARYID
+				            AND B.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				WHERE   A.CODECLASSID = 'LanguageType'
+				AND     A.VALIDSTATE = 'Valid'
+				ORDER BY A.DISPLAYSEQUENCE
+			]]>
+		</statement>
+	</query>
+	
+	<query id="CODE_LANGUAGETYPE_COMBO" version="00001" dbms="MSSQL">
+		<statement>
+			<![CDATA[
+				SELECT  CASE WHEN (B.DICTIONARYNAME IS NULL OR B.DICTIONARYNAME = '') THEN CASE WHEN (A.CODENAME IS NULL OR A.CODENAME = '') THEN A.CODEID + ' (' + A.CODEID + ')'
+				                                                     ELSE A.CODEID + ' (' + A.CODENAME + ')' END
+				             ELSE A.CODEID + ' (' + B.DICTIONARYNAME + ')'
+				        END AS TEXT
+				        , A.CODEID AS VALUE
+				FROM    SF_CODE A
+				        LEFT JOIN SF_DICTIONARY B
+				            ON  A.DICTIONARYID = B.DICTIONARYID
+				            AND B.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				WHERE   A.CODECLASSID = 'LanguageType'
+				AND     A.VALIDSTATE = 'Valid'
+				ORDER BY A.DISPLAYSEQUENCE
+			]]>
+		</statement>
+	</query>
+	
+	<query id="CODE_MENUTYPE_COMBO" version="00001">
+		<statement>
+			<![CDATA[
+		        SELECT  CODEID TEXT, CODEID VALUE
+		        FROM    SF_CODE
+		        WHERE   CODECLASSID = 'MenuType'
+		        AND     VALIDSTATE = 'Valid'
+		        ORDER BY DISPLAYSEQUENCE
+			]]>
+		</statement>
+	</query>
+	
+	<query id="CODE_LANGUAGETYPE_GRID" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT  
+					CASE WHEN B.DICTIONARYNAME is Not Null THEN B.DICTIONARYNAME ELSE A.CODENAME END AS TITLE, 
+					A.CODEID AS FIELD
+				FROM    
+					SF_CODE A
+					LEFT JOIN SF_DICTIONARY B ON A.DICTIONARYID = B.DICTIONARYID AND LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+				WHERE   
+					A.CODECLASSID = 'LanguageType'
+				AND     
+					A.VALIDSTATE = 'Valid'
+				ORDER BY 
+					A.DISPLAYSEQUENCE
+			]]>
+		</statement>
+	</query>
+</list>

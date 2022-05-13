@@ -1,0 +1,758 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list>
+
+	<!--
+	설		명	: LOT 라벨 라벨ID와 쿼리ID 조회 
+	생	성	자	: 황유성
+	생	성	일	: 2020-06-15
+	수  정   이  력	: 
+	-->
+	<query id="GetLotLabelQuery" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetLotLabelQuery
+				-- Version : 00001
+
+				WITH LOT AS 
+				(
+					SELECT	LOTID
+						,	PRODUCTDEFID
+					FROM	SF_LOT
+					WHERE	LOTID = '$!{LOTID}'
+
+					UNION
+
+					SELECT	CONSUMABLELOTID	AS LOTID
+						,	CONSUMABLEDEFID	AS PRODUCTDEFID
+					FROM	SF_CONSUMABLELOT
+					WHERE	CONSUMABLELOTID = '$!{LOTID}'
+				)
+				SELECT		MAP.LABELID
+						,	LBL.QUERYID
+						,	LBL.QUERYVERSION
+				FROM		LOT					L
+				JOIN		SF_LABELMAP			MAP	ON	MAP.PRODUCTDEFID = L.PRODUCTDEFID
+				JOIN		SF_LABELDEFINITION	LBL	ON	LBL.LABELID = MAP.LABELID
+				AND			LBL.LABELTYPE = '$!{LABELTYPE}'
+				AND			LBL.VALIDSTATE = 'Valid'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 라벨의 쿼리ID 조회 
+	생	성	자	: 황유성
+	생	성	일	: 2020-06-15
+	수  정   이  력	: 
+	-->
+	<query id="GetLabelQuery" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetLabelQuery
+				-- Version : 00001
+
+				SELECT		LBL.LABELID
+						,	LBL.QUERYID
+						,	LBL.QUERYVERSION
+				FROM		SF_LABELDEFINITION	LBL
+				WHERE		LBL.LABELID = '$!{LABELID}'
+				AND			LBL.VALIDSTATE = 'Valid'
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	설		명	: CELL 라벨 발행정보 조회 
+	생	성	자	: 황유성
+	생	성	일	: 2020-06-26
+	수  정   이  력	: 
+	-->
+	<query id="GetCellLabel" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetCellLabel
+				-- Version : 00001
+						
+				SELECT
+							C.CELLID
+						,	CD.CONSUMABLEDEFID
+						,	CD.PARTNUMBER
+						,	CD.CONSUMABLEDEFNAME
+						,	CD.STANDARD
+						,	C.LOCATION
+						,	CG.CELLGROUPNAME
+				FROM		UL_CELL					C
+				LEFT JOIN	UL_CELLGROUP			CG	ON	CG.CELLGROUPID = C.CELLGROUPID
+				LEFT JOIN	SF_CONSUMABLEDEFINITION CD	ON	CD.CONSUMABLEDEFID = C.CONSUMABLEDEFID
+				WHERE		C.CELLID = '$!{CELLID}'
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	설		명	: 간반 라벨 발행정보 조회 
+	생	성	자	: 황유성
+	생	성	일	: 2020-07-07
+	수  정   이  력	: 
+	-->
+	<query id="GetKanbanLabel" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetKanbanLabel
+				-- Version : 00001
+						
+				SELECT
+							C.CELLID
+						,	C.LOCATION
+						,	C.QTY
+						,	C.CONSUMABLEDEFID
+						,	CD.PARTNUMBER
+						,	CD.CONSUMABLEDEFSHORTNAME AS CONSUMABLEDEFNAME
+				FROM		UL_CELL					C
+				JOIN		UL_CELLGROUP			CG	ON	CG.CELLGROUPID = C.CELLGROUPID
+				LEFT JOIN	SF_CONSUMABLEDEFINITION	CD	ON	CD.CONSUMABLEDEFID = C.CONSUMABLEDEFID
+				WHERE		CG.TYPE = 'KB'			-- 간반
+				AND			C.CELLID = '$!{CELLID}'
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	설		명	: LOT 라벨 발행정보 조회 
+	생	성	자	: 황유성
+	생	성	일	: 2020-06-15
+	수  정   이  력	: 
+	-->
+	<query id="GetLotLabel" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetLotLabel
+				-- Version : 00001
+						
+				WITH LOT AS 
+				(
+					SELECT	LOTID
+						,	PRODUCTDEFID
+					FROM	SF_LOT
+					WHERE	LOTID = '$!{LOTID}'
+
+					UNION
+
+					SELECT	CONSUMABLELOTID	AS LOTID
+						,	CONSUMABLEDEFID	AS PRODUCTDEFID
+					FROM	SF_CONSUMABLELOT
+					WHERE	CONSUMABLELOTID = '$!{LOTID}'
+				)
+				SELECT
+							L.PRODUCTDEFID
+						,	ISNULL(PD.PARTNUMBER, CD.PARTNUMBER)						AS PARTNUMBER
+						,	COALESCE(PTD.DICTIONARYNAME, PD.PRODUCTDEFTYPE
+								, CTD.DICTIONARYNAME, CD.CONSUMABLETYPE)				AS PRODUCTDEFTYPE
+						,	ISNULL(PD.PRODUCTDEFSHORTNAME, CD.CONSUMABLEDEFSHORTNAME)	AS PRODUCTDEFNAME
+						,	L.LOTID
+						,	ISNULL(CL.CONSUMABLELOTQTY, L2.QTY)				AS QTY
+						,	UN.UNIT											AS UNIT
+						,	ISNULL(T.DESCRIPTION, PD.TEAMID)				AS TEAM
+				FROM		LOT						L
+				LEFT JOIN   SF_LOT					L2	ON	L2.LOTID = L.LOTID
+				LEFT JOIN	SF_CONSUMABLELOT		CL	ON	CL.CONSUMABLELOTID = L.LOTID
+				LEFT JOIN	SF_PRODUCTDEFINITION	PD	ON	PD.PRODUCTDEFID = L.PRODUCTDEFID
+				LEFT JOIN	CT_UNITDEFINITION		UN	ON	UN.UNITID = PD.UNIT
+				LEFT JOIN	SF_CODE					PT	ON	PT.CODECLASSID = 'ProductDefType'
+														AND	PT.CODEID = PD.PRODUCTDEFTYPE
+				LEFT JOIN	SF_DICTIONARY			PTD	ON	PTD.DICTIONARYID = PT.DICTIONARYID
+														AND	PTD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN	CT_TEAM					T	ON	T.TEAMID = PD.TEAMID
+				LEFT JOIN	SF_CONSUMABLEDEFINITION	CD	ON	CD.CONSUMABLEDEFID = L.PRODUCTDEFID
+				LEFT JOIN	SF_CODE					CT	ON	CT.CODECLASSID = 'ConsumableType'
+														AND	CT.CODEID = CD.CONSUMABLETYPE
+				LEFT JOIN	SF_DICTIONARY			CTD	ON	CTD.DICTIONARYID = CT.DICTIONARYID
+														AND	CTD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	설		명	: 자재라벨 발행정보 조회
+	생	성	자	: 황유성
+	생	성	일	: 2020-06-15
+	수  정   이  력	: 2020-06-19 | JYLEE | CONSUMABLELOTID 추가
+	-->
+	<query id="GetConsumableLotLabel" version="00001">
+		<statement>
+			<![CDATA[
+				WITH GENEAL AS
+				(
+					SELECT
+							PARENTCONSUMABLELOTID
+						,	CONSUMABLELOTID
+						,	CONSUMABLELOTID AS FIRSTCONSUMABLELOTID
+						,	1	AS LVL
+					FROM	SF_CONSUMABLELOT
+					WHERE	CONSUMABLELOTID = '$!{CONSUMABLELOTID}'
+					
+					UNION ALL
+					
+					SELECT
+							CL.PARENTCONSUMABLELOTID
+						,	CL.CONSUMABLELOTID
+						,	G.FIRSTCONSUMABLELOTID
+						,	G.LVL + 1 AS LVL
+					FROM	SF_CONSUMABLELOT	CL
+					JOIN	GENEAL				G	ON	G.PARENTCONSUMABLELOTID = CL.CONSUMABLELOTID
+				)
+				, ROOT AS
+				(
+					SELECT	TOP 1
+							CONSUMABLELOTID
+						,	FIRSTCONSUMABLELOTID
+					FROM	GENEAL
+					ORDER BY LVL DESC
+				)
+				SELECT 
+							R.FIRSTCONSUMABLELOTID		AS CONSUMABLELOTID		-- 자재LOT
+						,	ORD.CUSTNAME										-- 업체명
+						,	ORD.PONO											-- 발주번호
+						,	CL.CONSUMABLEDEFID									-- 자재코드
+						,	CD.PARTNUMBER										-- 품번
+						,	CD.CONSUMABLEDEFSHORTNAME	AS CONSUMABLEDEFNAME	-- 품명
+						,	CD.STANDARD											-- 규격
+						,	FORMAT(FCL.CONSUMABLELOTQTY, #[['0.######']]#) + ' ' + ISNULL(CD.UNIT, '')	AS QTY	-- 수량/단위
+						,	''	AS MANUFACTUREDATE								-- 제조일자	-- NOTE : ERP에 없는 데이터
+						,	ORD.DELVDATE										-- 납품일자
+						,	RI.INSPECTIONDATE									-- 검사일자
+						,	RI.INSPECTOR										-- 검사자
+				FROM		ROOT						R
+				JOIN 		SF_CONSUMABLELOT			CL	ON	CL.CONSUMABLELOTID = R.CONSUMABLELOTID
+				JOIN		SF_CONSUMABLELOT			FCL	ON	FCL.CONSUMABLELOTID = R.FIRSTCONSUMABLELOTID
+				LEFT JOIN	SF_CONSUMABLEDEFINITION		CD	ON	CD.CONSUMABLEDEFID = CL.CONSUMABLEDEFID
+				LEFT JOIN	UL_ORDERDETAIL				ORD	ON	ORD.SEQ = CL.ORDERSEQ
+				LEFT JOIN	CT_RECEIVINGINSPECTION		RI	ON	RI.DELIVERYSEQUENCE = ORD.DELVSERL
+															AND	RI.DELIVERYCODE = ORD.DELVSEQ
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	프 로 그 램 명	: 공정관리 > 공정작업
+	설		명	: 제품라벨 발행정보 조회(Adsorber)
+	생	성	자	: 황유성
+	생	성	일	: 2020-06-30
+	수  정   이  력	: 
+	-->
+	<query id="GetProductLabelAdsorber" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetProductLabelAdsorber
+				-- Version : 00001
+	
+				WITH GENEAL AS
+				(
+					SELECT
+							PARENTCONSUMABLELOTID
+						,	CONSUMABLELOTID
+						,	CONSUMABLELOTID AS FIRSTCONSUMABLELOTID
+						,	1	AS LVL
+					FROM	SF_CONSUMABLELOT
+					WHERE	CONSUMABLELOTID = '$!{LOTID}'
+					
+					UNION ALL
+					
+					SELECT
+							CL.PARENTCONSUMABLELOTID
+						,	CL.CONSUMABLELOTID
+						,	G.FIRSTCONSUMABLELOTID
+						,	G.LVL + 1 AS LVL
+					FROM	SF_CONSUMABLELOT	CL
+					JOIN	GENEAL				G	ON	G.PARENTCONSUMABLELOTID = CL.CONSUMABLELOTID
+				)
+				, ROOT AS
+				(
+					SELECT	TOP 1
+							CONSUMABLELOTID
+						,	FIRSTCONSUMABLELOTID
+					FROM	GENEAL
+					ORDER BY LVL DESC
+				)
+				SELECT	FORMAT(L.TRACKOUTTIME, 'yyyy/MM')	AS DATE	
+				FROM	ROOT	R
+				JOIN	SF_LOT	L	ON L.LOTID = R.CONSUMABLELOTID
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	프 로 그 램 명	: 공정관리 > 공정작업
+	설		명	: 제품라벨 발행정보 조회(Compressor Unit)
+	생	성	자	: 황유성
+	생	성	일	: 2020-06-30
+	수  정   이  력	: 
+	-->
+	<query id="GetProductLabelCompressorUnit" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetProductLabelCompressorUnit
+				-- Version : 00001
+	
+				WITH GENEAL AS
+				(
+					SELECT
+							PARENTCONSUMABLELOTID
+						,	CONSUMABLELOTID
+						,	CONSUMABLELOTID AS FIRSTCONSUMABLELOTID
+						,	1	AS LVL
+					FROM	SF_CONSUMABLELOT
+					WHERE	CONSUMABLELOTID = '$!{LOTID}'
+					
+					UNION ALL
+					
+					SELECT
+							CL.PARENTCONSUMABLELOTID
+						,	CL.CONSUMABLELOTID
+						,	G.FIRSTCONSUMABLELOTID
+						,	G.LVL + 1 AS LVL
+					FROM	SF_CONSUMABLELOT	CL
+					JOIN	GENEAL				G	ON	G.PARENTCONSUMABLELOTID = CL.CONSUMABLELOTID
+				)
+				, ROOT AS
+				(
+					SELECT	TOP 1
+							CONSUMABLELOTID
+						,	FIRSTCONSUMABLELOTID
+					FROM	GENEAL
+					ORDER BY LVL DESC
+				)
+				SELECT	
+							R.FIRSTCONSUMABLELOTID					AS LOTID
+						,	ISNULL(MDD.DICTIONARYNAME, MD.CODENAME)	AS MODEL
+				FROM		ROOT					R
+				JOIN		SF_LOT					L	ON	L.LOTID = R.CONSUMABLELOTID
+				LEFT JOIN	SF_PRODUCTDEFINITION	PD	ON	PD.PRODUCTDEFID = L.PRODUCTDEFID
+				LEFT JOIN	SF_CODE					MD	ON	MD.CODECLASSID = 'ModelCode'
+														AND	MD.CODEID = PD.MODELID
+				LEFT JOIN	SF_DICTIONARY			MDD	ON	MDD.DICTIONARYID = MD.DICTIONARYID
+														AND	MDD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	프 로 그 램 명	: 공정관리 > 공정작업
+	설		명	: 제품라벨 발행정보 조회(Cryo Pump)
+	생	성	자	: 황유성
+	생	성	일	: 2020-06-30
+	수  정   이  력	: 
+	-->
+	<query id="GetProductLabelCryoPump" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetProductLabelCryoPump
+				-- Version : 00001
+	
+				WITH GENEAL AS
+				(
+					SELECT
+							PARENTCONSUMABLELOTID
+						,	CONSUMABLELOTID
+						,	CONSUMABLELOTID AS FIRSTCONSUMABLELOTID
+						,	1	AS LVL
+					FROM	SF_CONSUMABLELOT
+					WHERE	CONSUMABLELOTID = '$!{LOTID}'
+					
+					UNION ALL
+					
+					SELECT
+							CL.PARENTCONSUMABLELOTID
+						,	CL.CONSUMABLELOTID
+						,	G.FIRSTCONSUMABLELOTID
+						,	G.LVL + 1 AS LVL
+					FROM	SF_CONSUMABLELOT	CL
+					JOIN	GENEAL				G	ON	G.PARENTCONSUMABLELOTID = CL.CONSUMABLELOTID
+				)
+				, ROOT AS
+				(
+					SELECT	TOP 1
+							CONSUMABLELOTID
+						,	FIRSTCONSUMABLELOTID
+					FROM	GENEAL
+					ORDER BY LVL DESC
+				)
+				SELECT	
+							'CRYO-' + ISNULL(MDD.DICTIONARYNAME, MD.CODENAME)	AS MODEL
+						,	R.FIRSTCONSUMABLELOTID								AS LOTID	
+				FROM		ROOT					R
+				JOIN		SF_LOT					L	ON	L.LOTID = R.CONSUMABLELOTID
+				LEFT JOIN	SF_PRODUCTDEFINITION	PD	ON	PD.PRODUCTDEFID = L.PRODUCTDEFID
+				LEFT JOIN	SF_CODE					MD	ON	MD.CODECLASSID = 'ModelCode'
+														AND	MD.CODEID = PD.MODELID
+				LEFT JOIN	SF_DICTIONARY			MDD	ON	MDD.DICTIONARYID = MD.DICTIONARYID
+														AND	MDD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	프 로 그 램 명	: 공정관리 > 공정작업
+	설		명	: 제품라벨 발행정보 조회(MBS-C)
+	생	성	자	: 황유성
+	생	성	일	: 2020-06-30
+	수  정   이  력	: 
+	-->
+	<query id="GetProductLabelMbsC" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetProductLabelMbsC
+				-- Version : 00001
+	
+				SELECT 
+						CONSUMABLELOTID	AS LOTID
+					,	SUBPARTNUMBER
+				FROM	SF_CONSUMABLELOT
+				WHERE	CONSUMABLELOTID = '$!{LOTID}'
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	프 로 그 램 명	: 공정관리 > 공정작업
+	설		명	: 제품라벨 발행정보 조회(Refrigerator Unit)
+	생	성	자	: 황유성
+	생	성	일	: 2020-06-30
+	수  정   이  력	: 2021-05-13 정송은 냉동기 기준서2 앞에 띄어쓰기 추가
+	-->
+	<query id="GetProductLabelRefrigeratorUnit" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetProductLabelRefrigeratorUnit
+				-- Version : 00001
+	
+				WITH GENEAL AS
+				(
+					SELECT
+							PARENTCONSUMABLELOTID
+						,	CONSUMABLELOTID
+						,	CONSUMABLELOTID AS FIRSTCONSUMABLELOTID
+						,	1	AS LVL
+					FROM	SF_CONSUMABLELOT
+					WHERE	CONSUMABLELOTID = '$!{LOTID}'
+					
+					UNION ALL
+					
+					SELECT
+							CL.PARENTCONSUMABLELOTID
+						,	CL.CONSUMABLELOTID
+						,	G.FIRSTCONSUMABLELOTID
+						,	G.LVL + 1 AS LVL
+					FROM	SF_CONSUMABLELOT	CL
+					JOIN	GENEAL				G	ON	G.PARENTCONSUMABLELOTID = CL.CONSUMABLELOTID
+				)
+				, ROOT AS
+				(
+					SELECT	TOP 1
+							CONSUMABLELOTID
+						,	FIRSTCONSUMABLELOTID
+					FROM	GENEAL
+					ORDER BY LVL DESC
+				)
+				SELECT	
+							ISNULL(MDD.DICTIONARYNAME, MD.CODENAME)	AS MODEL
+						--,	R.FIRSTCONSUMABLELOTID					AS LOTID
+						  , REPLACE(R.FIRSTCONSUMABLELOTID, MSO.STANDARD2, ' '+STANDARD2) AS LOTID
+				FROM		ROOT					R
+				JOIN		SF_LOT					L	ON	L.LOTID = R.CONSUMABLELOTID
+				LEFT JOIN	SF_PRODUCTDEFINITION	PD	ON	PD.PRODUCTDEFID = L.PRODUCTDEFID
+				LEFT JOIN	SF_CODE					MD	ON	MD.CODECLASSID = 'ModelCode'
+														AND	MD.CODEID = PD.MODELID
+				LEFT JOIN	SF_DICTIONARY			MDD	ON	MDD.DICTIONARYID = MD.DICTIONARYID
+														AND	MDD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN   CT_MODELSTANDARDINFO	MSO ON 	L.PROCESSSEGMENTID = MSO.PROCESSSEGMENTID
+														AND	PD.MODELID = MSO.MODELID
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	프 로 그 램 명	: 공정관리 > 공정작업 > 출하라벨 발행
+	설		명	: 출하라벨 발행정보 조회(Compressor Model Name)
+	생	성	자	: 황유성
+	생	성	일	: 2020-06-29
+	수  정   이  력	: 
+	-->
+	<query id="GetShippingLabelCompressorModelName" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetShippingLabelCompressorModelName
+				-- Version : 00001
+	
+				WITH GENEAL AS
+				(
+					SELECT
+							PARENTCONSUMABLELOTID
+						,	CONSUMABLELOTID
+						,	CONSUMABLELOTID AS FIRSTCONSUMABLELOTID
+						,	1	AS LVL
+					FROM	SF_CONSUMABLELOT
+					WHERE	CONSUMABLELOTID = '$!{LOTID}'
+					
+					UNION ALL
+					
+					SELECT
+							CL.PARENTCONSUMABLELOTID
+						,	CL.CONSUMABLELOTID
+						,	G.FIRSTCONSUMABLELOTID
+						,	G.LVL + 1 AS LVL
+					FROM	SF_CONSUMABLELOT	CL
+					JOIN	GENEAL				G	ON	G.PARENTCONSUMABLELOTID = CL.CONSUMABLELOTID
+				)
+				, ROOT AS
+				(
+					SELECT	TOP 1
+							CONSUMABLELOTID
+						,	FIRSTCONSUMABLELOTID
+					FROM	GENEAL
+					ORDER BY LVL DESC
+				)
+				SELECT	
+							ISNULL(MDD.DICTIONARYNAME, MD.CODENAME)	AS MODEL
+						,	R.FIRSTCONSUMABLELOTID					AS LOTID	
+						,	CASE WHEN CHARINDEX('r', STANDARD) > 0 THEN SUBSTRING(STANDARD, 1, CHARINDEX('r', STANDARD) - 1)
+								ELSE STANDARD
+							END AS STANDARD
+				FROM		ROOT					R
+				JOIN		SF_LOT					L	ON	L.LOTID = R.CONSUMABLELOTID
+				LEFT JOIN	SF_PRODUCTDEFINITION	PD	ON	PD.PRODUCTDEFID = L.PRODUCTDEFID
+				LEFT JOIN	SF_CODE					MD	ON	MD.CODECLASSID = 'ModelCode'
+														AND	MD.CODEID = PD.MODELID
+				LEFT JOIN	SF_DICTIONARY			MDD	ON	MDD.DICTIONARYID = MD.DICTIONARYID
+														AND	MDD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	프 로 그 램 명	: 공정관리 > 공정작업 > 출하라벨 발행
+	설		명	: 출하라벨 발행정보 조회(Passing Compressor)
+	생	성	자	: 황유성
+	생	성	일	: 2020-06-29
+	수  정   이  력	: 
+	-->
+	<query id="GetShippingLabelPassingCompressor" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetShippingLabelPassingCompressor
+				-- Version : 00001
+	
+				WITH GENEAL AS
+				(
+					SELECT
+							PARENTCONSUMABLELOTID
+						,	CONSUMABLELOTID
+						,	CONSUMABLELOTID AS FIRSTCONSUMABLELOTID
+						,	1	AS LVL
+					FROM	SF_CONSUMABLELOT
+					WHERE	CONSUMABLELOTID = '$!{LOTID}'
+					
+					UNION ALL
+					
+					SELECT
+							CL.PARENTCONSUMABLELOTID
+						,	CL.CONSUMABLELOTID
+						,	G.FIRSTCONSUMABLELOTID
+						,	G.LVL + 1 AS LVL
+					FROM	SF_CONSUMABLELOT	CL
+					JOIN	GENEAL				G	ON	G.PARENTCONSUMABLELOTID = CL.CONSUMABLELOTID
+				)
+				, ROOT AS
+				(
+					SELECT	TOP 1
+							CONSUMABLELOTID
+						,	FIRSTCONSUMABLELOTID
+					FROM	GENEAL
+					ORDER BY LVL DESC
+				)
+				SELECT	
+							ISNULL(MDD.DICTIONARYNAME, MD.CODENAME)	AS MODEL
+						,	RT.FIRSTCONSUMABLELOTID					AS LOTID
+						,	CASE WHEN CHARINDEX('r', PD.STANDARD) > 0 THEN SUBSTRING(PD.STANDARD, 1, CHARINDEX('r', PD.STANDARD) - 1)
+								ELSE PD.STANDARD
+							END AS STANDARD
+						,	FORMAT(R.WORKENDTIME, 'yy.MM.dd')	AS CHECKDATE
+						,	USR.NICKNAME						AS CHECKUSER
+				FROM		ROOT					RT
+				JOIN		SF_LOT					L	ON	L.LOTID = RT.CONSUMABLELOTID
+				LEFT JOIN	SF_PRODUCTDEFINITION	PD	ON	PD.PRODUCTDEFID = L.PRODUCTDEFID
+				LEFT JOIN	SF_CODE					MD	ON	MD.CODECLASSID = 'ModelCode'
+														AND	MD.CODEID = PD.MODELID
+				LEFT JOIN	SF_DICTIONARY			MDD	ON	MDD.DICTIONARYID = MD.DICTIONARYID
+														AND	MDD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN	UL_SUBPROCESSWORKRESULT	R	ON	R.LOTID = L.LOTID
+														AND	R.SUBPROCESSSEGMENTID = 'SGS056'	-- 최종 검사 공정
+				LEFT JOIN	SF_USER					USR	ON	USR.USERID = R.CHARGEUSERID
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	프 로 그 램 명	: 공정관리 > 공정작업 > 출하라벨 발행
+	설		명	: 출하라벨 발행정보 조회(Passing Pump)
+	생	성	자	: 황유성
+	생	성	일	: 2020-06-29
+	수  정   이  력	: 2021-05-13  정송은 자재 LOT 번호 UPPER 처리
+				  2021-05-18 정송은 STANDARD에 r 포함 시 뒷 번호 -1 처리
+				  2021-05-27 정송은 STANDARD r 포함 상관 없이 뒷 번호 -1 처리 되도록 수정
+	-->
+	<query id="GetShippingLabelPassingPump" version="00001">
+		<statement>
+			<![CDATA[
+                --
+                -- Id : GetShippingLabelPassingPump
+                -- Version : 00001
+    
+                WITH GENEAL AS
+                (
+                    SELECT
+                            PARENTCONSUMABLELOTID
+                        ,   CONSUMABLELOTID
+                        ,   CONSUMABLELOTID AS FIRSTCONSUMABLELOTID
+                        ,   1   AS LVL
+                    FROM    SF_CONSUMABLELOT
+                    WHERE   CONSUMABLELOTID = '$!{LOTID}'
+                    
+                    UNION ALL
+                    
+                    SELECT
+                            CL.PARENTCONSUMABLELOTID
+                        ,   CL.CONSUMABLELOTID
+                        ,   G.FIRSTCONSUMABLELOTID
+                        ,   G.LVL + 1 AS LVL
+                    FROM    SF_CONSUMABLELOT    CL
+                    JOIN    GENEAL              G   ON  G.PARENTCONSUMABLELOTID = CL.CONSUMABLELOTID
+                )
+                , ROOT AS
+                (
+                    SELECT  TOP 1
+                            CONSUMABLELOTID
+                        ,   FIRSTCONSUMABLELOTID
+                    FROM    GENEAL
+                    ORDER BY LVL DESC
+                )
+                SELECT  
+                            'CRYO-' + ISNULL(MDD.DICTIONARYNAME, MD.CODENAME) AS MODEL
+                        ,   RT.FIRSTCONSUMABLELOTID                           AS LOTID    
+                       -- ,   CASE WHEN CHARINDEX('r', PD.STANDARD) > 0 THEN SUBSTRING(PD.STANDARD, 1, CHARINDEX('r', PD.STANDARD) - 1)
+                       --         ELSE PD.STANDARD
+                       --     END AS STANDARD
+                      	,	CASE WHEN LEN(PD.STANDARD) = 16 THEN SUBSTRING(PD.STANDARD, 1, CHARINDEX('r', PD.STANDARD) - 3) + 
+									FORMAT(RIGHT(SUBSTRING(PD.STANDARD, 1, CHARINDEX('r', PD.STANDARD) - 1), 2) -1, '00')
+								 WHEN LEN(PD.STANDARD) = 13 THEN SUBSTRING(PD.STANDARD, 1, CHARINDEX('-', PD.STANDARD, CHARINDEX('-', PD.STANDARD) + 1)) +
+									 FORMAT(SUBSTRING(PD.STANDARD, CHARINDEX('-', PD.STANDARD, CHARINDEX('-', PD.STANDARD) + 1) + 1, 2) -1 ,'00')
+								 ELSE STANDARD END AS STANDARD
+                        ,   FORMAT(R.WORKENDTIME, 'yy.MM.dd')  AS CHECKDATE
+                        ,   USR.NICKNAME                       AS CHECKUSER
+                        ,   UPPER(X.REFLOTID) AS REFLOTID
+                FROM        ROOT                    RT
+                JOIN        SF_LOT                  L   ON  L.LOTID = RT.CONSUMABLELOTID
+                LEFT JOIN   SF_PRODUCTDEFINITION    PD  ON  PD.PRODUCTDEFID = L.PRODUCTDEFID
+                LEFT JOIN   SF_CODE                 MD  ON  MD.CODECLASSID = 'ModelCode'
+                                                        AND MD.CODEID = PD.MODELID
+                LEFT JOIN   SF_DICTIONARY           MDD ON  MDD.DICTIONARYID = MD.DICTIONARYID
+                                                        AND MDD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+                LEFT JOIN   UL_SUBPROCESSWORKRESULT R   ON  R.LOTID = L.LOTID
+                                                        AND R.SUBPROCESSSEGMENTID = 'SGS056'    -- 최종 검사 공정
+                LEFT JOIN   SF_USER                 USR ON  USR.USERID = R.CHARGEUSERID
+                LEFT JOIN   (
+                                SELECT  STRING_AGG( CASE WHEN PDC.PRODUCTDEFID IS NULL THEN NULL 
+                                                        ELSE SUBSTRING(CML.MATERIALLOTID, 1, 3)
+                                                            + ' ' + SUBSTRING(CML.MATERIALLOTID, 4, 4)
+                                                            + ' ' + SUBSTRING(CML.MATERIALLOTID, 8, LEN(CML.MATERIALLOTID) - 7)
+                                                    END
+                                                    , ' / ')  AS REFLOTID                       -- 냉각기 LOT ID
+				                FROM    ROOT                    RT2
+				                JOIN    SF_CONSUMEMATERIALLOT   CML ON  CML.LOTID = RT2.CONSUMABLELOTID                                
+				                JOIN    SF_CONSUMABLEDEFINITION CD  ON  CD.CONSUMABLEDEFID = CML.MATERIALDEFID
+				                                                    AND CD.CONSUMABLETYPE = 'HalfProduct'   -- 반제품
+				                JOIN    SF_PRODUCTDEFINITION    PDC ON  PDC.PRODUCTDEFID = CD.CONSUMABLEDEFID
+				                                                    AND PDC.TEAMID = 'T03'                  -- 냉동기팀
+				            ) X ON 1 = 1
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 공정관리 > 공정작업 > 출하라벨 발행
+	설		명	: 출하라벨 발행정보 조회(Pump Model Name)
+	생	성	자	: 황유성
+	생	성	일	: 2020-06-29
+	수  정   이  력	: 2021-05-13 정송은 STANDARD R 있을 때 뒷자리 1 빼줌
+				  2021-05-27 정송은 STANDARD R 여부 상관없이 뒷자리 -1 빠지도록 수정
+	-->
+	<query id="GetShippingLabelPumpModelName" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetShippingLabelPumpModelName
+				-- Version : 00001
+	
+				WITH GENEAL AS
+				(
+					SELECT
+							PARENTCONSUMABLELOTID
+						,	CONSUMABLELOTID
+						,	CONSUMABLELOTID AS FIRSTCONSUMABLELOTID
+						,	1	AS LVL
+					FROM	SF_CONSUMABLELOT
+					WHERE	CONSUMABLELOTID = '$!{LOTID}'
+					
+					UNION ALL
+					
+					SELECT
+							CL.PARENTCONSUMABLELOTID
+						,	CL.CONSUMABLELOTID
+						,	G.FIRSTCONSUMABLELOTID
+						,	G.LVL + 1 AS LVL
+					FROM	SF_CONSUMABLELOT	CL
+					JOIN	GENEAL				G	ON	G.PARENTCONSUMABLELOTID = CL.CONSUMABLELOTID
+				)
+				, ROOT AS
+				(
+					SELECT	TOP 1
+							CONSUMABLELOTID
+						,	FIRSTCONSUMABLELOTID
+					FROM	GENEAL
+					ORDER BY LVL DESC
+				)
+				SELECT	
+							'CRYO-' + ISNULL(MDD.DICTIONARYNAME, MD.CODENAME)	AS MODEL
+						,	R.FIRSTCONSUMABLELOTID								AS LOTID	
+						--,	CASE WHEN CHARINDEX('r', STANDARD) > 0 THEN SUBSTRING(STANDARD, 1, CHARINDEX('r', STANDARD) - 1)
+						--		ELSE STANDARD
+						--	END AS STANDARD
+						,	CASE WHEN LEN(PD.STANDARD) = 16 THEN SUBSTRING(PD.STANDARD, 1, CHARINDEX('r', PD.STANDARD) - 3) + 
+									FORMAT(RIGHT(SUBSTRING(PD.STANDARD, 1, CHARINDEX('r', PD.STANDARD) - 1), 2) -1, '00')
+								 WHEN LEN(PD.STANDARD) = 13 THEN SUBSTRING(PD.STANDARD, 1, CHARINDEX('-', PD.STANDARD, CHARINDEX('-', PD.STANDARD) + 1)) +
+									 FORMAT(SUBSTRING(PD.STANDARD, CHARINDEX('-', PD.STANDARD, CHARINDEX('-', PD.STANDARD) + 1) + 1, 2) -1 ,'00')
+								 ELSE STANDARD END AS STANDARD
+				FROM		ROOT					R
+				JOIN		SF_LOT					L	ON	L.LOTID = R.CONSUMABLELOTID
+				LEFT JOIN	SF_PRODUCTDEFINITION	PD	ON	PD.PRODUCTDEFID = L.PRODUCTDEFID
+				LEFT JOIN	SF_CODE					MD	ON	MD.CODECLASSID = 'ModelCode'
+														AND	MD.CODEID = PD.MODELID
+				LEFT JOIN	SF_DICTIONARY			MDD	ON	MDD.DICTIONARYID = MD.DICTIONARYID
+														AND	MDD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+			]]>
+		</statement>
+	</query>
+	
+</list>

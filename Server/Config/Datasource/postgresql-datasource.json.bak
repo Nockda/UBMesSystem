@@ -1,0 +1,22 @@
+{
+	"usable": true,
+	"usepool": true,
+	"config": "database.config.postgresql",
+	"properties": {
+		"DriverClassName": "org.postgresql.Driver",
+		"Url": "jdbc:postgresql://172.16.4.126:5432/mes?currentSchema=mesmgr&targetServerType=master",
+		"Username": "experdba",
+		"Password": "experdba",
+		"MaxTotal": 50,
+		"MaxIdle": 50,
+		"MinIdle": 50,
+		"InitialSize": 50,
+		"MaxWaitMillis": 10000,
+		"TestWhileIdle": true,
+		"ValidationQuery": "select 1",
+		"ValidationQueryTimeout": 10,
+		"TestOnBorrow": true,
+		"DefaultAutoCommit": false,
+		"EnableAutoCommitOnReturn": false
+	}
+}

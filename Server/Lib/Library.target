@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><?pde version="3.8"?><target name="SmartFrame.Plugin" sequenceNumber="53">
+<locations>
+<location path="${workspace_loc}/Lib/System" type="Directory"/>
+	<location path="${workspace_loc}/Lib/Target/factory" type="Directory"/>
+	<location path="${workspace_loc}/Lib/Target/common" type="Directory"/>
+</locations>
+<launcherArgs>
+<vmArgs>-Declipse.ignoreApp=true &#13;
+-Dosgi.noShutdown=true &#13;
+-Dsf.server.home="${workspace_loc}"
+&#13;
+-Dsf.server.config="${workspace_loc}/Config"&#13;
+-Dsf.server.mode=DEV&#13;
+-Dsf.server.name=SmartFrame&#13;
+-Dsf.server.sequence=2.1&#13;
+-Dsf.server.module.manage=none
+&#13;
+-Duser.language=ko&#13;
+
+-Duser.country=KR&#13;
+-Djava.io.tmpdir="${workspace_loc}/Tmp"&#13;
+
+-Djava.net.preferIPv4Stack=true&#13;
+
+-Djava.library.path="${workspace_loc}/Lib/Other"</vmArgs>
+	<programArgs>-Xms=4096m &#13;
+-Xmx4096m &#13;
+-XX:+UseG1GC</programArgs>
+</launcherArgs>
+</target>

@@ -1,0 +1,4536 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list>
+	<!--
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 조립
+	설		명	: 작업지시정보 조회
+	작	성	자	: JYLEE
+	작	성	일	: 2020-05-17
+	주요 변경 로그	:
+	-->
+	<query id="SelectWorkOrderInfo" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id = SelectWorkOrderInfo
+				-- Version = 00001
+				SELECT
+				  W.WORKORDERID AS WORKORDERID -- 작업지시번호
+				, W.PRODUCTID AS PRODUCTID	   -- 품목
+				, W.MODELID AS MODELID         -- 기종
+				, W.ORDERQTY AS ORDERQTY       -- 지시수량
+				, W.ORDERDATE AS ORDERDATE     -- 지시일자
+				, W.PLANDATE AS PLANDATE       -- 기획일자
+				, W.DESCRIPTION AS DESCRIPTION -- 비고
+				FROM UL_TEMP_WORKORDER2 W				
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 조립
+	설		명	: 실적입력정보 조회
+	작	성	자	: JYLEE
+	작	성	일	: 2020-05-17
+	주요 변경 로그	:
+	-->
+	<query id="SelectResultInfo" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id = SelectResultInfo
+				-- Version = 00001
+				SELECT 
+						T.ITEMID   AS ITEM    -- 실적항목
+					,	T.UNIT	   AS UNIT    -- 단위
+					,	T.RESULT   AS RESULT  -- 결과
+					,	T.SPECMAX  AS SPECMAX -- 스팩MAX
+					,	T.SPECMIN  AS SPECMIN -- 스팩MIN
+				FROM UL_TEMP_INSPITEM T			
+			]]>
+		</statement>
+	</query>
+			<!--
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 조립
+	설		명	: 조립 - 세부공정정보
+	작	성	자	: JYLEE
+	작	성	일	: 2020-05-17
+	주요 변경 로그	:
+	-->
+	<query id="SelectAssemblyInfo" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id = "SelectAssemblyInfo"
+				-- Version = 00001
+				SELECT 
+					UL.SUBPROCESS AS SUBPROCESS    -- SUB공정
+				,	UL.USERNAME AS USERNAME		   -- 담당자
+				,	UL.WORKER AS WORKER			   -- 작업자
+				,	UL.STARTDATE AS STARTDATE      -- 시작일시
+				,	UL.ENDDATE AS ENDDATE          -- 종료일시
+				,	UL.LEADTIME AS LEADTIME        -- 리드타임
+				,	UL.EQUIPMENT AS EQUIPMENT      -- 설비명
+				,	UL.WORKHOUR AS WORKHOUR        -- 가동시간
+				,	UL.COMPLETION AS COMPLETION    -- 완료
+				,	UL.DESCRIPTION AS DESCRIPTION  -- 특이사항
+				FROM UL_TEMP_ASSEMBLY UL		
+			]]>
+		</statement>
+	</query>
+	<!--
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 조립
+	설		명	: 조립 - 자재정보
+	작	성	자	: JYLEE
+	작	성	일	: 2020-05-17
+	주요 변경 로그	:
+	-->
+	<query id="SelectMaterInfo" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id = "SelectMaterInfo"
+				-- Version = 00001
+					SELECT
+					  UL.MATERCODE AS MATERCODE	     -- 자재품번
+						, UL.MATERNAME AS MATERNAME	     -- 자재품명
+						, UL.LOTNO AS LOTNO			     -- LOT No
+						, UL.PRODUCT AS PRODUCT		     -- 양품
+						, UL.DISPRODUCT AS DISPRODUCT    -- 불량
+						, UL.UNIT AS UNIT                -- 단위
+						, UL.DESCRIPTION AS DESCRIPTION 
+					FROM UL_TEMP_MATER UL	
+			]]>
+		</statement>
+	</query>
+		<!--
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 조립
+	설		명	: 조립 - 자재정보
+	작	성	자	: JYLEE
+	작	성	일	: 2020-05-17
+	주요 변경 로그	:
+	-->
+	<query id="SelectInputMaterList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id = "id="SelectInputMaterList""
+				-- Version = 00001
+				SELECT
+					UL.CONSUMABLELOTID AS LOTNO,
+					UL.CONSUMABLEDEFID AS NAME,
+					UL.CONSUMABLELOTQTY AS QTY
+				FROM SF_CONSUMABLELOT UL
+				WHERE 1=1
+					#if ("$!{P_LOT}" != "" && "$!{P_LOT}" != "*")	
+						AND UL.CONSUMABLELOTID = '$!{P_LOT}'
+					#end
+			]]>
+		</statement>
+	</query>
+	<!--
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 무지시공정
+	설		명	: 무지시 공정 리스트 조회
+	작	성	자	: JYLEE
+	작	성	일	: 2020-05-19
+	주요 변경 로그	:
+	-->
+	<query id="GetNoOrderProcessList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id = "id="GetNoOrderProcessList""
+				-- Version = 00001
+				
+				SELECT
+				SF.PROCESSSEGMENTID AS PROCESSID											-- 공정ID
+				,(
+					CASE 
+						WHEN '$!{P_LANGUAGETYPE}' = 'ko-KR' THEN SF.PROCESSSEGMENTNAMEKOR
+						WHEN '$!{P_LANGUAGETYPE}' = 'en-US' THEN SF.PROCESSSEGMENTNAMEENG
+						WHEN '$!{P_LANGUAGETYPE}' = 'zh-CN' THEN SF.PROCESSSEGMENTNAMEJPN
+					END
+					) AS PROCESSNAME                                                      -- 공정명
+				, UC.USERNAME AS CREATOR												  -- 생성자
+				, SF.CREATEDTIME AS CREATEDTIME											  -- 생성일
+				, UM.USERNAME AS MODIFIER												  -- 수정자
+				, SF.MODIFIEDTIME AS MODIFIEDTIME										  --수정일
+				FROM SF_PROCESSSEGMENT  SF
+					LEFT JOIN SF_USER UC ON UC.USERID = SF.CREATOR
+					LEFT JOIN SF_USER UM ON UM.USERID = SF.MODIFIER
+				WHERE PROCESSSEGMENTTYPE = 'NO';
+			]]>
+		</statement>
+	</query>
+	<!--
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 조립
+	설		명	: 세부공정 실적등록되지 않은 건 조회
+	작	성	자	: yshwang
+	작	성	일	: 2020-05-28
+	주요 변경 로그	:
+	-->
+	<query id="GetMissingSubProcessResult" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id = GetMissingSubProcessResult
+				-- Version = 00001
+				
+				SELECT		COUNT(*) AS RESULTNOTFOUND
+				FROM		SF_LOT					L
+				JOIN		SF_PRODUCTDEFINITION	PD	ON	PD.PRODUCTDEFID = L.PRODUCTDEFID
+														AND	PD.PRODUCTDEFVERSION = L.PRODUCTDEFVERSION
+				JOIN		CT_SUBSEGMENTSPEC		SP	ON	SP.SPECDEFID = PD.SPECDEFID
+														AND	SP.VALIDSTATE = 'Valid'
+				LEFT JOIN	UL_SUBPROCESSWORKRESULT	SR	ON	SR.LOTID = L.LOTID
+														AND	SR.SUBPROCESSSEGMENTID = SP.SUBPROCESSSEGMENTID
+														AND	SR.ISFINISHED = 'Y'
+				WHERE		L.LOTID = '$!{LOTID}'
+				AND			SR.LOTID IS NULL
+			]]>
+		</statement>
+	</query>
+	<!--
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 조립
+	설		명	: 세부공정의 검사실적 등록되지 않은 건 조회
+	작	성	자	: yshwang
+	작	성	일	: 2020-05-28
+	주요 변경 로그	:
+	-->
+	<query id="GetMissingSubProcessResultDetail" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id = GetMissingSubProcessResultDetail
+				-- Version = 00001
+				
+				WITH SEQUENCES AS (
+					SELECT 	1 AS SEQ
+					UNION ALL
+					SELECT 	SEQ + 1 
+					FROM 	SEQUENCES 
+					WHERE 	SEQ < $!{CREATEDQTY} 
+				)
+				SELECT		COUNT(*) AS RESULTNOTFOUND
+				FROM		SF_LOT							L
+				JOIN		SF_PRODUCTDEFINITION			PD	ON	PD.PRODUCTDEFID = L.PRODUCTDEFID
+																AND	PD.PRODUCTDEFVERSION = L.PRODUCTDEFVERSION
+				JOIN		CT_SUBSEGMENTSPEC				SP	ON	SP.SPECDEFID = PD.SPECDEFID
+																AND SP.SPECDEFIDVERSION = '$!{SPECDEFIDVERSION}'
+																AND	SP.VALIDSTATE = 'Valid'
+				JOIN		CT_SUBSEGMENTSPECDETAIL			SPD	ON	SPD.SPECDEFID = SP.SPECDEFID
+																AND	SPD.SPECSEQUENCE = SP.SPECSEQUENCE
+																AND SPD.SPECDEFIDVERSION = '$!{SPECDEFIDVERSION}'
+																AND	SPD.VALIDSTATE = 'Valid'
+				JOIN		CT_PARAMETERDEFINITION			PA	ON	PA.PARAMETERID = SPD.PARAMETERID
+				LEFT JOIN	SEQUENCES						S	ON	ISNULL(SPD.ISMEASURE, 'N') = 'Y'
+				LEFT JOIN	UL_SUBPROCESSWORKRESULT			SR	ON	SR.LOTID = L.LOTID
+																AND	SR.SUBPROCESSSEGMENTID = SP.SUBPROCESSSEGMENTID
+				LEFT JOIN	UL_SUBPROCESSWORKRESULTDETAIL	SRD	ON	SRD.WORKRESULTHISTKEY = SR.TXNHISTKEY
+																AND	SRD.PARAMETERID = SPD.PARAMETERID
+																AND ((ISNULL(SPD.ISMEASURE, 'N') = 'Y' AND SRD.SEQ = S.SEQ)
+																	OR (ISNULL(SPD.ISMEASURE, 'N') <> 'Y' AND SRD.SEQ = 0))
+				WHERE		L.LOTID = '$!{LOTID}'
+				AND			SP.SUBPROCESSSEGMENTID = '$!{SUBPROCESSSEGMENTID}'
+				AND			SRD.PARAMETERID IS NULL
+				AND			ISNULL(PA.ISNOTREQUIRED, 'N') <> 'Y'
+				OPTION (MAXRECURSION 10000)
+			]]>
+		</statement>
+	</query>	
+
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 가공	
+	설		명	: 작업시작(팝업) - 설비정보 조회	
+	작	성	자	: JYLEE	
+	작	성	일	: 2020-05-25	
+	주요 변경 로그	:	
+	-->	
+	<query id="GetProcessEquipPopup" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = GetProcessEquipPopup	
+				-- Version = 00001	
+
+				SELECT 	
+					 		EQ.EQUIPMENTID																-- 설비ID	
+					  	,	ISNULL(EQD.DICTIONARYNAME, EQ.EQUIPMENTNAME)		AS EQUIPMENTNAME		-- 설비명	
+						,	ISNULL(ECD.DICTIONARYNAME, EQC.EQUIPMENTCLASSNAME)	AS EQUIPMENTCLASSNAME	-- 설비그룹명
+				FROM		SF_EQUIPMENT		EQ
+				LEFT JOIN	SF_DICTIONARY		EQD	ON	EQD.DICTIONARYID = EQ.DICTIONARYID
+													AND	EQD.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+				LEFT JOIN	SF_EQUIPMENTCLASS	EQC	ON	EQC.EQUIPMENTCLASSID = EQ.EQUIPMENTCLASSID
+				LEFT JOIN	SF_DICTIONARY		ECD	ON	ECD.DICTIONARYID = EQC.DICTIONARYID
+													AND	ECD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE		1 = 1
+				AND			EQ.VALIDSTATE = 'Valid'
+				AND			EQ.EQUIPMENTTYPE = 'M01'	-- 가공설비
+				#if ("$!{P_AREAID}" != "" && "$!{P_AREAID}" != "*")	
+				AND			EQ.AREAID = '$!{P_AREAID}'
+				#end
+				#if ("$!{EQUIPMENTID}" != "")	
+				AND			EQ.EQUIPMENTID = '$!{EQUIPMENTID}'
+				#end
+				ORDER BY	EQ.EQUIPMENTCLASSID, EQ.EQUIPMENTID
+			]]>	
+		</statement>	
+	</query>	
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 가공	
+	설		명	: 작업시작(팝업) - 작업자 조회	
+	작	성	자	: JYLEE	
+	작	성	일	: 2020-05-25	
+	주요 변경 로그	:	
+	-->	
+	<query id="GetProcessUserPopup" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = "id="GetProcessUserPopup""	
+				-- Version = 00001	
+					
+					SELECT 	
+						US.USERID AS USERID       		-- 사용자ID	
+						,	US.USERNAME AS USERNAME     -- 사용자명
+						,	'N' AS ISCHARGE
+					FROM SF_USER US	
+						WHERE VALIDSTATE = 'Valid'	
+			]]>	
+		</statement>	
+	</query>	
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 공통	
+	설		명	: 자재투입(팝업)
+				필요수량, 가투입 수량, 재고수량 등 을 감안한 투입수량 및 자재 LOT 정보를 조회한다.
+	작	성	자	: yshwang	
+	작	성	일	: 2020-06-05	
+	주요 변경 로그	:	
+	-->	
+	<query id="SearchMaterial" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = SearchMaterial
+				-- Version = 00001	
+				WITH TEMPINPUT AS 
+				(
+					SELECT 	ISNULL(SUM(CONSUMEDQTY), 0) AS CONSUMEDQTY 		-- 가투입수량
+					FROM	SF_CONSUMEMATERIALLOTTEMP
+					WHERE	MATERIALLOTID = '$!{CONSUMABLELOTID}'
+				)
+				SELECT	
+							MAX(CL.CONSUMABLEDEFID)										AS	CONSUMABLEDEFID
+						,	MAX(CD.PARTNUMBER) 											AS 	PARTNUMBER
+						,	MAX(CD.CONSUMABLEDEFNAME)									AS	CONSUMABLEDEFNAME
+						,	CL.CONSUMABLELOTID
+						,	ISNULL(MAX(CTD.DICTIONARYNAME), MAX(CD.CONSUMABLETYPE)) 	AS CONSUMABLETYPE
+						,	MAX(CL.CONSUMABLELOTQTY) - ISNULL(MAX(T.CONSUMEDQTY), 0)	AS CONSUMABLELOTQTY
+						,	CASE WHEN MAX(BOM.CONSUMABLEDEFID) IS NOT NULL THEN 'Y' ELSE 'N' END AS ISINBOM						-- BOM 등록여부
+						,	CASE WHEN MAX(BOM.CONSUMABLEDEFID) IS NOT NULL														-- 자재 투입수량
+							THEN 																								-- BOM 등록 자재 : 투입수량 = MAX(MIN(필요수량 - 기투입수량, 자재재고), 0)
+								CASE	WHEN (MAX(BOM.QTY) / MAX(WO.ORDERQTY)) * MAX(L.CREATEDQTY) 								-- BOM 미등록 자재 : 투입수량 = 0
+												- SUM(CASE WHEN CML.CONSUMABLELOTID IS NOT NULL THEN CM.GOODQTY ELSE 0 END)
+												< MAX(CL.CONSUMABLELOTQTY) - ISNULL(MAX(T.CONSUMEDQTY), 0)
+								THEN 
+									CASE WHEN (MAX(BOM.QTY) / MAX(WO.ORDERQTY)) * MAX(L.CREATEDQTY) 
+												- SUM(CASE WHEN CML.CONSUMABLELOTID IS NOT NULL THEN CM.GOODQTY ELSE 0 END) 
+												< 0 
+									THEN 0
+									ELSE
+										(MAX(BOM.QTY) / MAX(WO.ORDERQTY)) * MAX(L.CREATEDQTY) 
+											- SUM(CASE WHEN CML.CONSUMABLELOTID IS NOT NULL THEN CM.GOODQTY ELSE 0 END)
+									END
+								ELSE 
+									MAX(CL.CONSUMABLELOTQTY) - ISNULL(MAX(T.CONSUMEDQTY), 0)
+								END
+							ELSE	0
+							END 							AS INPUTQTY
+						,	ISNULL(MAX(CD.ISSERIAL), 'N')	AS ISSERIAL
+				FROM		SF_CONSUMABLELOT			CL
+				JOIN		SF_LOT						L	ON	L.LOTID = '$!{LOTID}'
+				LEFT JOIN	TEMPINPUT					T	ON	1 = 1
+				LEFT JOIN	SF_CONSUMABLEDEFINITION		CD	ON	CD.CONSUMABLEDEFID = CL.CONSUMABLEDEFID
+				LEFT JOIN	SF_WORKORDER				WO	ON	WO.WORKORDERID = L.WORKORDERID
+				LEFT JOIN	SF_WORKORDERBOM				BOM	ON	BOM.WORKORDERID = WO.WORKORDERID
+															AND	BOM.CONSUMABLEDEFID = CL.CONSUMABLEDEFID
+				LEFT JOIN	SF_CONSUMEMATERIALLOTTEMP	CM	ON	CM.LOTID = L.LOTID
+				LEFT JOIN	SF_CONSUMABLELOT			CML	ON	CML.CONSUMABLELOTID = CM.MATERIALLOTID
+															AND	CML.CONSUMABLEDEFID = CL.CONSUMABLEDEFID
+				LEFT JOIN	SF_CODE						CT	ON	CT.CODECLASSID = 'ConsumableType'
+															AND	CT.CODEID = CD.CONSUMABLETYPE
+				LEFT JOIN	SF_DICTIONARY				CTD	ON	CTD.DICTIONARYID = CT.DICTIONARYID
+															AND	CTD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE 		1 = 1
+				AND			CL.CONSUMABLELOTID = '$!{CONSUMABLELOTID}'
+				GROUP BY	CL.CONSUMABLELOTID
+			]]>	
+		</statement>	
+	</query>	
+	<!--	
+	프 로 그 램 명	: 공정관리 -공정등록 - 가공 	
+	설		명	: 가공 작업지시 전체 리스트	
+	작	성	자	: jylee	
+	작	성	일	: 2020-05-22	
+	주요 변경 로그	: 2020-05-27 JYLEE | 쿼리 수정	
+	-->	
+	<query id="GetProcessedWorkOrderList" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = GetProcessedWorkOrderList	
+				-- Version = 00001	
+					
+				SELECT 
+							WO.WORKORDERID
+						,	MAX(WO.WORKORDERDATE) 										AS WORKORDERDATE
+						,	MAX(PRD.PARTNUMBER)											AS PARTNUMBER
+						,	MAX(PRD.PRODUCTDEFNAME)										AS PRODUCTDEFNAME
+						,	MAX(ISNULL(PRSD.DICTIONARYNAME, PRS.PROCESSSEGMENTNAME))	AS PROCESSSEGMENTNAME
+						,	MAX(ISNULL(ARD.DICTIONARYNAME, AR.AREANAME))				AS AREANAME
+						,	MAX(WO.ORDERQTY)											AS ORDERQTY 
+						,	ISNULL(SUM(R.QTY), 0)										AS RESULTQTY
+						,	MAX(PRD.LOTSIZE)											AS LOTSIZE
+						,	MAX(WO.PLANENDTIME)											AS PLANENDTIME
+						,	MAX(ISNULL(STD.DICTIONARYNAME, WO.STATE))					AS STATE
+						,	MAX(WO.DESCRIPTION)											AS DESCRIPTION
+						,	MAX(AR.AREAID)												AS AREAID
+						,	MAX(ISNULL(VSD.DICTIONARYNAME, WO.VALIDSTATE))				AS VALIDSTATE
+				FROM 		SF_WORKORDER 			WO 
+				LEFT JOIN	SF_LOT					R	 	ON	R.WORKORDERID = WO.WORKORDERID
+															AND	R.LOTSTATE = 'Finished'
+				LEFT JOIN	SF_PRODUCTDEFINITION	PRD		ON	WO.PRODUCTDEFID = PRD.PRODUCTDEFID
+				LEFT JOIN	SF_PROCESSPATH			PRP		ON	PRP.PROCESSDEFID = PRD.PROCESSDEFID
+															AND	PRP.PATHSEQUENCE = 1
+				LEFT JOIN	SF_PROCESSSEGMENT		PRS		ON	PRS.PROCESSSEGMENTID = PRP.PROCESSSEGMENTID
+				LEFT JOIN	SF_AREA					AR		ON	AR.AREAID = PRD.AREAID
+				LEFT JOIN	SF_DICTIONARY			ARD		ON	ARD.DICTIONARYID = AR.DICTIONARYID
+															AND ARD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN	SF_CODE			   		ST		ON	ST.CODECLASSID = 'WorkOrderState'
+															AND	ST.CODEID = WO.STATE
+				LEFT JOIN	SF_DICTIONARY			PRSD	ON	PRSD.DICTIONARYID = PRS.DICTIONARYID
+															AND PRSD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN	SF_DICTIONARY			STD		ON	STD.DICTIONARYID = ST.DICTIONARYID
+															AND STD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN	SF_CODE			   		VS		ON	VS.CODECLASSID = 'VALIDSTATE'
+															AND	VS.CODEID = WO.VALIDSTATE
+				LEFT JOIN	SF_DICTIONARY			VSD		ON	VSD.DICTIONARYID = VS.DICTIONARYID
+															AND VSD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE 		1 = 1
+				AND 		PRS.PROCESSSEGMENTCLASSID = 'SGC00001'		-- 가공공정
+				AND			WO.WORKORDERDATE BETWEEN '$!{P_DATEPERIOD_PERIODFR}' AND '$!{P_DATEPERIOD_PERIODTO}'
+				#if ("$!{P_AREACODE}" != "" && "$!{P_AREACODE}" != "*")
+				AND			PRD.AREAID = '$!{P_AREACODE}'
+				#end
+				#if ("$!{P_PROCESSCODE}" != "" && "$!{P_PROCESSCODE}" != "*")
+				AND			PRS.PROCESSSEGMENTID = '$!{P_PROCESSCODE}'
+				#end
+				#if ("$!{P_WORKORDERSTATE}" != "" && "$!{P_WORKORDERSTATE}" != "*")
+				AND			WO.STATE = '$!{P_WORKORDERSTATE}'
+				#end
+				#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+				AND			WO.VALIDSTATE = '$!{P_VALIDSTATE}'
+				#end
+				GROUP BY	WO.WORKORDERID
+				ORDER BY 	MAX(WO.WORKORDERDATE) DESC
+			]]>	
+		</statement>	
+	</query>	
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 가공	
+	설		명	: LOT생성 정보	
+	작	성	자	: JYLEE	
+	작	성	일	: 2020-05-27	
+	주요 변경 로그	:	
+	-->	
+	<query id="GetProcessMachiningLot" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = GetProcessMachiningLot	
+				-- Version = 00001
+					
+				SELECT
+							L.LOTID
+						,	MAX(L.CREATEDQTY)	AS CREATEDQTY
+						,	MAX(L.QTY)			AS QTY
+						,	MAX(L.TRACKINTIME)	AS TRACKINTIME
+						,	CASE	WHEN MAX(L.PROCESSSTATE) = 'Run' THEN NULL ELSE MAX(L.TRACKOUTTIME) END AS TRACKOUTTIME
+						,	CASE	WHEN MAX(L.PROCESSSTATE) = 'Run' THEN NULL
+									ELSE ROUND(DATEDIFF(SECOND, MAX(L.TRACKINTIME), MAX(L.TRACKOUTTIME)) / 60.0, 2) 
+							END 	 			AS WORKTIME
+						,	COUNT(LE.LOTID)		AS COUNT
+				FROM		SF_LOT			L
+				LEFT JOIN	SF_LOTEQUIPMENT	LE	ON	LE.LOTID = L.LOTID
+				WHERE		L.WORKORDERID = '$!{WORKORDERID}'
+				GROUP BY 	L.LOTID
+				ORDER BY	MAX(L.CREATEDTIME)
+			]]>	
+		</statement>	
+	</query>
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 가공	
+	설		명	: 작업시작 => LOT 설비정보
+	작	성	자	: JYLEE	
+	작	성	일	: 2020-05-28	
+	주요 변경 로그	: 2020-06-22 | JYLEE | 가공진척현황 쿼리 반영, 수정x
+	-->	
+	<query id="GetProcessMachiningEquipment" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = GetProcessMachiningEquipment
+				-- Version = 00001
+					
+				SELECT X.*
+				FROM
+				(
+					SELECT 
+								LEQ.EQUIPMENTID
+							,	ISNULL(EQD.DICTIONARYNAME, EQ.EQUIPMENTNAME)	AS EQUIPMENTNAME
+							,	US.USERNAME										AS WORKER
+							,	LEQ.TRACKINTIME
+							,	LEQ.TRACKOUTTIME
+							,	ROUND(DATEDIFF(SECOND, LEQ.TRACKINTIME, LEQ.TRACKOUTTIME) / 60.0, 2) AS WORKTIME 
+							,	ROW_NUMBER() OVER(PARTITION BY LEQ.TXNGROUPHISTKEY ORDER BY LW.CREATEDTIME)	AS RN
+					FROM 		SF_LOTEQUIPMENT 	LEQ
+					LEFT JOIN	SF_EQUIPMENT 		EQ	ON	EQ.EQUIPMENTID = LEQ.EQUIPMENTID
+					LEFT JOIN	SF_DICTIONARY		EQD	ON	EQD.DICTIONARYID = EQ.DICTIONARYID
+														AND	EQD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+					LEFT JOIN	SF_LOTWORKER 		LW	ON	LW.LOTID = LEQ.LOTID
+														AND	LW.TXNGROUPHISTKEY = LEQ.TXNGROUPHISTKEY
+					LEFT JOIN	SF_USER 			US	ON	US.USERID = LW.USERID
+					WHERE 		LEQ.LOTID = '$!{P_LOTID}'	
+				) X
+				WHERE X.RN = 1
+				ORDER BY	X.TRACKINTIME
+			]]>	
+		</statement>	
+	</query>	
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록	
+	설		명	: LOT 별 자재투입 내역
+	작	성	자	: yshwang
+	작	성	일	: 2020-05-28	
+	주요 변경 로그	:	
+	-->	
+	<query id="GetConsumeMaterialLotByLotId" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = GetConsumeMaterialLotByLotId	
+				-- Version = 00001	
+	
+				WITH BOM AS 
+				(
+					SELECT
+							BOM.CONSUMABLEDEFID
+						,	BOM.CONSUMABLEDEFVERSION
+						,	BOM.QTY
+					FROM	SF_WORKORDERBOM				BOM
+					JOIN	SF_CONSUMABLEDEFINITION		CD	ON	CD.CONSUMABLEDEFID = BOM.CONSUMABLEDEFID
+															AND	CD.CONSUMABLEDEFVERSION = BOM.CONSUMABLEDEFVERSION
+					WHERE	BOM.WORKORDERID = '$!{WORKORDERID}'
+					AND		(CD.ISTRACKING = 'Y' OR CD.CONSUMABLETYPE = 'HalfProduct')
+				)
+				, CONSUMED AS 
+				(
+					SELECT
+							CD.CONSUMABLEDEFID
+						,	CD.CONSUMABLEDEFVERSION
+						,	SUM(CML.CONSUMEDQTY)	AS CONSUMEDQTY 
+						,	SUM(CML.GOODQTY)		AS GOODQTY
+						,	SUM(CML.BADQTY)			AS BADQTY
+					FROM	SF_CONSUMEMATERIALLOT		CML
+					JOIN	SF_CONSUMABLELOT			CL	ON	CL.CONSUMABLELOTID = CML.MATERIALLOTID
+					JOIN	SF_CONSUMABLEDEFINITION		CD	ON	CD.CONSUMABLEDEFID = CL.CONSUMABLEDEFID
+															AND	CD.CONSUMABLEDEFVERSION = CL.CONSUMABLEDEFVERSION
+					WHERE	CML.LOTID = '$!{LOTID}'
+					GROUP BY CD.CONSUMABLEDEFID, CD.CONSUMABLEDEFVERSION
+				)
+				SELECT
+							BOM.CONSUMABLEDEFID
+						,	BOM.CONSUMABLEDEFVERSION
+						,	BOM.QTY						AS BOMQTY
+						,	ISNULL(CON.CONSUMEDQTY, 0) 	AS CONSUMEDQTY
+						,	ISNULL(CON.GOODQTY, 0) 		AS GOODQTY
+						,	ISNULL(CON.BADQTY, 0) 		AS BADQTY
+						,	CASE WHEN BOM.QTY <= CON.GOODQTY THEN 'Y' ELSE 'N' END AS ISENOUGH
+				FROM		BOM			BOM
+				LEFT JOIN	CONSUMED	CON	ON	CON.CONSUMABLEDEFID = BOM.CONSUMABLEDEFID
+											AND	CON.CONSUMABLEDEFVERSION = BOM.CONSUMABLEDEFVERSION
+			]]>	
+		</statement>	
+	</query>
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록
+	설		명	: BOM에 등록된 투입대상 자재여부 확인(조회된 행이 있다면 투입대상)
+	작	성	자	: yshwang
+	작	성	일	: 2020-05-28	
+	주요 변경 로그	:	
+	-->	
+	<query id="IsInWorkorderBom" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = IsInWorkorderBom
+				-- Version = 00001	
+	
+				SELECT
+						BOM.CONSUMABLEDEFID
+					,	BOM.CONSUMABLEDEFVERSION
+					,	BOM.QTY
+				FROM	SF_WORKORDERBOM				BOM
+				JOIN	SF_CONSUMABLEDEFINITION		CD	ON	CD.CONSUMABLEDEFID = BOM.CONSUMABLEDEFID
+														AND	CD.CONSUMABLEDEFVERSION = BOM.CONSUMABLEDEFVERSION
+				WHERE	BOM.WORKORDERID = '$!{WORKORDERID}'
+				AND		BOM.CONSUMABLEDEFID = '$!{CONSUMABLEDEFID}'
+				AND		BOM.CONSUMABLEDEFVERSION = '$!{CONSUMABLEDEFVERSION}'
+				AND		(CD.ISTRACKING = 'Y' OR CD.CONSUMABLETYPE = 'HalfProduct')
+			]]>	
+		</statement>	
+	</query>
+		<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 가공	
+	설		명	: 자재투입 => BOM정보
+	작	성	자	: JYLEE	
+	작	성	일	: 2020-05-28	
+	주요 변경 로그	:	
+	-->	
+	<query id="GetMachiningBomInfoByLotId" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = GetMachiningBomInfoByLotId
+				-- Version = 00001
+					
+				SELECT
+							BOM.CONSUMABLEDEFID
+						,	MAX(CD.PARTNUMBER) 											AS PARTNUMBER
+						,	MAX(CD.CONSUMABLEDEFNAME)								AS CONSUMABLEDEFNAME
+						,	ISNULL(MAX(CTD.DICTIONARYNAME), MAX(CD.CONSUMABLETYPE)) AS CONSUMABLETYPE
+						,	'Y'														AS ISINBOM
+						,	(MAX(BOM.QTY) / MAX(WO.ORDERQTY)) * MAX(L.CREATEDQTY)	AS NEEDQTY
+						,	ISNULL(SUM(CASE WHEN CL.CONSUMABLELOTID IS NOT NULL THEN CML.GOODQTY ELSE 0 END), 0)	AS INPUTQTY
+						,	1														AS DISPLAYSEQUENCE
+				FROM		SF_LOT						L
+				JOIN		SF_WORKORDER				WO	ON	WO.WORKORDERID = L.WORKORDERID
+				JOIN		SF_WORKORDERBOM				BOM	ON	BOM.WORKORDERID = WO.WORKORDERID
+															AND	BOM.VALIDSTATE = 'Valid'
+				JOIN		SF_CONSUMABLEDEFINITION		CD	ON	CD.CONSUMABLEDEFID = BOM.CONSUMABLEDEFID
+															AND	(CD.ISTRACKING = 'Y' OR CD.CONSUMABLETYPE = 'HalfProduct')
+				LEFT JOIN	SF_CONSUMEMATERIALLOTTEMP	CML	ON	CML.LOTID = L.LOTID
+				LEFT JOIN	SF_CONSUMABLELOT			CL	ON	CL.CONSUMABLELOTID = CML.MATERIALLOTID
+															AND	CL.CONSUMABLEDEFID = CD.CONSUMABLEDEFID
+				LEFT JOIN	SF_CODE						CT	ON	CT.CODECLASSID = 'ConsumableType'
+															AND	CT.CODEID = CD.CONSUMABLETYPE
+				LEFT JOIN	SF_DICTIONARY				CTD	ON	CTD.DICTIONARYID = CT.DICTIONARYID
+															AND	CTD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE 		L.LOTID = '$!{LOTID}'
+				GROUP BY	BOM.CONSUMABLEDEFID
+
+				UNION ALL
+
+				SELECT
+							CL.CONSUMABLEDEFID
+						,	MAX(CD.PARTNUMBER)										AS PARTNUMBER
+						,	MAX(CD.CONSUMABLEDEFNAME)								AS CONSUMABLEDEFNAME
+						,	ISNULL(MAX(CTD.DICTIONARYNAME), MAX(CD.CONSUMABLETYPE)) AS CONSUMABLETYPE
+						,	'N'														AS ISINBOM
+						,	0														AS NEEDQTY
+						,	ISNULL(SUM(CML.GOODQTY), 0)								AS INPUTQTY
+						,	2														AS DISPLAYSEQUENCE
+				FROM		SF_CONSUMEMATERIALLOTTEMP	CML
+				JOIN		SF_CONSUMABLELOT			CL	ON	CL.CONSUMABLELOTID = CML.MATERIALLOTID
+				JOIN		SF_CONSUMABLEDEFINITION		CD	ON	CD.CONSUMABLEDEFID = CL.CONSUMABLEDEFID
+				LEFT JOIN	SF_CODE						CT	ON	CT.CODECLASSID = 'ConsumableType'
+															AND	CT.CODEID = CD.CONSUMABLETYPE
+				LEFT JOIN	SF_DICTIONARY				CTD	ON	CTD.DICTIONARYID = CT.DICTIONARYID
+															AND	CTD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE 		CML.LOTID = '$!{LOTID}'
+				AND			NOT EXISTS 
+				(
+					SELECT	* 
+					FROM	SF_LOT					L
+					JOIN	SF_WORKORDERBOM			BOM	ON	BOM.WORKORDERID = L.WORKORDERID
+														AND	BOM.VALIDSTATE = 'Valid'
+					JOIN	SF_CONSUMABLEDEFINITION	CD2	ON	CD2.CONSUMABLEDEFID = BOM.CONSUMABLEDEFID
+														AND	(CD2.ISTRACKING = 'Y' OR CD2.CONSUMABLETYPE = 'HalfProduct')
+					WHERE	L.LOTID = CML.LOTID
+					AND		BOM.CONSUMABLEDEFID = CD.CONSUMABLEDEFID
+				)				
+				GROUP BY	CL.CONSUMABLEDEFID
+
+				ORDER BY	DISPLAYSEQUENCE, CONSUMABLEDEFID
+			]]>	
+		</statement>	
+	</query>
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 가공	
+	설		명	: 자재투입 => 가투입내역 조회
+	작	성	자	: JYLEE	
+	작	성	일	: 2020-05-28	
+	주요 변경 로그	:	
+	-->	
+	<query id="GetMachiningInsertMaterialInfo" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = GetMachiningInsertMaterialInfo	
+				-- Version = 00001
+				
+				SELECT
+						COD.CONSUMABLEDEFID		AS CONSUMABLEDEFID 		-- 자재ID
+						,	COD.PARTNUMBER			AS PARTNUMBER
+						, 	COD.CONSUMABLEDEFNAME	AS CONSUMABLEDEFNAME	-- 자재명
+						, 	COM.MATERIALLOTID		AS MATERIALLOTID 		-- 자재LOT
+						, 	COM.SERIALNO			AS SERIALNO 			-- SERIALNO
+						, 	COM.GOODQTY				AS GOODQTY 				-- 양품
+						, 	COM.BADQTY				AS BADQTY 				-- 불량품
+						,	COM.DESCRIPTION
+						,	CASE WHEN BOM.CONSUMABLEDEFID IS NOT NULL THEN 1 ELSE 2 END AS DISPLAYSEQUENCE
+				FROM		SF_CONSUMEMATERIALLOTTEMP	COM
+				LEFT JOIN	SF_CONSUMABLELOT 			COL	ON	COL.CONSUMABLELOTID = COM.MATERIALLOTID
+				LEFT JOIN	SF_CONSUMABLEDEFINITION 	COD ON	COD.CONSUMABLEDEFID = COM.MATERIALDEFID
+				LEFT JOIN	SF_LOT						L	ON	L.LOTID = COM.LOTID
+				LEFT JOIN	SF_WORKORDERBOM				BOM	ON	BOM.WORKORDERID = L.WORKORDERID
+															AND	BOM.VALIDSTATE = 'Valid'
+															AND	BOM.CONSUMABLEDEFID = COD.CONSUMABLEDEFID
+															AND (COD.ISTRACKING = 'Y' OR COD.CONSUMABLETYPE = 'HalfProduct')
+				WHERE 		COM.LOTID = '$!{P_LOTID}'
+				AND			COM.MATERIALLOTID <> '*'
+				ORDER BY	DISPLAYSEQUENCE, COL.CONSUMABLEDEFID
+			]]>	
+		</statement>	
+	</query>
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 가공	
+	설		명	: 자재투입 => 실투입내역 조회
+	작	성	자	: JYLEE	
+	작	성	일	: 2020-05-28	
+	주요 변경 로그	: 2021-05-14 scmo 자재입고처 추가
+				: 2021-08-06 이준용  쿼리속도로 인해 기존 CT_CONSUMABLETRANSACTION 조인테이블을
+				  UL_ORDERDETAIL로 변경하여 거래처 정보 조회
+	-->	
+	<query id="GetMachiningInsertMaterialInfo" version="00002">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = GetMachiningInsertMaterialInfo	
+				-- Version = 00002
+				
+				SELECT
+							COM.MATERIALDEFID		AS CONSUMABLEDEFID 		-- 자재ID
+						,   COD.PARTNUMBER	
+						, 	COD.CONSUMABLEDEFNAME	AS CONSUMABLEDEFNAME	-- 자재명
+						, 	COM.MATERIALLOTID		AS MATERIALLOTID 		-- 자재LOT
+						, 	COM.SERIALNO			AS SERIALNO 			-- SERIALNO
+						, 	COM.GOODQTY				AS GOODQTY 				-- 양품
+						, 	COM.BADQTY				AS BADQTY 				-- 불량품
+						,	COM.DESCRIPTION
+						,	CASE WHEN COD.ISTRACKING = 'Y' OR COD.CONSUMABLETYPE = 'HalfProduct' THEN 1 ELSE 2 END AS DISPLAYSEQUENCE
+						,	ISNULL(CUST.CUSTNAME, '')AS CUSTOMERNAME
+				FROM		SF_CONSUMEMATERIALLOT		COM
+				LEFT JOIN	SF_CONSUMABLEDEFINITION 	COD ON	COD.CONSUMABLEDEFID = COM.MATERIALDEFID
+				LEFT JOIN   SF_CONSUMABLELOT			COL ON COL.CONSUMABLELOTID = COM.MATERIALLOTID
+				LEFT JOIN   UL_ORDERDETAIL				ORD ON ORD.SEQ = COL.ORDERSEQ
+				LEFT JOIN	[UCKERP].[$!{DBLINKNAME}].[dbo].[uck_VIEW_Cust] CUST ON CUST.CUSTSEQ = ORD.CUSTSEQ
+				WHERE 		COM.LOTID = '$!{P_LOTID}'	
+				ORDER BY	DISPLAYSEQUENCE, COM.MATERIALDEFID
+			]]>	
+		</statement>	
+	</query>
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 가공	
+	설		명	: BOM자재 확인
+	작	성	자	: JYLEE	
+	작	성	일	: 2020-06-01	
+	주요 변경 로그	:	
+	-->	
+	<query id="checkWorkorderBomLot" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = "id="checkWorkorderBomLot"
+				-- Version = 00001
+					
+						SELECT 
+							*
+						FROM SF_CONSUMABLELOT COL
+							LEFT JOIN SF_WORKORDERBOM WOB ON COL.CONSUMABLEDEFID = WOB.CONSUMABLEDEFID
+							WHERE 1=1 
+								AND WOB.WORKORDERID = '20180700170001'
+								AND WOB.VALIDSTATE = 'Valid'
+							#if ("$!{P_MATERIALLOT}" != "" && "$!{P_MATERIALLOT}" != "*")		
+								AND COL.CONSUMABLELOTID = '$!{P_MATERIALLOT}'	
+							#end
+			]]>	
+		</statement>	
+	</query>
+
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 조립
+	설		명	: 검사실적 등록대상 조회(pivot)
+	작	성	자	: yshwang
+	작	성	일	: 2020-06-01	
+	주요 변경 로그	:	
+	-->	
+	<query id="GetInspectionResultSheet" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = GetInspectionResultSheet	
+				-- Version = 00001
+					
+				DECLARE @cols		AS NVARCHAR(MAX);	-- PIVOT 컬럼
+				DECLARE @cols_org	AS NVARCHAR(MAX);	-- PIVOT 컬럼
+				DECLARE @query		AS NVARCHAR(MAX);	-- 쿼리
+				
+				SELECT @cols_org = STRING_AGG(CONVERT(NVARCHAR(MAX), QUOTENAME(C.PARAMETERID)), ',') WITHIN GROUP(ORDER BY C.DISPLAYSEQUENCE)
+				FROM
+				(
+					SELECT
+								SPD.PARAMETERID
+							,	SPD.DISPLAYSEQUENCE
+					FROM		UL_SUBPROCESSWORKRESULT			WR
+					JOIN		CT_SUBSEGMENTSPEC				SP	ON	SP.SPECDEFID = WR.SPECDEFID
+																	AND	SP.SUBPROCESSSEGMENTID = WR.SUBPROCESSSEGMENTID
+																	AND	SP.VALIDSTATE = 'Valid'
+					JOIN		CT_SUBSEGMENTSPECDETAIL			SPD	ON	SPD.SPECDEFID = SP.SPECDEFID
+																	AND	SPD.SPECSEQUENCE = SP.SPECSEQUENCE
+																	AND	SPD.VALIDSTATE = 'Valid'
+					WHERE	1 = 1
+					AND		WR.LOTID = '$!{LOTID}'
+					AND		WR.PROCESSSEGMENTID = '$!{PROCESSSEGMENTID}'
+					AND		WR.SUBPROCESSSEGMENTID = '$!{SUBPROCESSSEGMENTID}'
+					AND		ISNULL(SPD.ISMEASURE, 'N') = 'Y'
+				) C
+
+				SET @cols = 'ISSCRAP,ISDEFECT,' + @cols_org
+				
+				SET @query = '	
+					WITH SEQUENCES AS (
+						SELECT 	1 AS SEQ
+						UNION ALL
+						SELECT 	SEQ + 1 
+						FROM 	SEQUENCES 
+						WHERE 	SEQ < $!{CREATEDQTY} 
+					)
+					SELECT 	SEQ
+						,	CAST(CASE WHEN ISNULL(ISSCRAP, ''N'') = ''Y'' THEN 1 ELSE 0 END AS BIT) AS ISSCRAP
+						, 	CAST(CASE WHEN ISNULL(ISDEFECT, ''N'') = ''Y'' OR ISNULL(ISSCRAP, ''N'') = ''Y'' THEN 1 ELSE 0 END AS BIT) AS ISDEFECT
+						,	' + @cols_org + '
+					FROM  
+					(
+						-- 측정값
+						SELECT
+									SPD.PARAMETERID
+								,	SQ.SEQ
+								,	CASE WHEN PA.INPUTTYPE = ''CheckBox'' THEN ISNULL(WRD.MEASUREVALUE, '''')
+										ELSE WRD.MEASUREVALUE
+									END AS MEASUREVALUE
+						FROM		UL_SUBPROCESSWORKRESULT			WR
+						JOIN		CT_SUBSEGMENTSPEC				SP	ON	SP.SPECDEFID = WR.SPECDEFID
+																		AND	SP.SUBPROCESSSEGMENTID = WR.SUBPROCESSSEGMENTID
+																		AND	SP.VALIDSTATE = ''Valid''
+						JOIN		CT_SUBSEGMENTSPECDETAIL			SPD	ON	SPD.SPECDEFID = SP.SPECDEFID
+																		AND	SPD.SPECSEQUENCE = SP.SPECSEQUENCE
+																		AND	SPD.VALIDSTATE = ''Valid''
+						JOIN		CT_PARAMETERDEFINITION			PA	ON	PA.PARAMETERID = SPD.PARAMETERID
+						JOIN		SEQUENCES						SQ	ON	1 = 1
+						LEFT JOIN	UL_SUBPROCESSWORKRESULTDETAIL	WRD	ON	WRD.WORKRESULTHISTKEY = WR.TXNHISTKEY
+																		AND	WRD.PARAMETERID = SPD.PARAMETERID
+																		AND	SQ.SEQ = WRD.SEQ
+						WHERE	1 = 1
+						AND		WR.LOTID = ''$!{LOTID}''
+						AND		WR.PROCESSSEGMENTID = ''$!{PROCESSSEGMENTID}''
+						AND		WR.SUBPROCESSSEGMENTID = ''$!{SUBPROCESSSEGMENTID}''
+						AND		ISNULL(SPD.ISMEASURE, ''N'') = ''Y''
+
+						UNION ALL
+
+						-- 불량여부
+						SELECT
+									''ISDEFECT''						AS PARAMETERID
+								,	SQ.SEQ
+								,	ISNULL(MAX(WRD.ISDEFECT), ''N'')	AS MEASUREVALUE
+						FROM		UL_SUBPROCESSWORKRESULT			WR
+						JOIN		CT_SUBSEGMENTSPEC				SP	ON	SP.SPECDEFID = WR.SPECDEFID
+																		AND	SP.SUBPROCESSSEGMENTID = WR.SUBPROCESSSEGMENTID
+																		AND	SP.VALIDSTATE = ''Valid''
+						JOIN		CT_SUBSEGMENTSPECDETAIL			SPD	ON	SPD.SPECDEFID = SP.SPECDEFID
+																		AND	SPD.SPECSEQUENCE = SP.SPECSEQUENCE
+																		AND	SPD.VALIDSTATE = ''Valid''
+						JOIN		SEQUENCES						SQ	ON	1 = 1
+						LEFT JOIN	UL_SUBPROCESSWORKRESULTDETAIL	WRD	ON	WRD.WORKRESULTHISTKEY = WR.TXNHISTKEY
+																		AND	WRD.PARAMETERID = SPD.PARAMETERID
+																		AND	SQ.SEQ = WRD.SEQ
+						WHERE	1 = 1
+						AND		WR.LOTID = ''$!{LOTID}''
+						AND		WR.PROCESSSEGMENTID = ''$!{PROCESSSEGMENTID}''
+						AND		WR.SUBPROCESSSEGMENTID = ''$!{SUBPROCESSSEGMENTID}''
+						AND		ISNULL(SPD.ISMEASURE, ''N'') = ''Y''
+						GROUP BY SQ.SEQ
+
+						UNION ALL
+
+						-- 폐기여부
+						SELECT
+									''ISSCRAP''						AS PARAMETERID
+								,	SQ.SEQ
+								,	CASE WHEN SUM(CASE WHEN ISNULL(WRD.ISDEFECT, ''N'') = ''Y''THEN 1 ELSE 0 END) > 0 THEN ''Y'' ELSE ''N'' END AS MEASUREVALUE
+						FROM		UL_SUBPROCESSWORKRESULT			WR
+						JOIN		CT_SUBSEGMENTSPEC				SP	ON	SP.SPECDEFID = WR.SPECDEFID
+																		AND	SP.SUBPROCESSSEGMENTID = WR.SUBPROCESSSEGMENTID
+																		AND	SP.VALIDSTATE = ''Valid''
+						JOIN		CT_SUBSEGMENTSPECDETAIL			SPD	ON	SPD.SPECDEFID = SP.SPECDEFID
+																		AND	SPD.SPECSEQUENCE = SP.SPECSEQUENCE
+																		AND	SPD.VALIDSTATE = ''Valid''
+						JOIN		SEQUENCES						SQ	ON	1 = 1
+						LEFT JOIN	UL_SUBPROCESSWORKRESULTDETAIL	WRD	ON	WRD.WORKRESULTHISTKEY = WR.TXNHISTKEY
+																		AND	WRD.PARAMETERID = SPD.PARAMETERID
+																		AND	SQ.SEQ = WRD.SEQ
+						WHERE	1 = 1
+						AND		WR.LOTID = ''$!{LOTID}''
+						AND		WR.PROCESSSEGMENTID = ''$!{PROCESSSEGMENTID}''
+						AND		WR.ISFINISHED = ''Y''
+						AND		ISNULL(SPD.ISMEASURE, ''N'') = ''Y''
+						GROUP BY SQ.SEQ
+					) AS SRC
+					PIVOT  
+					(  
+						MAX(MEASUREVALUE)  
+						FOR PARAMETERID IN (' + @cols + ')    
+					) AS PIVOT_TABLE
+				
+					UNION ALL
+				
+					SELECT NULL AS SEQ, ' + @cols + '
+					FROM  
+					(
+						SELECT
+								0	AS SEQ
+								,	SPD.PARAMETERID
+								,	CASE SPD.SPECTYPE	WHEN ''UPPER''	THEN '' ~ '' + FORMAT(SPD.USL, #[[''0.######'']]#) 
+														WHEN ''LOWER''	THEN FORMAT(SPD.LSL, #[[''0.######'']]#) + '' ~ ''
+														WHEN ''BOTH''	THEN FORMAT(SPD.LSL, #[[''0.######'']]#) + '' ~ '' + FORMAT(SPD.USL, #[[''0.######'']]#)
+														WHEN ''STRING''	THEN SPD.TARGET
+									END AS SPEC
+						FROM		UL_SUBPROCESSWORKRESULT			WR
+						JOIN		CT_SUBSEGMENTSPEC				SP	ON	SP.SPECDEFID = WR.SPECDEFID
+																		AND	SP.SUBPROCESSSEGMENTID = WR.SUBPROCESSSEGMENTID
+																		AND	SP.VALIDSTATE = ''Valid''
+						JOIN		CT_SUBSEGMENTSPECDETAIL			SPD	ON	SPD.SPECDEFID = SP.SPECDEFID
+																		AND	SPD.SPECSEQUENCE = SP.SPECSEQUENCE
+																		AND	SPD.VALIDSTATE = ''Valid''
+						WHERE	1 = 1
+						AND		WR.LOTID = ''$!{LOTID}''
+						AND		WR.PROCESSSEGMENTID = ''$!{PROCESSSEGMENTID}''
+						AND		WR.SUBPROCESSSEGMENTID = ''$!{SUBPROCESSSEGMENTID}''	
+						AND		ISNULL(SPD.ISMEASURE, ''N'') = ''Y''
+					) AS SRC
+					PIVOT  
+					(  
+						MAX(SPEC)  
+						FOR PARAMETERID IN (' + @cols + ')  
+					) AS PIVOT_TABLE
+				
+					ORDER BY SEQ
+					OPTION (maxrecursion 10000)						
+					';
+				
+				execute(@query);	
+			]]>	
+		</statement>	
+	</query>
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 조립	
+	설		명	: LOT기준 작업지시 정보 조회
+	작	성	자	: JYLEE	
+	작	성	일	: 2020-06-02	
+	주요 변경 로그	:	
+	-->	
+	<query id="GetProcessWorkorderInfoByLotId" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = GetProcessWorkorderInfoByLotId
+				-- Version = 00001
+					
+					SELECT 
+								WO.WORKORDERID		AS	WORKORDERID 	-- 작업지시번호
+							,   PDD.PRODUCTDEFNAME 	AS  PRODUCTDEFNAME 	-- 품목명
+							,	ISNULL(MCD.DICTIONARYNAME, PDD.MODELID)	AS	MODEL	-- 기종
+							,	WO.WORKORDERDATE 	AS  WORKORDERDATE 	-- 작업지시일
+							,	WO.ORDERQTY 		AS  ORDERQTY 		-- 지시수량
+							,	LOT.LOTID 			AS  LOTID 			-- LOT번호
+							,	LOT.QTY				AS  QTY 			-- 수량
+							,	LOT.CREATEDQTY		AS	CREATEDQTY		-- 생성수량
+							,	WO.PLANENDTIME		AS	PLANENDTIME 	-- 완료예정일
+							,	WO.DESCRIPTION 		AS	DESCRIPTION 	-- 비고사항
+							,	CASE WHEN LOT.LOTSTATE = 'Finished' THEN 'Y' WHEN LOT.LOTSTATE = 'Terminated' THEN 'Terminated' ELSE 'N' END AS ISFINISHED	-- 완료여부
+							,	LOT.PRODUCTDEFID 
+							,	PDD.PARTNUMBER		AS PARTNUMBER
+							,	PDD.STANDARD		AS ITEMSTANDARD
+							,   PDD.SPECDEFID		AS SPECDEFID
+							, 	CASE WHEN (SELECT COUNT(*) FROM UL_SUBPROCESSWORKRESULT WHERE LOTID = '$!{P_LOTNUM}') > 0
+									 THEN (SELECT TOP 1 SPECDEFIDVERSION FROM UL_SUBPROCESSWORKRESULT WHERE LOTID = '$!{P_LOTNUM}')
+									 ELSE (SELECT MAX(SPECDEFIDVERSION) FROM CT_SPECDEFINITIONVERSION WHERE SPECDEFID = PDD.SPECDEFID) END AS SPECDEFIDVERSION -- 스펙 버전
+										
+					FROM	 	SF_LOT					LOT		
+					LEFT JOIN	SF_WORKORDER 			WO	ON	WO.WORKORDERID = LOT.WORKORDERID 
+					LEFT JOIN	SF_PRODUCTDEFINITION	PDD	ON	PDD.PRODUCTDEFID = WO.PRODUCTDEFID
+					LEFT JOIN	SF_CODE      	       	MC	ON  MC.CODECLASSID = 'ModelCode' 
+															AND	MC.CODEID = PDD.MODELID
+					LEFT JOIN	SF_DICTIONARY   	    MCD ON  MCD.DICTIONARYID = MC.DICTIONARYID 
+					                                   		AND MCD.LANGUAGETYPE = '$!{_TXNINFO.LANGUAGETYPE}'
+					WHERE LOT.LOTID = '$!{P_LOTNUM}'	
+			]]>	
+		</statement>	
+	</query>
+	
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적 > 조립실적상세현황	
+	설		명	: 조립실적조회
+	작	성	자	: 배선용
+	작	성	일	: 2020-06-17	
+	주요 변경 로그	:	
+	-->	
+	<query id="SearchAssyResult" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = SearchAssyResult
+				-- Version = 00001
+					
+				SELECT CONVERT(VARCHAR,L.TRACKOUTTIME,23) WORKDATE
+				    ,  L.LOTID 
+				    ,  L.WORKORDERID
+				    ,  PD.PRODUCTDEFID
+				    ,  PD.PARTNUMBER 
+				    ,  PD.PRODUCTDEFNAME 
+				    ,  PD.STANDARD   
+				    ,  ISNULL(SD1.DICTIONARYNAME ,PD.MODELID ) MODEL
+				    ,  L.QTY 
+				    ,  CONVERT(VARCHAR,TRACKINTIME ,120)  TRACKINTIME
+				    ,  CONVERT(VARCHAR,TRACKOUTTIME ,120) TRACKOUTTIME
+				    ,  ROUND(DATEDIFF(SECOND, TRACKINTIME, TRACKOUTTIME) / 60.0, 2) WORKTIME
+				    ,  ISNULL(WR.STANDARDTIME, PD.STANDARDTIME) AS STANDARDTIME
+				    ,  ISNULL(SD3.DICTIONARYNAME ,SA.AREANAME ) AREANAME
+				    ,  ISNULL(SD2.DICTIONARYNAME ,PS.PROCESSSEGMENTNAME ) PROCESSSEGMENTNAME
+				    ,  L.WORKORDERID 
+				    ,  ISNULL(S.STATENAME ,L.LOTSTATE ) LOTSTATE
+				FROM SF_LOT L
+				INNER JOIN SF_PROCESSSEGMENT     PS ON  L.PROCESSSEGMENTID  = PS.PROCESSSEGMENTID
+				INNER JOIN SF_PRODUCTDEFINITION  PD ON  L.PRODUCTDEFID  = PD.PRODUCTDEFID
+				LEFT  JOIN SF_CODE              SC1 ON  PD.MODELID  = SC1.CODEID 
+				                                    AND SC1.CODECLASSID  = 'ModelCode' 
+				LEFT  JOIN SF_DICTIONARY        SD1 ON  SC1.DICTIONARYID  = SD1.DICTIONARYID 
+				                                    AND SD1.LANGUAGETYPE  = '$!{LANGUAGETYPE}'
+				LEFT  JOIN SF_DICTIONARY        SD2 ON  PS.DICTIONARYID  = SD2.DICTIONARYID 
+				                                    AND SD2.LANGUAGETYPE  = '$!{LANGUAGETYPE}'
+				LEFT  JOIN SF_AREA               SA ON  L.AREAID  = SA.AREAID 
+				LEFT  JOIN SF_DICTIONARY        SD3 ON  SA.DICTIONARYID  = SD3.DICTIONARYID 
+				                                    AND SD3.LANGUAGETYPE  = '$!{LANGUAGETYPE}'   
+                LEFT  JOIN SF_STATE               S ON  L.LOTSTATE  = S.STATEID 
+                                                    AND S.STATEMODELID  = 'LotState'
+				LEFT  JOIN UL_PROCESSWORKRESULT	WR	ON	WR.LOTID = L.LOTID
+				WHERE 1=1
+				AND   L.LOTSTATE  IN  ('Finished','Terminated')
+				AND   PS.PROCESSSEGMENTCLASSID  = 'SGC00002'	
+				AND   L.TRACKOUTTIME BETWEEN  '$!{P_DATEPERIOD_PERIODFR}' AND '$!{P_DATEPERIOD_PERIODTO}'
+				#if ("$!{P_AREACODE}" != "" && "$!{P_AREACODE}" != "*")		
+				AND   L.AREAID = '$!{P_AREACODE}'
+				#end	
+				#if ("$!{P_TEAM}" != "" && "$!{P_TEAM}" != "*")		
+				AND   PD.TEAMID = '$!{P_TEAM}'
+				#end		
+				#if ("$!{P_PROCESSCODE}" != "" && "$!{P_PROCESSCODE}" != "*")		
+				AND   L.PROCESSSEGMENTID = '$!{P_PROCESSCODE}'
+				#end		
+				#if ("$!{P_PRODUCTDEFID}" != "" && "$!{P_PRODUCTDEFID}" != "*")		
+				--AND   L.PRODUCTDEFID = '$!{P_PRODUCTDEFID}'
+				AND   L.PRODUCTDEFID = (SELECT CONSUMABLEDEFID FROM SF_CONSUMABLEDEFINITION WHERE PARTNUMBER = '$!{P_PRODUCTDEFID}')
+				#end	
+				#if ("$!{P_LOTNUM}" != "" && "$!{P_LOTNUM}" != "*")		
+				AND   L.LOTID LIKE '%$!{P_LOTNUM}%'
+				#end
+				ORDER BY L.TRACKOUTTIME DESC					
+			]]>	
+		</statement>	
+	</query>	
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적 > 조립실적상세현황	> 공정실적 탭
+	설		명	: 조립실적조회
+	작	성	자	: 배선용
+	작	성	일	: 2020-06-17	
+	주요 변경 로그	:	
+	-->	
+	<query id="SearchAssyProcessResult" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = SearchAssyProcessResult
+				-- Version = 00001
+					
+				WITH WORKER AS
+				(
+					SELECT SUBPROCESSSEGMENTID 
+					    ,  STRING_AGG(UR.USERNAME ,',') WITHIN GROUP(ORDER  BY SL.USERID ) USERLIST
+					FROM SF_LOTWORKER SL
+					INNER JOIN SF_USER UR ON SL.USERID = UR.USERID 
+					WHERE LOTID  = '$!{LOTID}'
+					GROUP BY SUBPROCESSSEGMENTID 
+				)
+				SELECT SS.USERSEQUENCE   
+				    ,  ISNULL(SD1.DICTIONARYNAME ,PS.PROCESSSEGMENTNAME )SUBPROCESSSEGMENTNAME
+				    ,  W.USERLIST WORKER
+				    ,  CONVERT(VARCHAR, US.WORKSTARTTIME,120) WORKSTARTTIME
+				    ,  CONVERT(VARCHAR, US.WORKENDTIME ,120)  WORKENDTIME
+				    ,  ROUND(DATEDIFF(SECOND, US.WORKSTARTTIME, US.WORKENDTIME) / 60.0, 2) WORKTIME
+				    ,  ISNULL(SD2.DICTIONARYNAME ,EP.EQUIPMENTNAME )WORKEQUIPMENT
+				FROM UL_SUBPROCESSWORKRESULT US
+				INNER JOIN CT_SUBSEGMENTSPEC SS ON  US.SPECDEFID = SS.SPECDEFID
+				                                AND US.SUBPROCESSSEGMENTID  = SS.SUBPROCESSSEGMENTID
+				                                AND US.SPECDEFIDVERSION = SS.SPECDEFIDVERSION
+				INNER JOIN SF_PROCESSSEGMENT PS ON  SS.SUBPROCESSSEGMENTID  = PS.PROCESSSEGMENTID 
+				                                AND PS.PROCESSSEGMENTTYPE  = 'SUB'    
+				LEFT  JOIN SF_DICTIONARY    SD1 ON  PS.DICTIONARYID  = SD1.DICTIONARYID 
+				                                AND SD1.LANGUAGETYPE  = '$!{LANGUAGETYPE}'
+				LEFT  JOIN SF_EQUIPMENT      EP ON  US.EQUIPMENTID  = EP.EQUIPMENTID
+				LEFT  JOIN SF_DICTIONARY    SD2 ON  EP.DICTIONARYID  = SD2.DICTIONARYID 
+				                                AND SD2.LANGUAGETYPE  = '$!{LANGUAGETYPE}'
+				LEFT  JOIN WORKER             W ON  US.SUBPROCESSSEGMENTID  = W.SUBPROCESSSEGMENTID                               
+				WHERE LOTID  = '$!{LOTID}'
+				ORDER BY SPECSEQUENCE 													
+			]]>	
+		</statement>	
+	</query>
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적 > 조립실적상세현황	> 작업실적 
+	설		명	: 조립실적조회
+	작	성	자	: 배선용
+	작	성	일	: 2020-06-17	
+	주요 변경 로그	:	ParameterID 추가
+	-->	
+	<query id="SearchAssyWorkResult" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = SearchAssyWorkResult
+				-- Version = 00001
+					
+				SELECT	SS.SPECDEFID
+				     ,  US.SPECDEFIDVERSION
+					 ,	SS.USERSEQUENCE 
+				     ,	US.SUBPROCESSSEGMENTID 
+				     ,	ISNULL(SD1.DICTIONARYNAME, PS.PROCESSSEGMENTNAME)	AS SUBPROCESSSEGMENTNAME
+				     ,	SD.PARAMETERID 
+				     ,	ISNULL(SD2.DICTIONARYNAME, CP.PARAMETERNAME)		AS PARAMETERNAME
+				     ,	SD.MEASUREVALUE 
+				     ,	ISNULL(UD.UNIT, CP.UNIT) UNIT
+				     ,	CASE WHEN CP.INPUTTYPE  = 'INT' OR CP.INPUTTYPE  = 'FLOAT' THEN SD.LSL 
+							ELSE NULL END LSL
+				     ,	CASE WHEN CP.INPUTTYPE  = 'INT' OR CP.INPUTTYPE  = 'FLOAT' THEN SD.USL 
+							ELSE NULL END USL
+				     ,	ISNULL(SU.USERNAME, SD.CREATOR )     	AS CREATOR
+				     ,	CONVERT(VARCHAR, SD.CREATEDTIME, 120)	AS CREATEDTIME
+				     ,	SSD.SPECTYPE
+				     ,	CP.INPUTTYPE
+				     ,  SD.PARAMETERID
+   					 ,  SD.WORKRESULTHISTKEY
+					 ,  SD.POINTID
+					 ,  SD.SEQ
+ 					 ,	CASE WHEN SC.CODENAME = '체크박스' THEN 'Y/N' 
+							 WHEN SC.CODENAME = '콤보박스' THEN 'OK'
+							 ELSE SC.CODENAME END CODENAME
+				FROM UL_SUBPROCESSWORKRESULT US 
+				INNER JOIN UL_SUBPROCESSWORKRESULTDETAIL  SD ON US.TXNHISTKEY = SD.WORKRESULTHISTKEY 
+				INNER JOIN CT_SUBSEGMENTSPEC              SS ON  US.SPECDEFID = SS.SPECDEFID 
+				                                             AND US.SUBPROCESSSEGMENTID = SS.SUBPROCESSSEGMENTID 
+				                                             AND US.SPECDEFIDVERSION = SS.SPECDEFIDVERSION 
+				INNER JOIN CT_SUBSEGMENTSPECDETAIL		 SSD ON	 SS.SPECDEFID = SSD.SPECDEFID
+															 AND SS.SPECSEQUENCE = SSD.SPECSEQUENCE
+															 AND SD.PARAMETERID = SSD.PARAMETERID
+															 AND US.SPECDEFIDVERSION = SSD.SPECDEFIDVERSION
+				INNER JOIN SF_PROCESSSEGMENT              PS ON  US.SUBPROCESSSEGMENTID = PS.PROCESSSEGMENTID 
+				LEFT  JOIN SF_DICTIONARY                 SD1 ON  PS.DICTIONARYID = SD1.DICTIONARYID 
+				                                             AND SD1.LANGUAGETYPE = '$!{LANGUAGETYPE}' 
+				INNER JOIN CT_PARAMETERDEFINITION         CP ON SD.PARAMETERID = CP.PARAMETERID                   
+				LEFT  JOIN SF_DICTIONARY                 SD2 ON  CP.DICTIONARYID = SD2.DICTIONARYID 
+				                                             AND SD2.LANGUAGETYPE = '$!{LANGUAGETYPE}' 
+				LEFT  JOIN CT_UNITDEFINITION              UD ON  CP.UNIT = UD.UNITID 
+				LEFT  JOIN SF_USER                        SU ON  US.CHARGEUSERID = SU.USERID
+				LEFT  JOIN SF_CODE						  SC ON  SC.CODEID = CP.INPUTTYPE  AND SC.CODECLASSID = 'InspItemInputType' 
+				WHERE	1 = 1
+				AND		US.LOTID  = '$!{LOTID}'
+				AND		ISNULL(SSD.ISMEASURE, 'N') <> 'Y'
+				ORDER BY CAST(SS.USERSEQUENCE AS INT), SSD.DISPLAYSEQUENCE 												
+			]]>	
+		</statement>	
+	</query>
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적 > 조립실적상세현황	> 자재투입이력 
+	설		명	: 자재투입 이력
+	작	성	자	: 배선용
+	작	성	일	: 2020-06-19	
+	주요 변경 로그	: 2021-05-14 scmo 자재입고처 추가
+	-->	
+	<query id="SearchAssyMaterialInputHist" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id SearchAssyMaterialInputHist
+				-- Version = 00001
+					
+				SELECT ISNULL(SD1.DICTIONARYNAME ,SD.CONSUMABLETYPE ) CONSUMABLETYPE
+				    ,  SD.CONSUMABLEDEFID 
+				    ,  SD.PARTNUMBER
+				    ,  SD.CONSUMABLEDEFNAME 
+				    ,  SD.STANDARD 
+				    ,  ISNULL(SD2.DICTIONARYNAME ,PD.MODELID ) MODEL
+				    ,  SC.MATERIALLOTID 
+				    ,  SC.GOODQTY 
+				    ,  SC.BADQTY 
+				    ,  SC.SERIALNO 
+				    ,  SC.DESCRIPTION 
+				    ,  ISNULL(CUST.CUSTNAME, '')AS CUSTOMERNAME
+				FROM SF_CONSUMEMATERIALLOT SC
+				INNER JOIN SF_CONSUMABLELOT  CL ON SC.MATERIALLOTID  = CL.CONSUMABLELOTID 
+				INNER JOIN SF_CONSUMABLEDEFINITION  SD ON  CL.CONSUMABLEDEFID  = SD.CONSUMABLEDEFID 
+				LEFT  JOIN SF_CODE                 SC1 ON  SD.CONSUMABLETYPE  = SC1.CODEID 
+				                                       AND SC1.CODECLASSID  = 'ItemDefType'  
+				LEFT  JOIN SF_DICTIONARY           SD1 ON  SC1.DICTIONARYID  = SD1.DICTIONARYID 
+				                                       AND SD1.LANGUAGETYPE  = '$!{LANGUAGETYPE}'
+				LEFT  JOIN SF_PRODUCTDEFINITION     PD ON  SD.CONSUMABLEDEFID  = PD.PRODUCTDEFID
+				LEFT  JOIN SF_CODE                 SC2 ON  PD.MODELID  = SC2.CODEID 
+				                                       AND SC2.CODECLASSID  = 'ModelCode'  
+				LEFT  JOIN SF_DICTIONARY           SD2 ON  SC2.DICTIONARYID  = SD2.DICTIONARYID 
+				                                       AND SD2.LANGUAGETYPE  = '$!{LANGUAGETYPE}'    
+				LEFT  JOIN CT_CONSUMABLETRANSACTION TRA ON TRA.CONSUMABLELOTID = dbo.FN_GETFIRSTOFALLLOTID(SC.MATERIALLOTID)
+														AND TRA.TRANSACTIONTYPE = 'In'
+														AND TRA.TRANSACTIONCODE = 'IB'
+				LEFT JOIN [UCKERP].[$!{DBLINKNAME}].[dbo].[uck_VIEW_Cust] CUST ON CUST.CUSTSEQ = TRA.CUSTOMERID                                   	   
+				WHERE LOTID  = '$!{LOTID}'											
+			]]>	
+		</statement>	
+	</query>							
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 무지시 공정실적	
+	설		명	: 무지시 공정실적 등록 대상 자재 LOT 조회
+	작	성	자	: yshwang	
+	작	성	일	: 2020-06-02
+	주요 변경 로그	: 2020-07-16 | JYLEE | CONSUMABLEDEFID => PARTNUMBER
+				  2020-07-22 | JYLEE | 조건추가(가공, 컴프레서)
+				  2021-05-11 | SCMO | LOT분할시 ISHOLD필드를 ''값으로 하여 생성. WHERE절에 ''인 값 출력이 안되고 있었음.
+	-->
+	<query id="GetConsumableLotListForNonOrderWork" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = GetConsumableLotListForNonOrderWork
+				-- Version = 00001
+					
+				SELECT
+							ISNULL(WHD.DICTIONARYNAME, WH.WAREHOUSENAME)	AS WAREHOUSENAME		-- 창고명
+						,	CD.PARTNUMBER															-- 품목 ID
+						,	CD.CONSUMABLEDEFNAME													-- 품목명
+						,	CL.CONSUMABLELOTID														-- 자재 LOT ID
+						,	CD.STANDARD																-- 규격
+						,	CD.NOTORDERSEGMENTID													-- 무지시 작업공정 ID
+						,	ISNULL(PD.DICTIONARYNAME, CD.NOTORDERSEGMENTID) AS PROCESSSEGMENTNAME	-- 무지시 작업공정명
+						,	CD.UNIT 										AS UNITID				-- 단위 ID
+						,	ISNULL(U.UNIT, CD.UNIT) 						AS UNIT					-- 단위명
+						,	CL.CONSUMABLELOTQTY														-- 수량
+						,	CL.CONSUMABLELOTQTY								AS WORKQTY				-- 작업수량
+				FROM		SF_CONSUMABLELOT		CL
+				JOIN		SF_CONSUMABLEDEFINITION	CD	ON	CD.CONSUMABLEDEFID = CL.CONSUMABLEDEFID
+														AND	CD.CONSUMABLEDEFVERSION = CL.CONSUMABLEDEFVERSION
+				JOIN		SF_PROCESSSEGMENT		P	ON	P.PROCESSSEGMENTID = CD.NOTORDERSEGMENTID
+				LEFT JOIN	SF_DICTIONARY			PD	ON	PD.DICTIONARYID = P.DICTIONARYID
+														AND	PD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN	CT_UNITDEFINITION		U	ON	U.UNITID = CD.UNIT
+				LEFT JOIN	SF_WAREHOUSE			WH	ON	WH.WAREHOUSEID = CL.WAREHOUSEID
+				LEFT JOIN	SF_DICTIONARY			WHD	ON	WHD.DICTIONARYID = WH.DICTIONARYID
+														AND	WHD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE		1 = 1
+				AND			CL.CONSUMABLESTATE = 'Available'
+				--AND			ISNULL(CL.ISHOLD, 'N') = 'N' 
+				AND			IIF(DATALENGTH(CL.ISHOLD) = 0,'N',ISNULL(CL.ISHOLD, 'N')) = 'N'
+				AND			ISNULL(CL.ISNOTORDERRESULT, 'N') <> 'Y'		-- 무지시 공정 실적등록을 하지 않았음
+				AND			CD.ISNOTORDERRESULT = 'Y'					-- 무지시 공정 실적등록 대상
+				AND   		P.PROCESSSEGMENTCLASSID = 'SGC00004'		-- 무지시 공정
+				AND			P.PROCESSSEGMENTTYPE  = 'MAIN'
+				AND   		P.PROCESSSEGMENTID <> 'SGM029'				-- 디스플레이서건조가 아님
+				AND 		(WH.WAREHOUSEID = '7' OR WH.WAREHOUSEID = '8') -- 7 : 가공창고, 8: 컴프레셔 창고
+				
+				#if ("$!{P_NONORDERSEGMENT}" != "" && "$!{P_NONORDERSEGMENT}" != "*")		
+				AND			CD.NOTORDERSEGMENTID = '$!{P_NONORDERSEGMENT}'
+				#end	
+				#if ("$!{P_CONSUMABLEDEFID}" != "" && "$!{P_CONSUMABLEDEFID}" != "*")		
+				AND			CD.PARTNUMBER = '$!{P_CONSUMABLEDEFID}'
+				#end
+				#if ("$!{P_WAREHOUSE}" != "" && "$!{P_WAREHOUSE}" != "*")		
+				AND			WH.WAREHOUSEID = '$!{P_WAREHOUSE}'
+				#end
+				ORDER BY 	CL.CREATEDTIME DESC	
+			]]>	
+		</statement>	
+	</query>
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 조립	
+	설		명	: LOT기준 서브공정 조회
+	작	성	자	: JYLEE	
+	작	성	일	: 2020-06-03	
+	주요 변경 로그	:	
+	-->	
+	<query id="GetSubProcessInfoByLotId" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = GetSubProcessInfoByLotId
+				-- Version = 00001
+					
+				SELECT 
+							LOT.LOTID				AS LOTID					-- LOTID(HIDDEN) 
+						,	SSS.SUBPROCESSSEGMENTID AS SUBPROCESSSEGMENTID      -- 공정ID(HIDDEN)
+						,	PSS.PROCESSSEGMENTNAME  AS SUBPROCESSSEGMENTNAME    -- 공정명
+						,	US.USERNAME				AS WORKER 					-- 작업자
+						,	SWR.WORKSTARTTIME 		AS TRACKINTIME 				-- 시작일시
+						,	SWR.WORKENDTIME 		AS TRACKOUTTIME 			-- 종료일시
+						,	SWR.WORKTIME 			AS WORKTIME 				-- 작업시간
+						,	ISNULL(EQD.DICTIONARYNAME, EQ.EQUIPMENTNAME) AS EQUIPMENTNAME 	-- 설비명
+																				-- TODO : 가동시간
+						,	SWR.COMMENTS 			AS DESCRIPTION 				-- 설명
+						,	SSS.SPECSEQUENCE		AS SEQ 						-- 순서 (HIDDEN)
+						,	PD.SPECDEFID			AS SPECDEFID				-- SPECID (HIDDEN)
+						,	LOT.PROCESSSEGMENTID    AS PROCESSSEGMENTID			-- 공정ID(HIDDEN)
+						,	SWR.ISFINISHED			AS ISFINISHED				-- 작업종료유무(HIDDEN)
+						,	PD.AREAID				AS AREAID					-- AREAID(HIDDEN)
+				FROM		SF_LOT					LOT
+				JOIN		SF_PRODUCTDEFINITION	PD	ON	PD.PRODUCTDEFID = LOT.PRODUCTDEFID
+				JOIN		CT_SUBSEGMENTSPEC		SSS ON	SSS.SPECDEFID = PD.SPECDEFID
+														AND SSS.SPECDEFIDVERSION = '$!{P_SPECDEFIDVERSION}'																											
+														AND	SSS.VALIDSTATE = 'Valid'
+				LEFT JOIN	UL_SUBPROCESSWORKRESULT SWR	ON	SWR.LOTID = LOT.LOTID
+														AND	SWR.SUBPROCESSSEGMENTID = SSS.SUBPROCESSSEGMENTID
+				LEFT JOIN	SF_PROCESSSEGMENT		PSS ON	PSS.PROCESSSEGMENTID = SSS.SUBPROCESSSEGMENTID
+				LEFT JOIN	SF_EQUIPMENT			EQ	ON	EQ.EQUIPMENTID = SWR.EQUIPMENTID
+				LEFT JOIN	SF_DICTIONARY			EQD	ON	EQD.DICTIONARYID = EQ.DICTIONARYID
+														AND	EQD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN	SF_USER					US	ON	US.USERID = SWR.CHARGEUSERID
+				WHERE 		LOT.LOTID = '$!{P_LOTID}'							
+				ORDER BY 	SSS.USERSEQUENCE + 0
+			]]>	
+		</statement>	
+	</query>
+
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 조립	
+	설		명	: 설비정보 리스트
+	작	성	자	: JYLEE	
+	작	성	일	: 2020-06-04	
+	주요 변경 로그	:	
+	-->	
+	<query id="GetAssyEquipmentList" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = GetAssyEquipmentList
+				-- Version = 00001
+				
+				SELECT
+							EQ.EQUIPMENTID 										AS EQUIPMENTID 			-- 설비ID
+						,	ISNULL(EQD.DICTIONARYNAME, EQ.EQUIPMENTNAME)		AS EQUIPMENTNAME		-- 설비명
+						,	ISNULL(ARD.DICTIONARYNAME, AR.AREANAME)				AS AREANAME 			-- 작업장
+						,	ISNULL(ECD.DICTIONARYNAME, EQC.EQUIPMENTCLASSNAME)	AS EQUIPMENTCLASSNAME	-- 설비그룹명
+						,	EQ.LOCATIONID
+						,	EQ.DESCRIPTION 										AS DESCRIPTION 			-- 설명
+						,	UC.USERNAME 										AS CREATOR 				-- 생성자
+						,	EQ.CREATEDTIME 										AS CREATEDTIME 			-- 생성일
+						,	UM.USERNAME 										AS MODIFIER 			-- 수정자
+						,	EQ.MODIFIEDTIME 									AS MODIFIEDTIME 		-- 수정일
+				FROM		SF_EQUIPMENT		EQ
+				LEFT JOIN	SF_EQUIPMENTCLASS	EQC	ON	EQC.EQUIPMENTCLASSID = EQ.EQUIPMENTCLASSID
+				LEFT JOIN	SF_DICTIONARY		EQD	ON	EQD.DICTIONARYID = EQ.DICTIONARYID
+													AND	EQD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN	SF_DICTIONARY		ECD	ON	ECD.DICTIONARYID = EQC.DICTIONARYID
+													AND	ECD.LANGUAGETYPE = '$!{LANGUAGETYPE}'		
+				LEFT JOIN	SF_USER				UC	ON	UC.USERID = EQ.CREATOR
+				LEFT JOIN	SF_USER				UM	ON	UM.USERID = EQ.MODIFIER
+				LEFT JOIN	SF_AREA				AR	ON	AR.AREAID = EQ.AREAID
+				LEFT JOIN	SF_DICTIONARY		ARD	ON	ARD.DICTIONARYID = AR.DICTIONARYID
+													AND	ARD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE		EQ.VALIDSTATE = 'Valid'
+				AND			EQ.EQUIPMENTTYPE = 'M01'	-- 생산설비
+				AND			EQ.AREAID = '$!{AREAID}'
+				ORDER BY 	EQ.EQUIPMENTCLASSID, EQ.EQUIPMENTID
+			]]>	
+		</statement>	
+	</query>
+
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 수리
+	설		명	: 수리 작업지시 조회
+	작	성	자	: yshwang
+	작	성	일	: 2020-06-04
+	주요 변경 로그	: 2021-05-20 정송은 LOT.CREATEDTIME 컬럼 추가
+	-->	
+	<query id="GetRepairWorkorder" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = GetRepairWorkorder
+				-- Version = 00001
+	
+				SELECT
+							WO.WORKORDERID
+						,	WO.WORKORDERDATE
+						,	L.LOTID
+						,	PD.PRODUCTDEFID
+						,	PD.PARTNUMBER
+						,	PD.PRODUCTDEFNAME
+						,	ISNULL(MCD.DICTIONARYNAME, PD.MODELID)	AS MODEL
+						,	''										AS VENDOR	-- TODO : 어느 테이블에서?
+						,	ISNULL(TD.DICTIONARYNAME, PD.TEAMID)	AS TEAMNAME
+						,	ROUND(R.WORKTIME / 60, 2)				AS WORKTIME									-- 작업시간(단위:시간)
+						,	ROUND(DATEDIFF(MINUTE, R.WORKSTARTTIME, R.WORKENDTIME) / 60.0, 2)	AS	LEADTIME	-- 리드타임(단위:시간)
+						,	WO.PLANENDTIME
+						,	ISNULL(STD.DICTIONARYNAME, WO.STATE)	AS STATE
+						,	CASE WHEN L.LOTSTATE = 'InProduction' THEN (SELECT DICTIONARYNAME FROM SF_DICTIONARY WHERE DICTIONARYID = 'PROGRESS' AND LANGUAGETYPE = '$!{LANGUAGETYPE}')  
+								WHEN L.LOTSTATE = 'Finished' THEN (SELECT DICTIONARYNAME FROM SF_DICTIONARY WHERE DICTIONARYID = 'COMPLETE' AND LANGUAGETYPE = '$!{LANGUAGETYPE}')
+								ELSE L.LOTSTATE
+							END AS LOTSTATE 
+						,	L.LOTSTATE								AS LOTSTATECODE 
+						,	WO.DESCRIPTION
+						,	R.WORKSTARTTIME
+						,	R.WORKENDTIME
+						,	R.COMMENTS
+						,	PD.AREAID
+						,	PC.PROCESSDEFID
+						,	PC.PROCESSDEFNAME
+						,	ISNULL(VSD.DICTIONARYNAME, WO.VALIDSTATE) AS VALIDSTATE
+						,   L.CREATEDTIME AS LOTCREATEDTIME
+				FROM		SF_WORKORDER			WO
+				JOIN		SF_PRODUCTDEFINITION	PD	ON	PD.PRODUCTDEFID = WO.PRODUCTDEFID
+				JOIN		SF_PROCESSDEFINITION	PC	ON	PC.PROCESSDEFID = PD.PROCESSDEFID
+				LEFT JOIN	SF_LOT					L	ON	L.WORKORDERID = WO.WORKORDERID
+				LEFT JOIN	UL_PROCESSWORKRESULT	R	ON	R.LOTID = L.LOTID
+				LEFT JOIN	CT_TEAM					T	ON	T.TEAMID = PD.TEAMID
+				LEFT JOIN	SF_DICTIONARY			TD	ON	TD.DICTIONARYID = T.DICTIONARYID
+														AND	TD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN	SF_CODE             	MC	ON  MC.CODECLASSID = 'ModelCode' 
+														AND	MC.CODEID = PD.MODELID
+				LEFT JOIN	SF_DICTIONARY        	MCD ON  MCD.DICTIONARYID = MC.DICTIONARYID 
+				                                    	AND MCD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN	SF_CODE					ST	ON	ST.CODECLASSID = 'WorkOrderState'
+														AND	ST.CODEID = WO.STATE
+				LEFT JOIN	SF_DICTIONARY			STD	ON	STD.DICTIONARYID = ST.DICTIONARYID
+														AND STD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN	SF_CODE			   		VS	ON	VS.CODECLASSID = 'VALIDSTATE'
+														AND	VS.CODEID = WO.VALIDSTATE
+				LEFT JOIN	SF_DICTIONARY			VSD	ON	VSD.DICTIONARYID = VS.DICTIONARYID
+														AND VSD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE		PC.PROCESSCLASSID = 'RTC003'	-- 수리
+				AND			WO.WORKORDERDATE BETWEEN '$!{P_DATEPERIOD_PERIODFR}' AND '$!{P_DATEPERIOD_PERIODTO}'
+				#if ("$!{P_TEAM}" != "" && "$!{P_TEAM}" != "*")
+				AND			PD.TEAMID = '$!{P_TEAM}'
+				#end
+				#if ("$!{P_WORKORDERSTATE}" != "" && "$!{P_WORKORDERSTATE}" != "*")
+				AND			WO.STATE = '$!{P_WORKORDERSTATE}'
+				#end
+				#if ("$!{P_LOTNUM}" != "")
+				AND			L.LOTID LIKE '%$!{P_LOTNUM}%'
+				#end
+				#if ("$!{P_PROCESSDEFID}" != "" && "$!{P_PROCESSDEFID}" != "*")
+				AND			PC.PROCESSDEFID = '$!{P_PROCESSDEFID}'
+				#end
+				#if ("$!{P_VALIDSTATE}" != "" && "$!{P_VALIDSTATE}" != "*")
+				AND			WO.VALIDSTATE = '$!{P_VALIDSTATE}'
+				#end
+				ORDER BY	WO.WORKORDERDATE DESC
+			]]>	
+		</statement>	
+	</query>
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 무지시 공정실적	
+	설		명	: 무지시 공정 작업실적 조회
+	작	성	자	: yshwang	
+	작	성	일	: 2020-06-03
+	주요 변경 로그	: 2020-07-16 | JYLEE | CONSUMABLEDEFID => PARTNUMBER	
+	-->	
+	<query id="GetNonOrderWorkResult" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = GetNonOrderWorkResult
+				-- Version = 00001
+					
+				SELECT 	
+							ISNULL(WHD.DICTIONARYNAME, WH.WAREHOUSENAME)	AS WAREHOUSENAME		-- 창고명	
+						,	CD.PARTNUMBER														    -- 자재 ID
+						,	CD.CONSUMABLEDEFNAME													-- 자재명
+						,	R.CONSUMABLELOTID														-- 자재 LOT ID (무지시 작업 LOT)
+						,	R.PARENTCONSUMABLELOTID													-- 부모 LOT ID
+						,	CD.NOTORDERSEGMENTID													-- 무지시 작업공정 ID
+						,	ISNULL(PD.DICTIONARYNAME, CD.NOTORDERSEGMENTID) AS PROCESSSEGMENTNAME	-- 무지시 작업공정명
+						,	CD.UNIT 										AS UNITID				-- 단위 ID
+						,	ISNULL(U.UNIT, CD.UNIT) 						AS UNIT					-- 단위명
+						,	R.INPUTQTY																-- 투입수량
+						,	R.WORKQTY										AS COMPLETEQTY			-- 완료수량
+						,	ISNULL(CU.USERNAME, R.CREATOR)					AS WORKER				-- 작업자
+						,	R.CREATEDTIME									AS WORKTIME				-- 작업시간
+				FROM		CT_NONORDERCONSUMABLEWORKRESULT		R	
+				JOIN		SF_CONSUMABLELOT					CL	ON	CL.CONSUMABLELOTID = R.CONSUMABLELOTID
+				JOIN		SF_CONSUMABLEDEFINITION				CD	ON	CD.CONSUMABLEDEFID = CL.CONSUMABLEDEFID
+																	AND	CD.CONSUMABLEDEFVERSION = CL.CONSUMABLEDEFVERSION
+				JOIN		SF_PROCESSSEGMENT					P	ON	P.PROCESSSEGMENTID = CD.NOTORDERSEGMENTID
+				LEFT JOIN	SF_DICTIONARY						PD	ON	PD.DICTIONARYID = P.DICTIONARYID
+																	AND	PD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN	SF_USER								CU	ON	CU.USERID = R.CREATOR
+				LEFT JOIN	CT_UNITDEFINITION					U	ON	U.UNITID = CD.UNIT
+				LEFT JOIN	SF_WAREHOUSE						WH	ON	WH.WAREHOUSEID = CL.WAREHOUSEID
+				LEFT JOIN	SF_DICTIONARY						WHD	ON	WHD.DICTIONARYID = WH.DICTIONARYID
+																	AND	WHD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE 		1 = 1
+				AND			R.CREATEDTIME BETWEEN '$!{P_DATEPERIOD_PERIODFR}' AND '$!{P_DATEPERIOD_PERIODTO}'
+				AND			P.PROCESSSEGMENTID <> 'SGM029'				-- 디스플레이서건조가 아님
+				#if ("$!{P_NONORDERSEGMENT}" != "" && "$!{P_NONORDERSEGMENT}" != "*")		
+				AND			CD.NOTORDERSEGMENTID = '$!{P_NONORDERSEGMENT}'
+				#end
+				#if ("$!{P_PARENTCONSUMABLELOTID}" != "")
+				AND			R.PARENTCONSUMABLELOTID	LIKE '%$!{P_PARENTCONSUMABLELOTID}%'
+				#end
+				#if ("$!{P_CONSUMABLEDEFID}" != "" && "$!{P_CONSUMABLEDEFID}" != "*")		
+				AND			CD.PARTNUMBER = '$!{P_CONSUMABLEDEFID}'
+				#end
+				#if ("$!{P_CONSUMABLELOTID}" != "" && "$!{P_CONSUMABLELOTID}" != "*")		
+				AND			CL.CONSUMABLELOTID = '$!{P_CONSUMABLELOTID}'
+				#end
+				#if ("$!{P_WAREHOUSE}" != "" && "$!{P_WAREHOUSE}" != "*")		
+				AND			CL.WAREHOUSEID = '$!{P_WAREHOUSE}'
+				#end
+				ORDER BY 	R.CREATEDTIME DESC
+			]]>	
+		</statement>	
+	</query>
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 조립
+	설		명	: SUB공정별 실적 리스트
+	작	성	자	: JYLEE
+	작	성	일	: 2020-06-05
+	주요 변경 로그	:	
+	-->	
+	<query id="GetResultBySubProcess" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = GetResultBySubProcess
+				-- Version = 00001
+
+				WITH SEQUENCES AS (
+					SELECT 	1 AS SEQ
+					UNION ALL
+					SELECT 	SEQ + 1 
+					FROM 	SEQUENCES 
+					WHERE 	SEQ < $!{P_LOTCREATEDQTY} 
+				)
+				SELECT
+							0 AS SEQ
+						,	PA.PARAMETERID															-- 검사항목 ID
+						,	ISNULL(MAX(PAD.DICTIONARYNAME), MAX(PA.PARAMETERNAME)) AS PARAMETERNAME	-- 검사항목명
+						#if ("$!{P_ISMEASURE}" != "")	
+						-- 실적등록 팝업
+						,	CASE WHEN ISNULL(MAX(SD.ISMEASURE), 'N') = 'Y' THEN
+									CASE WHEN SUM(CASE WHEN ISNULL(RD.ISDEFECT, 'N') <> 'Y' AND RD.MEASUREVALUE IS NULL THEN 1 ELSE 0 END) = 0 
+										THEN (SELECT DICTIONARYNAME FROM SF_DICTIONARY WHERE DICTIONARYID = 'INPUT' AND LANGUAGETYPE = '$!{P_LANGUAGETYPE}')
+										ELSE '' 
+									END
+								ELSE
+									CASE WHEN MAX(PA.INPUTTYPE) = 'CheckBox' THEN ISNULL(MAX(RD.MEASUREVALUE), '')	-- 체크박스인경우 기본값 ''
+										ELSE MAX(RD.MEASUREVALUE)
+									END 
+							END AS MEASUREVALUE 							-- 측정값
+						#else
+						-- 조립실적 등록 메인화면
+						,	CASE WHEN ISNULL(MAX(SD.ISMEASURE), 'N') = 'Y' THEN
+									CASE WHEN SUM(CASE WHEN ISNULL(RD.ISDEFECT, 'N') <> 'Y' AND RD.MEASUREVALUE IS NULL THEN 1 ELSE 0 END) = 0 
+										THEN (SELECT DICTIONARYNAME FROM SF_DICTIONARY WHERE DICTIONARYID = 'INPUT' AND LANGUAGETYPE = '$!{P_LANGUAGETYPE}')
+										ELSE '' 
+									END
+								ELSE MAX(RD.MEASUREVALUE) 
+							END AS MEASUREVALUE 							-- 측정값
+						#end
+						,	ISNULL(MAX(UN.UNIT), MAX(PA.UNIT))	AS UNIT		-- 단위
+						,	MAX(SD.SPECTYPE)				AS SPECTYPE		-- 스펙 구분(STRING, BOTH 등)
+						,	CASE WHEN MAX(SD.SPECTYPE) IN ('BOTH', 'LOWER') THEN MAX(SD.LSL)
+								ELSE NULL
+							END 							AS LSL			-- 측정값 하한
+						,	CASE WHEN MAX(SD.SPECTYPE) IN ('BOTH', 'UPPER') THEN MAX(SD.USL)
+								ELSE NULL
+							END								AS USL			-- 측정값 상한
+						,	MAX(PA.INPUTTYPE) 				AS INPUTTYPE	-- 측정값 구분(FLOAT/STRING/ComboBox)
+						,	MAX(PA.DECIMALPLACE) 			AS DECIMALPLACE	-- 소숫점 자리수
+						,	MAX(PA.CODECLASSID) 			AS CODECLASSID	-- 콤보박스 데이터소스 CodeClassId
+						,	ISNULL(MAX(SD.ISMEASURE), 'N')	AS ISMEASURE	-- 샘플별 측정 여부
+						,	ISNULL(MAX(SD.ISSPECFORCE), 'N')	AS ISSPECFORCE		-- 스펙 강제여부
+						,	ISNULL(MAX(PA.ISNOTREQUIRED), 'N')	AS ISNOTREQUIRED	-- 미필수여부
+				FROM		SF_LOT							L	
+				JOIN		SF_PRODUCTDEFINITION			PD	ON	PD.PRODUCTDEFID = L.PRODUCTDEFID
+				JOIN		CT_SUBSEGMENTSPEC				SP	ON	SP.SPECDEFID = PD.SPECDEFID
+																AND SP.SPECDEFIDVERSION = '$!{P_SPECDEFIDVERSION}'																
+																AND	SP.VALIDSTATE = 'Valid'
+				JOIN		CT_SUBSEGMENTSPECDETAIL 		SD	ON	SD.SPECDEFID = SP.SPECDEFID
+																AND	SD.SPECSEQUENCE = SP.SPECSEQUENCE
+																AND SD.SPECDEFIDVERSION = '$!{P_SPECDEFIDVERSION}'																
+																AND	SD.VALIDSTATE = 'Valid'
+				JOIN		CT_PARAMETERDEFINITION			PA	ON	PA.PARAMETERID = SD.PARAMETERID
+				LEFT JOIN	CT_UNITDEFINITION				UN	ON	UN.UNITID = PA.UNIT
+				LEFT JOIN	UL_SUBPROCESSWORKRESULT			R	ON	R.LOTID = L.LOTID
+																AND	R.SUBPROCESSSEGMENTID = SP.SUBPROCESSSEGMENTID
+				LEFT JOIN	SEQUENCES						S	ON	1 = 1
+				LEFT JOIN	UL_SUBPROCESSWORKRESULTDETAIL	RD	ON	RD.WORKRESULTHISTKEY = R.TXNHISTKEY
+																AND	RD.PARAMETERID = PA.PARAMETERID
+																AND	((ISNULL(SD.ISMEASURE, 'N') = 'Y' AND S.SEQ = RD.SEQ)
+																	OR ISNULL(SD.ISMEASURE, 'N') <> 'Y')
+				LEFT JOIN	SF_DICTIONARY					PAD	ON	PAD.DICTIONARYID = PA.DICTIONARYID
+																AND	PAD.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+
+				WHERE		L.LOTID = '$!{P_LOTID}'
+				AND			SP.SUBPROCESSSEGMENTID = '$!{P_SUBPROCESSSEGMENTID}'
+				#if ("$!{P_ISMEASURE}" != "")	
+				AND			ISNULL(SD.ISMEASURE, 'N') <> 'Y'
+				#end
+				GROUP BY	PA.PARAMETERID
+				ORDER BY	MAX(SD.DISPLAYSEQUENCE)
+			]]>	
+		</statement>	
+	</query>
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 수리
+	설		명	: 수리 자재투입 내역 조회
+	작	성	자	: yshwang
+	작	성	일	: 2020-06-05
+	주요 변경 로그	:	
+	-->	
+	<query id="GetMaterialList" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = GetMaterialList
+				-- Version = 00001
+				
+				SELECT
+							ISNULL(CTD.DICTIONARYNAME, CD.CONSUMABLETYPE)	AS CONSUMABLETYPE
+						,	CD.CONSUMABLEDEFID
+						,	CD.PARTNUMBER
+						,	CD.CONSUMABLEDEFNAME
+						,	CML.MATERIALLOTID
+						,	CML.GOODQTY										AS QTY
+						,	ISNULL(UN.UNIT, CD.UNIT)						AS UNIT
+						,	CML.DESCRIPTION
+				FROM		SF_CONSUMEMATERIALLOT	CML
+				JOIN		SF_CONSUMABLELOT		CL	ON	CL.CONSUMABLELOTID = CML.MATERIALLOTID
+				LEFT JOIN	SF_CONSUMABLEDEFINITION	CD	ON	CD.CONSUMABLEDEFID = CL.CONSUMABLEDEFID
+				LEFT JOIN	SF_CODE					CT	ON	CT.CODECLASSID = 'ConsumableType'
+														AND	CT.CODEID = CD.CONSUMABLETYPE
+				LEFT JOIN	SF_DICTIONARY			CTD	ON	CTD.DICTIONARYID = CT.DICTIONARYID
+														AND	CTD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN	CT_UNITDEFINITION		UN	ON	UN.UNITID = CD.UNIT
+				WHERE		CML.LOTID = '$!{LOTID}'
+
+				UNION ALL
+
+				SELECT
+							ISNULL(CTD.DICTIONARYNAME, CD.CONSUMABLETYPE)	AS CONSUMABLETYPE
+						,	CD.CONSUMABLEDEFID
+						,	CD.PARTNUMBER
+						,	CD.CONSUMABLEDEFNAME
+						,	CML.MATERIALLOTID
+						,	CML.GOODQTY										AS QTY
+						,	ISNULL(UN.UNIT, CD.UNIT)						AS UNIT
+						,	CML.DESCRIPTION
+				FROM		SF_CONSUMEMATERIALLOTTEMP	CML
+				JOIN		SF_CONSUMABLELOT			CL	ON	CL.CONSUMABLELOTID = CML.MATERIALLOTID
+				LEFT JOIN	SF_CONSUMABLEDEFINITION		CD	ON	CD.CONSUMABLEDEFID = CL.CONSUMABLEDEFID
+				LEFT JOIN	SF_CODE						CT	ON	CT.CODECLASSID = 'ConsumableType'
+															AND	CT.CODEID = CD.CONSUMABLETYPE
+				LEFT JOIN	SF_DICTIONARY				CTD	ON	CTD.DICTIONARYID = CT.DICTIONARYID
+															AND	CTD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN	CT_UNITDEFINITION			UN	ON	UN.UNITID = CD.UNIT
+				WHERE		CML.LOTID = '$!{LOTID}'
+
+				ORDER BY	CONSUMABLETYPE, CONSUMABLEDEFID
+			]]>	
+		</statement>	
+	</query>
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 조립
+	설		명	: 검사실적 팝업
+	작	성	자	: JYLEE
+	작	성	일	: 2020-06-05
+	주요 변경 로그	:	
+	-->	
+	<query id="GetSpecSubProcessInfoByPopup" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = GetSpecSubProcessInfoByPopup
+				-- Version = 00001
+				
+				SELECT
+							ISNULL(SDD.DICTIONARYNAME, SD.SPECDEFNAME)			AS SPECDEFNAME
+						,	ISNULL(PSD.DICTIONARYNAME, PS.PROCESSSEGMENTNAME)	AS PROCESSSEGMENTNAME
+				FROM		CT_SPECDEFINITION	SD
+				JOIN		SF_PROCESSSEGMENT	PS	ON	1 = 1
+				LEFT JOIN	SF_DICTIONARY		SDD	ON	SDD.DICTIONARYID = SD.DICTIONARYID
+													AND	SDD.LANGUAGETYPE = 'ko-KR'
+				LEFT JOIN	SF_DICTIONARY		PSD	ON	PSD.DICTIONARYID = PS.DICTIONARYID
+													AND	PSD.LANGUAGETYPE = 'ko-KR'
+				WHERE 		SD.SPECDEFID = '$!{P_SPECID}' 
+				AND 		PS.PROCESSSEGMENTID = '$!{P_SUBPROCESSSEGMENTID}'
+			]]>	
+		</statement>	
+	</query>
+	
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 수리
+	설		명	: 자재LOT 조회
+	작	성	자	: yshwang
+	작	성	일	: 2020-06-05
+	주요 변경 로그	:	
+	-->	
+	<query id="GetConsumableLot" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = GetConsumableLot
+				-- Version = 00001
+
+				WITH TEMPINPUT AS 
+				(
+					SELECT 	ISNULL(SUM(CONSUMEDQTY), 0) AS CONSUMEDQTY 		-- 가투입수량
+					FROM	SF_CONSUMEMATERIALLOTTEMP
+					WHERE	MATERIALLOTID = '$!{CONSUMABLELOTID}'
+				)
+				SELECT
+							CD.CONSUMABLEDEFID
+						,	CD.PARTNUMBER
+						,	CD.CONSUMABLEDEFNAME
+						,	CL.CONSUMABLELOTQTY - ISNULL(T.CONSUMEDQTY, 0)	AS CONSUMABLELOTQTY
+						,	ISNULL(UN.UNIT, CD.UNIT)	AS UNIT
+				FROM		SF_CONSUMABLELOT		CL
+				JOIN		SF_CONSUMABLEDEFINITION	CD	ON	CD.CONSUMABLEDEFID = CL.CONSUMABLEDEFID
+				LEFT JOIN	TEMPINPUT				T	ON	1 = 1
+				LEFT JOIN	CT_UNITDEFINITION		UN	ON	UN.UNITID = CD.UNIT
+				WHERE		CL.CONSUMABLELOTID = '$!{CONSUMABLELOTID}'
+				AND			CL.CONSUMABLESTATE = 'Available'
+			]]>	
+		</statement>	
+	</query>
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 공통
+	설		명	: 자재 가투입 수량 조회
+	작	성	자	: yshwang
+	작	성	일	: 2020-06-05
+	주요 변경 로그	:	
+	-->	
+	<query id="GetMaterialTempInputQty" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = GetMaterialTempInputQty
+				-- Version = 00001
+	
+				SELECT 	ISNULL(SUM(CONSUMEDQTY), 0) AS CONSUMEDQTY 
+				FROM	SF_CONSUMEMATERIALLOTTEMP
+				WHERE	MATERIALLOTID = '$!{CONSUMABLELOTID}'
+			]]>	
+		</statement>	
+	</query>
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 수리
+	설		명	: 수리 작업자 조회
+	작	성	자	: yshwang
+	작	성	일	: 2020-06-08
+	주요 변경 로그	:	
+	-->	
+	<query id="GetRepairUser" version="00001">	
+		<statement>	
+			<![CDATA[	
+					SELECT
+								U.USERID
+							,	U.USERNAME
+					FROM		SF_LOTWORKER	LW	
+					JOIN		SF_USER			U	ON	U.USERID = LW.USERID
+					WHERE		LW.LOTID = '$!{LOTID}'
+					ORDER BY 	U.USERID
+			]]>	
+		</statement>	
+	</query>
+	
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록
+	설		명	: 사용자 리스트
+	작	성	자	: jylee
+	작	성	일	: 2020-06-09
+	주요 변경 로그	:	
+	-->	
+	<query id="ProceeResultUserList" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--
+				-- Id : ProceeResultUserList
+				-- Version : 00001
+
+				WITH SUBSEGMENT_WORKER AS
+				(
+					SELECT	USERID
+					FROM	CT_SUBPROCESSWORKER
+					WHERE 	1 = 1
+					AND   	VALIDSTATE = 'Valid'
+					AND   	PROCESSSEGMENTID = '$!{P_PROCESSSEGMENTID}'
+					AND   	SUBPROCESSSEGMENTID = '$!{P_SUBPROCESSSEGMENTID}'
+				)
+				, AREA_WORKER AS
+				(
+					SELECT	USERID
+					FROM	CT_AREAWORKER
+					WHERE	1 = 1
+					AND		VALIDSTATE = 'Valid'
+					AND		AREAID = '$!{P_AREAID}'
+				)
+				SELECT
+						X.USERID
+					,	ISNULL(USR.USERNAME, X.USERID)	AS USERNAME
+					,	'N' 					AS ISCHARGE
+				FROM
+				(
+					SELECT	USERID
+					FROM	SUBSEGMENT_WORKER
+
+					UNION ALL
+
+					SELECT	USERID
+					FROM	AREA_WORKER
+					WHERE	0 = (SELECT COUNT(*) FROM SUBSEGMENT_WORKER)
+				) X
+				LEFT JOIN	SF_USER	USR	ON	USR.USERID = X.USERID
+				WHERE 1 = 1
+				AND USR.VALIDSTATE = 'Valid'
+				#if ("$!{USERID}" != "")
+				AND	X.USERID = '$!{USERID}'				
+				#end
+				ORDER BY X.USERID
+			]]>	
+		</statement>	
+	</query>
+
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 건조기
+	설		명	: 건조기 현황(무지시 공정)
+	작	성	자	: yshwang
+	작	성	일	: 2020-06-09
+	주요 변경 로그	:	
+	-->	
+	<query id="GetDryerListNonOrder" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--
+				-- Id : GetDryerListNonOrder
+				-- Version : 00001
+	
+				SELECT
+							EQ.EQUIPMENTID																-- 설비 ID
+						,	ISNULL(MAX(EQD.DICTIONARYNAME), MAX(EQ.EQUIPMENTNAME))	AS EQUIPMENTNAME	-- 설비명
+						,	ISNULL(MAX(ESD.DICTIONARYNAME), MAX(EQ.STATE))			AS STATE			-- 설비 상태
+						,	MAX(R.WORKSTARTTIME)									AS WORKSTARTTIME	-- 작업시작 시간
+						,	DATEDIFF(DAY, MAX(R.WORKSTARTTIME), GETDATE())			AS WORKDAY			-- 작업시간(단위:일)
+						,	COUNT(R.CONSUMABLELOTID) 								AS LOTCOUNT			-- LOT수
+						,	SUM(CL.CONSUMABLELOTQTY) 								AS QTY				-- 수량
+						,	ISNULL(MAX(USR.USERNAME), MAX(R.WORKER)) 				AS WORKER			-- 작업자
+						,	MAX(R.SWITCHDATE)										AS SWITCHDATE		-- 위치변경 시간
+				FROM		SF_EQUIPMENT					EQ
+				LEFT JOIN	CT_NONORDERCONSUMABLEWORKRESULT	R	ON	R.EQUIPMENTID = EQ.EQUIPMENTID
+																AND	R.WORKENDTIME IS NULL
+				LEFT JOIN	SF_CONSUMABLELOT				CL	ON	CL.CONSUMABLELOTID = R.CONSUMABLELOTID																
+				LEFT JOIN	SF_DICTIONARY					EQD	ON	EQD.DICTIONARYID = EQ.DICTIONARYID
+																AND	EQD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN	SF_CODE							ES	ON	ES.CODECLASSID = 'EquipmentState'
+																AND	ES.CODEID = EQ.STATE
+				LEFT JOIN	SF_DICTIONARY					ESD	ON	ESD.DICTIONARYID = ES.DICTIONARYID
+																AND	ESD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN	SF_USER							USR	ON	USR.USERID = R.WORKER
+				WHERE		EQ.EQUIPMENTCLASSID = 'MG05'	-- 건조기
+				AND			EQ.AREAID = 'AR-05'				-- 디스플레이 가공 작업장
+				AND			EQ.VALIDSTATE = 'Valid'
+				#if ("$!{P_EQUIPMENTID}" != "" && "$!{P_EQUIPMENTID}" != "*")	
+				AND			EQ.EQUIPMENTID = '$!{P_EQUIPMENTID}'
+				#end
+				GROUP BY	EQ.EQUIPMENTID
+				ORDER BY 	ISNULL(MAX(EQD.DICTIONARYNAME), MAX(EQ.EQUIPMENTNAME))
+			]]>	
+		</statement>	
+	</query>
+
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 건조기
+	설		명	: 건조기 내 LOT 조회(무지시 공정)
+	작	성	자	: yshwang
+	작	성	일	: 2020-06-09
+	주요 변경 로그	:	
+	-->	
+	<query id="GetLotsInDryerNonOrder" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--
+				-- Id : GetLotsInDryerNonOrder
+				-- Version : 00001
+
+				SELECT
+							R.PARENTCONSUMABLELOTID		AS INPUTLOT			-- 투입 LOT
+						,	CL.CONSUMABLEDEFID			AS PRODUCTDEFID		-- 품목
+						,	CD.PARTNUMBER									-- 품번
+						,	CD.CONSUMABLEDEFNAME		AS PRODUCTDEFNAME	-- 품목명
+						,	''							AS MODEL			-- 기종
+						,	R.INPUTQTY					AS INPUTQTY			-- 투입수량
+						,	CL.CONSUMABLELOTQTY			AS QTY				-- 수량
+						,	R.CONSUMABLELOTID								-- 자식 LOT
+				FROM		CT_NONORDERCONSUMABLEWORKRESULT	R
+				JOIN		SF_CONSUMABLELOT				CL	ON	CL.CONSUMABLELOTID = R.CONSUMABLELOTID
+				LEFT JOIN	SF_CONSUMABLEDEFINITION			CD	ON	CD.CONSUMABLEDEFID = CL.CONSUMABLEDEFID
+																AND	CD.CONSUMABLEDEFVERSION = CL.CONSUMABLEDEFVERSION
+				WHERE		R.EQUIPMENTID = '$!{EQUIPMENTID}'
+				AND			R.WORKENDTIME IS NULL
+				ORDER BY	R.PARENTCONSUMABLELOTID
+			]]>	
+		</statement>	
+	</query>
+
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 건조기
+	설		명	: 건조 실적 조회(무지시 공정)
+	작	성	자	: yshwang
+	작	성	일	: 2020-06-09
+	주요 변경 로그	:	
+	-->	
+	<query id="GetDryResultNonOrder" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--
+				-- Id : GetDryResultNonOrder
+				-- Version : 00001
+	
+				SELECT
+						R.EQUIPMENTID														-- 설비 ID
+					,	ISNULL(EQD.DICTIONARYNAME, EQ.EQUIPMENTNAME)	AS EQUIPMENTNAME	-- 설비명	
+					,	R.WORKSTARTTIME														-- 작업 시작시간
+					,	R.WORKENDTIME														-- 작업 완료시간
+					,	DATEDIFF(DAY, R.WORKSTARTTIME, R.WORKENDTIME)	AS WORKDAY			-- 작업시간(단위:일)
+					,	R.CONSUMABLELOTID								AS OUTPUTLOT		-- 생산LOT
+					,	CL.CONSUMABLEDEFID								AS PRODUCTDEFID		-- 품목코드
+					,	CD.PARTNUMBER														-- 품번
+					,	CD.CONSUMABLEDEFNAME							AS PRODUCTDEFNAME	-- 품목명
+					,	''												AS MODEL			-- 기종
+					,	R.WORKQTY										AS QTY				-- 수량
+					,	R.PARENTCONSUMABLELOTID							AS INPUTLOT			-- 투입LOT
+					,	ISNULL(USR.USERNAME, R.WORKER)					AS WORKER			-- 작업자
+				FROM		CT_NONORDERCONSUMABLEWORKRESULT	R
+				JOIN		SF_EQUIPMENT					EQ	ON	EQ.EQUIPMENTID = R.EQUIPMENTID
+				JOIN		SF_CONSUMABLELOT				CL	ON	CL.CONSUMABLELOTID = R.CONSUMABLELOTID
+				LEFT JOIN	SF_CONSUMABLEDEFINITION			CD	ON	CD.CONSUMABLEDEFID = CL.CONSUMABLEDEFID
+																AND	CD.CONSUMABLEDEFVERSION = CL.CONSUMABLEDEFVERSION
+				LEFT JOIN	SF_DICTIONARY					EQD	ON	EQD.DICTIONARYID = EQ.DICTIONARYID
+																AND	EQD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN	SF_USER							USR	ON	USR.USERID = R.WORKER
+				WHERE		EQ.EQUIPMENTCLASSID = 'MG05'	-- 건조기
+				AND			EQ.AREAID = 'AR-05'				-- 디스플레이 가공 작업장
+				AND			R.WORKENDTIME IS NOT NULL
+				AND			R.WORKENDTIME BETWEEN '$!{P_DATEPERIOD_PERIODFR}' AND '$!{P_DATEPERIOD_PERIODTO}'
+				#if ("$!{P_EQUIPMENTID}" != "" && "$!{P_EQUIPMENTID}" != "*")	
+				AND			EQ.EQUIPMENTID = '$!{P_EQUIPMENTID}'
+				#end
+				#if ("$!{P_CONSUMABLEPARTNUMBER}" != "" && "$!{P_CONSUMABLEPARTNUMBER}" != "*")	
+				AND			CD.PARTNUMBER = N'$!{P_CONSUMABLEPARTNUMBER}'
+				#end
+				ORDER BY	R.WORKENDTIME DESC, R.PARENTCONSUMABLELOTID		
+			]]>	
+		</statement>	
+	</query>
+	
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 건조기
+	설		명	: 건조 투입 LOT 조회(무지시 공정)
+	작	성	자	: yshwang
+	작	성	일	: 2020-06-10
+	주요 변경 로그	:	
+	-->	
+	<query id="GetConsumableLotForDry" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--
+				-- Id : GetConsumableLotForDry
+				-- Version : 00001
+	
+				SELECT
+							CL.CONSUMABLELOTID		AS INPUTLOT
+						,	CL.CONSUMABLEDEFID		AS PRODUCTDEFID
+						,	CD.CONSUMABLEDEFNAME	AS PRODUCTDEFNAME
+						,	''						AS MODEL
+						,	CL.CONSUMABLELOTQTY		AS QTY
+				FROM		SF_CONSUMABLELOT		CL
+				LEFT JOIN	SF_CONSUMABLEDEFINITION	CD	ON	CD.CONSUMABLEDEFID = CL.CONSUMABLEDEFID
+														AND	CD.CONSUMABLEDEFVERSION = CL.CONSUMABLEDEFVERSION
+				WHERE		CL.CONSUMABLELOTID = '$!{CONSUMABLELOTID}'
+			]]>	
+		</statement>	
+	</query>
+	
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 건조기
+	설		명	: 건조기 현황(2차 건조기)
+	작	성	자	: yshwang
+	작	성	일	: 2020-06-10
+	주요 변경 로그	:	
+	-->	
+	<query id="GetDryerListOrder" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--
+				-- Id : GetDryerListOrder
+				-- Version : 00001
+
+				SELECT
+							EQ.EQUIPMENTID																-- 설비 ID
+						,	ISNULL(MAX(EQD.DICTIONARYNAME), MAX(EQ.EQUIPMENTNAME))	AS EQUIPMENTNAME	-- 설비명
+						--	,	ISNULL(MAX(ESD.DICTIONARYNAME), MAX(EQ.STATE))			AS STATE			-- 설비 상태
+						,	(	SELECT		ISNULL(ESD.DICTIONARYNAME, ES.CODEID)
+								FROM		SF_CODE			ES	
+								LEFT JOIN	SF_DICTIONARY	ESD	ON	ESD.DICTIONARYID = ES.DICTIONARYID
+																AND	ESD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+								WHERE	ES.CODECLASSID = 'EquipmentState'
+								AND		ES.CODEID = CASE WHEN COUNT(R.LOTID) > 0 THEN 'Run' ELSE 'Idle' END
+							)	AS	STATE																-- 설비 상태
+						,	MAX(R.WORKSTARTTIME)									AS WORKSTARTTIME	-- 작업시작 시간
+						,	DATEDIFF(DAY, MAX(R.WORKSTARTTIME), GETDATE())			AS WORKDAY			-- 작업시간(단위:일)
+						,	COUNT(R.LOTID) 											AS LOTCOUNT			-- LOT수
+						,	SUM(R.WORKSTARTQTY) 									AS QTY				-- 수량
+						,	ISNULL(MAX(USR.USERNAME), MAX(R.CHARGEUSERID)) 			AS WORKER			-- 작업자
+				FROM		SF_EQUIPMENT					EQ
+				LEFT JOIN	UL_SUBPROCESSWORKRESULT			R	ON	R.EQUIPMENTID = EQ.EQUIPMENTID
+																AND	R.SUBPROCESSSEGMENTID = 'SGS011'	-- 건조작업
+																AND	ISNULL(R.ISFINISHED, 'N') <> 'Y'
+				LEFT JOIN	SF_DICTIONARY					EQD	ON	EQD.DICTIONARYID = EQ.DICTIONARYID
+																AND	EQD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN	SF_USER							USR	ON	USR.USERID = R.CHARGEUSERID
+				WHERE		EQ.EQUIPMENTCLASSID = 'MG05'		-- 건조기
+				AND			EQ.AREAID <> 'AR-05'				-- 디스플레이 가공 작업장
+				AND			EQ.VALIDSTATE = 'Valid'
+				#if ("$!{P_EQUIPMENTID}" != "" && "$!{P_EQUIPMENTID}" != "*")	
+				AND			EQ.EQUIPMENTID = '$!{P_EQUIPMENTID}'
+				#end
+				GROUP BY	EQ.EQUIPMENTID
+				ORDER BY 	ISNULL(MAX(EQD.DICTIONARYNAME), MAX(EQ.EQUIPMENTNAME))
+			]]>	
+		</statement>	
+	</query>
+
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 건조기
+	설		명	: 건조 실적 조회(2차 건조기)
+	작	성	자	: yshwang
+	작	성	일	: 2020-06-10
+	주요 변경 로그	:	
+	-->	
+	<query id="GetDryResultOrder" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--
+				-- Id : GetDryResultOrder
+				-- Version : 00001
+	
+				SELECT
+						R.EQUIPMENTID														-- 설비 ID
+					,	ISNULL(EQD.DICTIONARYNAME, EQ.EQUIPMENTNAME)	AS EQUIPMENTNAME	-- 설비명	
+					,	R.WORKSTARTTIME														-- 작업 시작시간
+					,	R.WORKENDTIME														-- 작업 완료시간
+					,	DATEDIFF(DAY, R.WORKSTARTTIME, R.WORKENDTIME)	AS WORKDAY			-- 작업시간(단위:일)
+					,	L.LOTID											AS OUTPUTLOT		-- 생산LOT
+					,	L.PRODUCTDEFID									AS PRODUCTDEFID		-- 품목코드
+					,	PD.PARTNUMBER														-- 품번
+					,	PD.PRODUCTDEFNAME								AS PRODUCTDEFNAME	-- 품목명
+					,	ISNULL(MCD.DICTIONARYNAME, PD.MODELID)			AS MODEL			-- 기종
+					,	R.WORKENDQTY									AS QTY				-- 수량
+					,	R.LOTID											AS INPUTLOT			-- 투입LOT
+					,	ISNULL(USR.USERNAME, R.CHARGEUSERID)			AS WORKER			-- 작업자
+				FROM		UL_SUBPROCESSWORKRESULT			R
+				JOIN		SF_EQUIPMENT					EQ	ON	EQ.EQUIPMENTID = R.EQUIPMENTID
+				JOIN		SF_LOT							L	ON	L.LOTID = R.LOTID
+				LEFT JOIN	SF_PRODUCTDEFINITION			PD	ON	PD.PRODUCTDEFID = L.PRODUCTDEFID
+																AND	PD.PRODUCTDEFVERSION = L.PRODUCTDEFVERSION
+				LEFT JOIN	SF_DICTIONARY					EQD	ON	EQD.DICTIONARYID = EQ.DICTIONARYID
+																AND	EQD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN	SF_USER							USR	ON	USR.USERID = R.CHARGEUSERID
+				LEFT JOIN	SF_CODE              			MC	ON  MC.CODECLASSID = 'ModelCode' 
+																AND	MC.CODEID = PD.MODELID
+				LEFT JOIN	SF_DICTIONARY        			MCD ON  MCD.DICTIONARYID = MC.DICTIONARYID 
+				                                    			AND MCD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				
+				WHERE		EQ.EQUIPMENTCLASSID = 'MG05'	-- 건조기
+				AND			EQ.AREAID <> 'AR-05'			-- 디스플레이 가공 작업장
+				AND			R.SUBPROCESSSEGMENTID = 'SGS011'	-- 건조작업				
+				AND			ISNULL(R.ISFINISHED, 'N') = 'Y'
+				AND			R.WORKENDTIME BETWEEN '$!{P_DATEPERIOD_PERIODFR}' AND '$!{P_DATEPERIOD_PERIODTO}'
+				#if ("$!{P_EQUIPMENTID}" != "" && "$!{P_EQUIPMENTID}" != "*")	
+				AND			EQ.EQUIPMENTID = '$!{P_EQUIPMENTID}'
+				#end
+				#if ("$!{P_PRODUCTPARTNUMBER}" != "" && "$!{P_PRODUCTPARTNUMBER}" != "*")	
+				AND			PD.PARTNUMBER = N'$!{P_PRODUCTPARTNUMBER}'
+				#end
+				ORDER BY	R.WORKENDTIME DESC, R.LOTID		
+			]]>	
+		</statement>	
+	</query>
+	
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 건조기
+	설		명	: 건조기 내 LOT 조회(2차 건조기)
+	작	성	자	: yshwang
+	작	성	일	: 2020-06-10
+	주요 변경 로그	:	
+	-->	
+	<query id="GetLotsInDryerOrder" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--
+				-- Id :GetLotsInDryerOrder
+				-- Version : 00001
+
+				SELECT
+							R.LOTID						AS INPUTLOT			-- 투입 LOT
+						,	L.PRODUCTDEFID				AS PRODUCTDEFID		-- 품목
+						,	PD.PARTNUMBER									-- 품번
+						,	PD.PRODUCTDEFNAME			AS PRODUCTDEFNAME	-- 품목명
+						,	ISNULL(MCD.DICTIONARYNAME, PD.MODELID) AS MODEL	-- 기종
+						,	R.WORKSTARTQTY				AS QTY				-- 수량
+				FROM		UL_SUBPROCESSWORKRESULT			R
+				JOIN		SF_LOT							L	ON	L.LOTID = R.LOTID
+				LEFT JOIN	SF_PRODUCTDEFINITION			PD	ON	PD.PRODUCTDEFID = L.PRODUCTDEFID
+																AND	PD.PRODUCTDEFVERSION = L.PRODUCTDEFVERSION
+				LEFT JOIN	SF_CODE              			MC	ON  MC.CODECLASSID = 'ModelCode' 
+																AND	MC.CODEID = PD.MODELID
+				LEFT JOIN	SF_DICTIONARY        			MCD ON  MCD.DICTIONARYID = MC.DICTIONARYID 
+				                                    			AND MCD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE		R.EQUIPMENTID = '$!{EQUIPMENTID}'
+				AND			R.SUBPROCESSSEGMENTID = 'SGS011'	-- 건조작업
+				AND			ISNULL(R.ISFINISHED, 'N')  <> 'Y'
+				ORDER BY	R.LOTID
+			]]>	
+		</statement>	
+	</query>
+
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 조립
+	설		명	: 세부공정 검사항목 조회
+	작	성	자	: yshwang
+	작	성	일	: 2020-06-12
+	주요 변경 로그	:	
+	-->	
+	<query id="GetSubSegmentParameter" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--
+				-- Id : GetSubSegmentParameter
+				-- Version : 00001
+
+				SELECT
+						SP.SPECDEFID
+					,	SP.SUBPROCESSSEGMENTID
+					,	SPD.PARAMETERID
+					,	PA.INPUTTYPE
+					,	PA.DECIMALPLACE
+					,	PA.CODECLASSID
+					,	SPD.SPECTYPE
+					,	SPD.USL
+					,	SPD.LSL
+					,	SPD.ISSPECFORCE
+				FROM	CT_SUBSEGMENTSPEC		SP
+				JOIN	CT_SUBSEGMENTSPECDETAIL	SPD	ON	SPD.SPECDEFID = SP.SPECDEFID
+													AND	SPD.SPECSEQUENCE = SP.SPECSEQUENCE
+													AND SPD.SPECDEFIDVERSION = SP.SPECDEFIDVERSION
+				JOIN	CT_PARAMETERDEFINITION	PA	ON	PA.PARAMETERID = SPD.PARAMETERID
+				WHERE	SP.SPECDEFID = '$!{SPECDEFID}'
+				AND		SP.SUBPROCESSSEGMENTID = '$!{SUBPROCESSSEGMENTID}'
+				AND		SP.SPECDEFIDVERSION = '$!{SPECDEFIDVERSION}'				
+			]]>	
+		</statement>	
+	</query>
+
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록
+	설		명	: 자재투입 검증(BOM 수량 만큼 투입되었는지 확인). NOTENOUGH > 0 이면 부족분이 있음
+	작	성	자	: yshwang
+	작	성	일	: 2020-06-12
+	주요 변경 로그	:	
+	-->	
+	<query id="GetIsMaterialEnough" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = GetIsMaterialEnough
+				-- Version = 00001
+
+				SELECT	ISNULL(COUNT(*), 0) AS NOTENOUGH
+				FROM
+				(
+					SELECT	BOM.CONSUMABLEDEFID
+						,	(MAX(BOM.QTY) / MAX(WO.ORDERQTY)) * MAX(L.CREATEDQTY)			AS NEEDQTY
+						,	ISNULL(SUM(CASE WHEN CL.CONSUMABLELOTID IS NOT NULL THEN CML.GOODQTY ELSE 0 END), 0)	AS INPUTQTY
+						,	CASE 	WHEN (MAX(BOM.QTY) / MAX(WO.ORDERQTY)) * MAX(L.CREATEDQTY) 									-- 필요수량 <= 투입수량
+										<= ISNULL(SUM(CASE WHEN CL.CONSUMABLELOTID IS NOT NULL THEN CML.GOODQTY ELSE 0 END), 0)	
+									THEN 'Y'
+									ELSE 'N'
+							END AS ISENOUGH
+					FROM		SF_LOT						L
+					INNER JOIN	SF_WORKORDER				WO	ON	WO.WORKORDERID = L.WORKORDERID
+					INNER JOIN	SF_WORKORDERBOM				BOM	ON	BOM.WORKORDERID = WO.WORKORDERID
+																AND	BOM.VALIDSTATE = 'Valid'
+					INNER JOIN	SF_CONSUMABLEDEFINITION		CD	ON	CD.CONSUMABLEDEFID = BOM.CONSUMABLEDEFID
+																AND	(CD.ISTRACKING = 'Y' OR CD.CONSUMABLETYPE = 'HalfProduct')
+					LEFT  JOIN	SF_CONSUMEMATERIALLOTTEMP	CML	ON	CML.LOTID = L.LOTID
+					LEFT  JOIN	SF_CONSUMABLELOT			CL	ON	CL.CONSUMABLELOTID = CML.MATERIALLOTID
+																AND	CL.CONSUMABLEDEFID = CD.CONSUMABLEDEFID
+					WHERE 		L.LOTID = '$!{LOTID}'
+					GROUP BY	BOM.CONSUMABLEDEFID
+				) AS X
+				WHERE	X.ISENOUGH = 'N'
+			]]>	
+		</statement>	
+	</query>
+	
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록
+	설		명	: 작업지시의 생성 LOT 수량 조회
+	작	성	자	: yshwang
+	작	성	일	: 2020-06-12
+	주요 변경 로그	:	
+	-->	
+	<query id="GetLotCreatedQtyOfWorkorder" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = GetLotCreatedQtyOfWorkorder
+				-- Version = 00001
+	
+				SELECT	ISNULL(SUM(QTY), 0) AS QTY 
+				FROM	SF_LOT
+				WHERE	WORKORDERID = '$!{WORKORDERID}'
+			]]>	
+		</statement>	
+	</query>
+	
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적 > 조립진척현황
+	설		명	: 조립공정의 진척현황을 조회한다.
+	작	성	자	: 유태근
+	작	성	일	: 2020-06-15
+	주요 변경 로그	: 2021-08-20 최창록
+	             SF_WORKORDER INNER JOIN 으로 변경, 이유 : ERP에서 작업지시번호 삭제 시 MES에서도 삭제 처리함.
+	-->	
+	<query id="SelectAssemblyProgress" version="00001">	
+		<statement>	
+			<![CDATA[	
+			--	
+			-- Id : SelectAssemblyProgress
+			-- Version : 00001	
+			WITH PROGRESSSEGMENT AS
+			(
+				SELECT	
+						TOP 100 PERCENT 
+						L.LOTID
+					,	PD.PRODUCTDEFID
+					,	PD.SPECDEFID
+					,	SD.PROCESSSEGMENTID
+					,	COUNT(SSD.SUBPROCESSSEGMENTID)													AS	ALLSEGMENTCOUNT
+					,	CASE WHEN CS.COMPLETESEGMENTCOUNT IS NULL  
+							 THEN 0 ELSE CS.COMPLETESEGMENTCOUNT END									AS	COMPLETESEGMENTCOUNT
+					,	CPS.CURRENTSEGMENT
+					,	CPS.SUBPROCESSSEGMENTID															AS  CURRENTSEGMENTID
+				FROM	SF_LOT								L	
+				LEFT JOIN	SF_PRODUCTDEFINITION		PD	ON	PD.PRODUCTDEFID = L.PRODUCTDEFID
+				LEFT JOIN	SF_PROCESSDEFINITION		PSD	ON	PSD.PROCESSDEFID = PD.PROCESSDEFID
+				LEFT JOIN	SF_PROCESSCLASS				PSC ON	PSC.PROCESSCLASSID = PSD.PROCESSCLASSID
+				LEFT JOIN	CT_SPECDEFINITION			SD	ON	SD.SPECDEFID = PD.SPECDEFID
+				LEFT JOIN	CT_SUBSEGMENTSPEC			SSD ON	SSD.SPECDEFID = SD.SPECDEFID
+															AND SSD.SPECDEFIDVERSION = CASE WHEN (SELECT SUM(@@ROWCOUNT) FROM UL_SUBPROCESSWORKRESULT WHERE LOTID =L.LOTID) > 0
+																							THEN (SELECT TOP 1 SPECDEFIDVERSION FROM UL_SUBPROCESSWORKRESULT WHERE LOTID = L.LOTID)
+																							ELSE '1' END
+				
+				LEFT OUTER JOIN 
+								(
+									SELECT 
+											LOTID
+										,	PROCESSSEGMENTID
+										,	SPECDEFID
+										,   SPECDEFIDVERSION
+										,	COUNT(CASE WHEN WORKENDTIME IS NOT NULL THEN 1 END)		AS	COMPLETESEGMENTCOUNT
+									FROM	UL_SUBPROCESSWORKRESULT
+									GROUP BY 
+											LOTID 
+										,	PROCESSSEGMENTID
+										,	SPECDEFID
+										,   SPECDEFIDVERSION
+			
+								)							CS	ON	CS.LOTID = L.LOTID
+																AND CS.PROCESSSEGMENTID = L.PROCESSSEGMENTID
+																AND CS.SPECDEFID = PD.SPECDEFID
+																
+																																										
+				LEFT OUTER JOIN 
+								(
+									SELECT 
+											L.LOTID
+										,	L.PROCESSSEGMENTID
+										,	PD.SPECDEFID
+										,	SSD.SUBPROCESSSEGMENTID
+										,	SWR.WORKSTARTTIME
+										,	SWR.WORKENDTIME
+										,	CASE WHEN SWR.WORKSTARTTIME IS NOT NULL 
+												 AND  SWR.WORKENDTIME IS NULL 
+												 THEN ISNULL(SPD.DICTIONARYNAME, SPS.PROCESSSEGMENTNAME) END			AS CURRENTSEGMENT 
+									FROM	SF_LOT								L	
+									INNER JOIN SF_PRODUCTDEFINITION				PD	ON	PD.PRODUCTDEFID = L.PRODUCTDEFID
+									INNER JOIN CT_SPECDEFINITION				SD	ON	SD.SPECDEFID = PD.SPECDEFID
+									INNER JOIN CT_SUBSEGMENTSPEC				SSD	ON	SSD.SPECDEFID = SD.SPECDEFID 
+									INNER JOIN SF_PROCESSSEGMENT				SPS	ON	SPS.PROCESSSEGMENTID = SSD.SUBPROCESSSEGMENTID
+																					AND SPS.PROCESSSEGMENTTYPE = 'SUB'
+									LEFT OUTER JOIN UL_SUBPROCESSWORKRESULT		SWR	ON	SWR.LOTID = L.LOTID
+																					AND SWR.PROCESSSEGMENTID = L.PROCESSSEGMENTID
+																					AND SWR.SPECDEFID = PD.SPECDEFID
+																					AND SWR.SUBPROCESSSEGMENTID = SSD.SUBPROCESSSEGMENTID
+									LEFT OUTER JOIN SF_DICTIONARY				SPD	ON	SPD.DICTIONARYID = SPS.DICTIONARYID
+																					AND SPD.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+									GROUP BY 
+											L.LOTID 
+										,	L.PROCESSSEGMENTID
+										,	PD.SPECDEFID
+										,	SSD.SUBPROCESSSEGMENTID
+										,	SWR.WORKSTARTTIME
+										,	SWR.WORKENDTIME
+										,	SPD.DICTIONARYNAME
+										,	SPS.PROCESSSEGMENTNAME
+			
+								)							CPS	ON	CPS.LOTID = L.LOTID
+																AND CPS.PROCESSSEGMENTID = L.PROCESSSEGMENTID
+																AND CPS.SPECDEFID = PD.SPECDEFID
+																AND CPS.CURRENTSEGMENT IS NOT NULL
+				WHERE	PSC.PROCESSCLASSID = 'RTC001' -- 조립공정
+				-- AND		L.PROCESSSTATE = 'Run' -- 작업시작한 LOT 기준1
+				AND 	L.LOTSTATE IN ('InProduction', 'Terminated')
+				-- LOT상태
+				#if ("$!{P_LOTSTATE}" != "" && "$!{P_LOTSTATE}" != "*")
+					AND 	L.LOTSTATE = '$!{P_LOTSTATE}'
+				#end
+				GROUP BY
+						L.LOTID
+					,	PD.PRODUCTDEFID
+					,	PD.SPECDEFID
+					,	SD.PROCESSSEGMENTID
+					,	CS.COMPLETESEGMENTCOUNT
+					,	CPS.CURRENTSEGMENT
+					,	CPS.SUBPROCESSSEGMENTID					
+				--ORDER BY
+				--		L.LOTID
+				--	,	PD.PRODUCTDEFID
+				--	,	PD.SPECDEFID
+			)
+			SELECT	
+					L.AREAID																				-- 작업장 ID
+				,	ISNULL(AD.DICTIONARYNAME, A.AREANAME)								AS	AREANAME		-- 작업장명
+				,	L.WORKORDERID																		-- 생산지시번호
+				,	L.WORKORDERID																			-- 작업지시번호
+				,	L.PRODUCTDEFID																			-- 품목코드
+				,   ISNULL(PD.PARTNUMBER,L.PRODUCTDEFID)                                AS  PARTNUMBER
+				,	ISNULL(PDD.DICTIONARYNAME, PD.PRODUCTDEFNAME)						AS	PRODUCTDEFNAME	-- 품목명
+				,	PD.STANDARD																				-- 규격
+				,	PD.MODELID																				-- 기종 ID
+				,	ISNULL(MCD.DICTIONARYNAME, MC.CODENAME)								AS	MODELNAME		-- 기종
+				,	CONVERT(DATE, WO.PLANENDTIME)										AS	PLANENDTIME		-- 완료예정일
+				,	L.LOTID																					-- Lot No
+				,	L.QTY																					-- 수량
+				,	PWR.WORKSTARTTIME																		-- 작업시작일
+				,	DATEDIFF(dd, CONVERT(DATE, PWR.WORKSTARTTIME), CONVERT(DATE, GETDATE())) AS ELAPSEDDAY 	-- 경과일수
+				,	PRS.ALLSEGMENTCOUNT																		-- 전체공정
+				,	PRS.COMPLETESEGMENTCOUNT																-- 완료공정
+				,	PRS.CURRENTSEGMENT																		-- 현재공정
+				,	CONVERT(VARCHAR(50), ROUND(CAST(CAST(PRS.COMPLETESEGMENTCOUNT AS FLOAT) 
+						/ CAST(PRS.ALLSEGMENTCOUNT AS FLOAT) * 100 AS FLOAT), 2)) + '%'	AS	PROGRESSRATE	-- 진척율				
+				,	PRS.PROCESSSEGMENTID																	-- 공정 ID
+				,	PRS.SPECDEFID																			-- 스펙 ID
+				,	ISNULL(STD.DICTIONARYNAME, L.LOTSTATE) AS LOTSTATE										-- LOT상태
+			FROM	SF_LOT												L
+			LEFT OUTER JOIN SF_AREA										A	ON	A.AREAID = L.AREAID
+			LEFT OUTER JOIN SF_PRODUCTDEFINITION						PD	ON	PD.PRODUCTDEFID = L.PRODUCTDEFID
+			LEFT OUTER JOIN SF_CODE										MC	ON	MC.CODEID = PD.MODELID
+																			AND MC.CODECLASSID = 'ModelCode'
+			INNER JOIN SF_WORKORDER								        WO	ON	WO.WORKORDERID = L.WORKORDERID
+																			AND	WO.PRODUCTIONORDERID = L.PRODUCTIONORDERID
+			--LEFT OUTER JOIN SF_WORKORDER								WO	ON	WO.WORKORDERID = L.WORKORDERID
+			--																AND	WO.PRODUCTIONORDERID = L.PRODUCTIONORDERID
+			LEFT OUTER JOIN UL_PROCESSWORKRESULT						PWR	ON	PWR.LOTID = L.LOTID
+																			AND PWR.PROCESSSEGMENTID = L.PROCESSSEGMENTID
+			INNER JOIN PROGRESSSEGMENT									PRS	ON	PRS.LOTID = L.LOTID
+																			AND PRS.PRODUCTDEFID = PD.PRODUCTDEFID
+																			AND PRS.PROCESSSEGMENTID = L.PROCESSSEGMENTID
+																			AND PRS.SPECDEFID = PD.SPECDEFID															
+			LEFT OUTER JOIN SF_DICTIONARY								AD	ON	AD.DICTIONARYID = A.DICTIONARYID
+																			AND AD.LANGUAGETYPE = '$!{P_LANGUAGETYPE}' 
+			LEFT OUTER JOIN SF_DICTIONARY								PDD	ON	PDD.DICTIONARYID = PD.DICTIONARYID
+																			AND PDD.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+			LEFT OUTER JOIN SF_DICTIONARY								MCD	ON	MCD.DICTIONARYID = MC.DICTIONARYID
+																			AND MCD.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+			LEFT OUTER JOIN SF_CODE										ST	ON	ST.CODECLASSID = 'AssemblyProgressLotState'
+																			AND	ST.CODEID = L.LOTSTATE
+			LEFT OUTER JOIN SF_DICTIONARY								STD	ON	STD.DICTIONARYID = ST.DICTIONARYID
+																			AND	STD.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+			WHERE	1 = 1
+			
+			-- 작업장
+			#if ("$!{P_AREACODE}" != "" && "$!{P_AREACODE}" != "*")
+				AND 	L.AREAID = '$!{P_AREACODE}'
+			#end
+			-- 공정
+			#if ("$!{P_PROCESSSEGMENT}" != "" && "$!{P_PROCESSSEGMENT}" != "*")
+				AND 	PRS.PROCESSSEGMENTID = '$!{P_PROCESSSEGMENT}'
+			#end
+			-- 세부공정
+			#if ("$!{P_SUBSEGMENT}" != "" && "$!{P_SUBSEGMENT}" != "*")
+				AND 	PRS.CURRENTSEGMENTID = '$!{P_SUBSEGMENT}'
+			#end
+			
+			ORDER BY L.CREATEDTIME DESC
+			]]>	
+		</statement>	
+	</query>
+	
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적 > 조립진척현황
+	설		명	: 조립공정의 상세 진척현황을 조회한다.
+	작	성	자	: 유태근
+	작	성	일	: 2020-06-15
+	주요 변경 로그	: 2020-07-28 | JYLEE | WORKORDERID추가 
+	-->	
+	<query id="SelectAssemblyProgressDetail" version="00001">	
+		<statement>	
+			<![CDATA[	
+			--	
+			-- Id : SelectAssemblyProgressDetail
+			-- Version : 00001	
+			SELECT	
+					SSD.SUBPROCESSSEGMENTID
+				,	L.WORKORDERID
+				,	ISNULL(SPD.DICTIONARYNAME, SPS.PROCESSSEGMENTNAME)							AS	SUBPROCESSSEGMENTNAME
+				,	SSD.USERSEQUENCE
+				,	CASE WHEN SWR.WORKSTARTTIME IS NOT NULL 
+						 AND  SWR.WORKENDTIME IS NULL 
+						 THEN PCD.DICTIONARYNAME
+						 WHEN SWR.WORKSTARTTIME IS NOT NULL 
+						 AND  SWR.WORKENDTIME IS NOT NULL
+						 THEN CMD.DICTIONARYNAME
+						 ELSE NULL END															AS 	PROGRESSSTATE
+				,	STRING_AGG(U.USERNAME, ',')													AS	WORKUSER
+				,	SWR.WORKSTARTTIME
+				,	SWR.WORKENDTIME
+				,	ROUND(DATEDIFF(HOUR, SWR.WORKSTARTTIME, SWR.WORKENDTIME) / 60.0, 2)		AS	WORKTIME
+				,	STRING_AGG(ISNULL(ED.DICTIONARYNAME, E.EQUIPMENTNAME), ',')					AS	WORKEQUIPMENT
+				,	SWR.COMMENTS
+			FROM	SF_LOT								L	
+			INNER JOIN SF_PRODUCTDEFINITION				PD	ON	PD.PRODUCTDEFID = L.PRODUCTDEFID
+			INNER JOIN CT_SPECDEFINITION				SD	ON	SD.SPECDEFID = PD.SPECDEFID	
+			INNER JOIN CT_SUBSEGMENTSPEC				SSD	ON	SSD.SPECDEFID = SD.SPECDEFID
+															AND SSD.SPECDEFIDVERSION = CASE WHEN (SELECT COUNT(*) FROM UL_SUBPROCESSWORKRESULT WHERE LOTID = L.LOTID) > 0 
+																							THEN (SELECT TOP 1 SPECDEFIDVERSION FROM UL_SUBPROCESSWORKRESULT WHERE LOTID = L.LOTID)
+																							ELSE '1' END
+			INNER JOIN SF_PROCESSSEGMENT				SPS	ON	SPS.PROCESSSEGMENTID = SSD.SUBPROCESSSEGMENTID
+															AND SPS.PROCESSSEGMENTTYPE = 'SUB'											
+			LEFT OUTER JOIN UL_SUBPROCESSWORKRESULT		SWR	ON	SWR.LOTID = L.LOTID	
+															AND SWR.PROCESSSEGMENTID = L.PROCESSSEGMENTID
+															AND	SWR.SUBPROCESSSEGMENTID	= SSD.SUBPROCESSSEGMENTID									
+			LEFT OUTER JOIN SF_LOTWORKER				LW	ON	LW.LOTID = L.LOTID 
+															AND LW.PROCESSSEGMENTID = L.PROCESSSEGMENTID
+															AND LW.SUBPROCESSSEGMENTID = SSD.SUBPROCESSSEGMENTID
+			LEFT OUTER JOIN SF_USER						U	ON	U.USERID = LW.USERID
+			LEFT OUTER JOIN SF_LOTEQUIPMENT				LE	ON	LE.LOTID = L.LOTID 
+															AND LE.PROCESSSEGMENTID = L.PROCESSSEGMENTID
+															AND LE.SUBPROCESSSEGMENTID = SSD.SUBPROCESSSEGMENTID
+			LEFT OUTER JOIN SF_EQUIPMENT				E	ON	E.EQUIPMENTID = LE.EQUIPMENTID
+			LEFT OUTER JOIN SF_DICTIONARY				ED	ON	ED.DICTIONARYID = E.DICTIONARYID
+															AND ED.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+			LEFT OUTER JOIN SF_DICTIONARY				SPD	ON	SPD.DICTIONARYID = SPS.DICTIONARYID
+															AND SPD.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+			LEFT OUTER JOIN SF_DICTIONARY				PCD	ON	PCD.DICTIONARYID = 'PROCEEDING'
+															AND PCD.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+			LEFT OUTER JOIN SF_DICTIONARY				CMD	ON	CMD.DICTIONARYID = 'COMPLETE'
+															AND CMD.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+			WHERE	1 = 1
+			AND		L.LOTID = '$!{P_LOTID}'	
+			AND		L.PROCESSSEGMENTID = '$!{P_PROCESSSEGMENTID}'
+			AND		PD.SPECDEFID = '$!{P_SPECDEFID}'
+			GROUP BY
+					L.LOTID
+				,	L.WORKORDERID
+				,	PD.PRODUCTDEFID
+				,	PD.SPECDEFID
+				,	SD.PROCESSSEGMENTID
+				,	SSD.SUBPROCESSSEGMENTID
+				,	SPD.DICTIONARYNAME
+				,	SPS.PROCESSSEGMENTNAME
+				,	SSD.USERSEQUENCE
+				,	PCD.DICTIONARYNAME
+				,	CMD.DICTIONARYNAME
+				,	SWR.WORKSTARTTIME
+				,	SWR.WORKENDTIME
+				,	LE.EQUIPMENTID
+				,	SWR.COMMENTS			
+			ORDER BY
+					L.LOTID
+				,	PD.PRODUCTDEFID
+				,	PD.SPECDEFID
+				,	SD.PROCESSSEGMENTID
+				,	CONVERT(NUMERIC, SSD.USERSEQUENCE);
+			]]>	
+		</statement>	
+	</query>
+
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적 > 수리
+	설		명	: 수리 자재투입 목록 조회
+	작	성	자	: 황유성
+	작	성	일	: 2020-06-16
+	주요 변경 로그	:	
+	-->	
+	<query id="SelectRepairMaterial" version="00001">	
+		<statement>	
+			<![CDATA[	
+			--	
+			-- Id : SelectRepairMaterial
+			-- Version : 00001	
+	
+			SELECT
+						CD.CONSUMABLEDEFID
+					,	CD.PARTNUMBER
+					,	CML.MATERIALLOTID AS CONSUMABLELOTID
+					,	CD.CONSUMABLEDEFNAME
+					,	CL.CONSUMABLELOTQTY
+					,	CML.GOODQTY
+					,	CD.UNIT
+					,	CML.DESCRIPTION AS COMMENT
+					,	CML.BADQTY
+					,	CML.SERIALNO
+			FROM		SF_CONSUMEMATERIALLOTTEMP	CML
+			LEFT JOIN	SF_CONSUMABLELOT			CL	ON	CL.CONSUMABLELOTID = CML.MATERIALLOTID
+			LEFT JOIN	SF_CONSUMABLEDEFINITION		CD	ON	CD.CONSUMABLEDEFID = CL.CONSUMABLEDEFID
+														AND	CD.CONSUMABLEDEFVERSION = CL.CONSUMABLEDEFVERSION
+			WHERE		CML.LOTID = '$!{LOTID}'
+			ORDER BY	CD.CONSUMABLEDEFID
+
+			]]>	
+		</statement>	
+	</query>
+
+	<!--	
+	프 로 그 램 명	: 공정관리 > Lot 추적 > Lot 정방향 이력
+	설		명	: Lot 이력화면의 정방향 추적 List
+	작	성	자	: jhpark
+	작	성	일	: 2020-06-15
+	주요 변경 로그	:	
+	-->	
+	<query id="SelectLotGenealTreeList" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = SelectLotGenealTreeList
+				-- Version = 00001
+	
+				SELECT	LOTNAME
+					,	LOTID
+					,	PARENTLOTID
+					,	ROOTLOTID
+					,	PROCESSSEGMENTID
+					,	PROCESSSEGMENTNAME
+					,	CONSUMABLEDEFNAME		AS PRODUCTDEFNAME
+					,	QTY
+					,	LOTLEVEL
+					,	PATH
+					,	PARENTPATH
+					,	ACTUALLOTID
+				FROM	FN_GETLOTHISTORY('$!{LOTID}', '$!{LANGUAGETYPE}')
+			]]>	
+		</statement>	
+	</query>
+	
+	<!--	
+	프 로 그 램 명	: 공정관리 > Lot 추적 > Lot 정방향 이력
+	설		명	: Lot 이력화면의 정방향 추적 List
+	작	성	자	: jhpark
+	작	성	일	: 2020-06-15
+	주요 변경 로그	:	
+	-->	
+	<query id="SelectLotGenealTreeList" version="00002">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = SelectLotGenealTreeList
+				-- Version = 00002
+	
+				WITH LOTHISTORY AS
+				(
+					SELECT	LH.LOTNAME
+						,	LH.LOTID
+						,	LH.PARENTLOTID
+						,	LH.ROOTLOTID
+						,	LH.PROCESSSEGMENTID
+						,	LH.PROCESSSEGMENTNAME
+						,	LH.CONSUMABLEDEFNAME		AS PRODUCTDEFNAME
+						,	LH.QTY
+						,	LH.LOTLEVEL
+						,	LH.PATH
+						,	L.TRACKINTIME				AS WORKSTARTTIME 
+						,	L.TRACKOUTTIME 				AS WORKENDTIME
+						,	CL.CREATEDTIME				AS INCOMMINGDATE
+						,	LH.ACTUALLOTID 
+					FROM	FN_GETLOTHISTORY('$!{LOTID}', '$!{LANGUAGETYPE}')	LH
+					LEFT JOIN SF_LOT											L 	ON 	LH.ACTUALLOTID	= L.LOTID
+					LEFT JOIN SF_CONSUMABLELOT 									CL 	ON 	LH.ACTUALLOTID 	= CL.CONSUMABLELOTID
+				)
+				SELECT *
+				FROM
+				(
+					SELECT 	LH.*
+						,	OI.INSPECTIONDATE  AS SHIPMENTDATE
+						,	RANK() OVER (PARTITION BY LH.LOTID ORDER BY OI.INSPECTIONDEGREE DESC) AS RNK
+					FROM 	LOTHISTORY					LH
+					LEFT JOIN CT_OUTGOINGINSPECTION		OI 	ON 	LH.LOTID = OI.LOTID
+				) X
+				WHERE 	X.RNK = 1
+				ORDER BY X.PATH
+			]]>	
+		</statement>	
+	</query>
+	
+	<!--	
+	프 로 그 램 명	: 공정관리 > Lot 추적 > 투입된 자재 이력 확인 (역방향 추적을 위한 기본 데이터 조회)
+	설		명	: Lot 추적의 자재투입 이력 확인
+	작	성	자	: jhpark
+	작	성	일	: 2020-06-15
+	주요 변경 로그	:	
+	-->	
+	<query id="SelectLotReverseHist" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = SelectLotReverseHist
+				-- Version = 00001
+	
+				SELECT	LOTNAME
+					,	LOTID
+					,	PROCESSSEGMENTID
+					,	PROCESSSEGMENTNAME
+					,	CONSUMABLEDEFNAME		AS PRODUCTDEFNAME
+					,	LOTLEVEL
+					,	PATH
+					,	PARENTPATH
+				FROM 	FN_GETREVERSELOTHISTORY('$!{LOTID}', '$!{LANGUAGETYPE}')
+			]]>	
+		</statement>	
+	</query>
+	
+	<!--	
+	프 로 그 램 명	: 공정관리 > Lot 추적 > 생산실적 조회
+	설		명	: Lot 공정실적 조회
+	작	성	자	: jhpark
+	작	성	일	: 2020-06-16
+	주요 변경 로그	:	
+	-->	
+	<query id="SelectLotTraceWorkResult" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = SelectLotTraceWorkResult
+				-- Version = 00001
+	
+				SELECT  L.LOTID
+					,	L.WORKORDERID 
+					,	L.AREAID
+					,	ISNULL(DC3.DICTIONARYNAME, AR.AREANAME)					AS AREANAME
+					,	L.PROCESSSEGMENTID 
+					,	ISNULL(DC1.DICTIONARYNAME, SG.PROCESSSEGMENTNAME)		AS PROCESSSEGMENTNAME
+					,	L.PRODUCTDEFID 
+					,   ISNULL(PD.PARTNUMBER,L.PRODUCTDEFID)                    AS PARTNUMBER
+					,	ISNULL(DC2.DICTIONARYNAME, PD.PRODUCTDEFNAME)			AS PRODUCTDEFNAME
+					,	WR.WORKSTARTQTY
+					,	WR.WORKENDQTY
+					,	L.TRACKINTIME 
+					,	L.TRACKOUTTIME 
+					,	L.TRACKINUSER 
+					,	ISNULL(US1.USERNAME, L.TRACKINUSER)						AS TRACKINUSERNAME
+					,	L.TRACKOUTUSER
+					,	ISNULL(US2.USERNAME, L.TRACKOUTUSER)					AS TRACKOUTUSERNAME
+					,	WR.WORKTIME 
+				FROM 	SF_LOT						L
+				LEFT JOIN UL_PROCESSWORKRESULT 		WR	ON 	L.LOTID 				= WR.LOTID
+				LEFT JOIN SF_PROCESSSEGMENT 		SG	ON 	L.PROCESSSEGMENTID 		= SG.PROCESSSEGMENTID 
+				LEFT JOIN SF_DICTIONARY 			DC1 ON 	SG.DICTIONARYID 		= DC1.DICTIONARYID 
+														AND DC1.LANGUAGETYPE 		= '$!{LANGUAGETYPE}'
+				LEFT JOIN SF_PRODUCTDEFINITION 		PD 	ON 	L.PRODUCTDEFID 			= PD.PRODUCTDEFID 
+				LEFT JOIN SF_DICTIONARY 			DC2 ON 	PD.DICTIONARYID 		= DC2.DICTIONARYID 
+														AND DC2.LANGUAGETYPE 		= '$!{LANGUAGETYPE}'
+				LEFT JOIN SF_AREA 					AR 	ON 	L.AREAID 				= AR.AREAID 
+				LEFT JOIN SF_DICTIONARY 			DC3 ON 	AR.DICTIONARYID 		= DC3.DICTIONARYID 
+														AND DC3.LANGUAGETYPE 		= '$!{LANGUAGETYPE}'
+				LEFT JOIN SF_USER 					US1 ON 	L.TRACKINUSER 			= US1.USERID
+				LEFT JOIN SF_USER 					US2 ON 	L.TRACKOUTUSER 			= US2.USERID
+				WHERE 	L.LOTID = '$!{LOTID}'
+			]]>	
+		</statement>	
+	</query>
+
+	<!--	
+	프 로 그 램 명	: 공정관리 > Lot 추적 > 생산실적 자재 투입실적 조회
+	설		명	: Lot 생산실적 자재 투입실적 조회
+	작	성	자	: jhpark
+	작	성	일	: 2020-06-16
+	주요 변경 로그	: 2021-05-14 scmo 자재거래처 추가
+	-->	
+	<query id="SelectLotTraceLotMaterial" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = SelectLotTraceLotMaterial
+				-- Version = 00001
+	
+				SELECT 	LM.LOTID
+					,	LM.MATERIALLOTID 
+					,	CD.CONSUMABLEDEFID 
+					,   ISNULL(CD.PARTNUMBER,CD.CONSUMABLEDEFID) PARTNUMBER
+					,	CD.CONSUMABLEDEFNAME 
+					,	LM.CONSUMEDQTY 
+					,	LM.SERIALNO 
+					,	CL.CREATEDTIME
+					,	ISNULL(CUST.CUSTNAME, '')AS CUSTOMERNAME
+				FROM	SF_CONSUMEMATERIALLOT 		LM
+				LEFT JOIN SF_CONSUMABLELOT 			CL 	ON 	LM.MATERIALLOTID = CL.CONSUMABLELOTID
+				LEFT JOIN SF_CONSUMABLEDEFINITION 	CD 	ON 	LM.MATERIALDEFID = CD.CONSUMABLEDEFID 
+				LEFT JOIN CT_CONSUMABLETRANSACTION	TRA ON	TRA.CONSUMABLELOTID = dbo.FN_GETFIRSTOFALLLOTID(LM.MATERIALLOTID)
+															AND TRA.TRANSACTIONTYPE = 'In'
+															AND TRA.TRANSACTIONCODE = 'IB'
+				LEFT JOIN[UCKERP].[$!{DBLINKNAME}].[dbo].[uck_VIEW_Cust] CUST ON CUST.CUSTSEQ = TRA.CUSTOMERID
+				WHERE 	LM.LOTID = '$!{LOTID}'
+			]]>	
+		</statement>	
+	</query>
+	
+	<!--	
+	프 로 그 램 명	: 공정관리 > Lot 추적 > 생산실적 설비
+	설		명	: Lot 생산실적 설비
+	작	성	자	: jhpark
+	작	성	일	: 2020-06-16
+	주요 변경 로그	:	
+	-->	
+	<query id="SelectLotTraceLotEquipment" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = SelectLotTraceLotEquipment
+				-- Version = 00001
+	
+				SELECT 	L.LOTID
+					,	L.EQUIPMENTID 
+					,	ISNULL(DC.DICTIONARYNAME, EQ.EQUIPMENTNAME)		AS EQUIPMENTNAME
+					,	L.TRACKINTIME 
+					,	L.TRACKOUTTIME 
+					,	L.QTY
+				FROM 	SF_LOTEQUIPMENT 		L
+				LEFT JOIN SF_EQUIPMENT 			EQ	ON 	L.EQUIPMENTID 		= EQ.EQUIPMENTID
+				LEFT JOIN SF_DICTIONARY 		DC 	ON 	EQ.DICTIONARYID 	= DC.DICTIONARYID 
+													AND DC.LANGUAGETYPE 	= '$!{LANGUAGETYPE}'
+				WHERE 	L.LOTID = '$!{LOTID}'
+			]]>	
+		</statement>	
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 품질관리 > 클레임 관리 > X번 관리대장
+	설		명	: X번 발행정보 조회 
+	작	성	자	: 정승원
+	작	성	일	: 2020-04-24
+	주요 변경 로그	: 2020-06-17, jhpark, X번관리대장의 Query를 복사하여 Lot추적에서 활용 (각 코드별 다국어 적용)
+				========================================================================
+				★ 쿼리 변경시 version = "00002" 확인 !! ★
+				========================================================================
+	-->
+	<query id="SelectLotTraceLotXManageList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id = SelectLotTraceLotXManageList
+				-- Version = 00001
+				
+	            SELECT	
+						X.XNUMBER														--X번호
+					,	X.CLAIMNUMBER													--Claim No
+					,	CONVERT(CHAR(10), X.PUBLISHDATE, 23)		AS PUBLISHDATE 		--발행일자
+					,	ISNULL(DC1.DICTIONARYNAME, CD1.CODENAME)	AS CLAIMTYPE		--Claim 구분
+					,	ISNULL(DC2.DICTIONARYNAME, CD2.CODENAME)	AS ISREPORT			--보고서
+					,	ISNULL(U.USERNAME, X.PUBLISHER)				AS PUBLISHER 		--발행자
+					,	ISNULL(DC3.DICTIONARYNAME, CD3.CODENAME)	AS PROGRESSSTATE 	--진행상태
+					,	DATEDIFF(DAY, X.PUBLISHDATE, GETDATE())		AS ELAPSEDDAY		--경과일
+					,	ISNULL(DC4.DICTIONARYNAME, CD4.CODENAME)	AS CHARGETYPE		--유/무상
+					,	ISNULL(DC5.DICTIONARYNAME, CD5.CODENAME)	AS XTYPE			--유형
+					,	ISNULL(DC6.DICTIONARYNAME, CD6.CODENAME)	AS TROUBLETYPE		--TROUBLE 분류
+					,	ISNULL(DC7.DICTIONARYNAME, CD7.TEAMNAME)	AS ITEMFAMILY		--제품군
+					,	X.MANUFACTURERID												--제조사
+					,	ISNULL(DC8.DICTIONARYNAME, CD8.CODENAME)	AS MODELID			--기종
+					,	X.MANUFACTURENUMBER												--제조번호
+					,	X.ETMHOUR														--ETM(H)
+					,	ISNULL(DC9.DICTIONARYNAME, CD9.CODENAME)	AS CUSTOMERREGIONID	--지역
+					,	X.CUSTOMERBASE													--거래선			
+					,	X.DEVICECUSTOMERID												--장치사
+					,	X.CUSTOMERID													--고객사
+					,	ISNULL(V.CUSTNAME, X.CUSTOMERID)			AS CUSTOMERNAME
+					,	X.LINEID														--LINE
+					,	X.CUSTOMERLOCATION												--소재지
+					,	X.CUSTOMERMANAGER												--담당자
+					,	X.TELLNUMBER													--연락처
+					,	X.FIXEDCOST														--고정비
+					,	X.VARIABLECOST													--변동비
+					,	ISNULL(X.PROCESSMONTH, 1)			 		AS PROCESSMONTH 	--처리월
+					,	X.ORDERPRICE													--수주액
+					,	ISNULL(X.ORDERMONTH, 1)						AS ORDERMONTH 		--수주월
+					,	X.SALESPRICE													--매출액
+					,	ISNULL(X.SALESMONTH, 1)						AS SALESMONTH 		--매출월
+					,	CONVERT(DATETIME, X.OCCURDATE)		 		AS OCCURDATE		--발생일
+					,	X.STATEDESC														--현상
+					,	X.RESPONSEDESC													--대응
+					,	X.RESPONSEFROM													--대응처
+					,	X.ORDERNUMBER													--작업지시번호
+					,	X.REQUESTDATE													--의뢰서 발행일
+					,	X.PROGRESSDESC													--진행현황
+					,	CONVERT(DATETIME, X.COMPLETEDATE)			AS COMPLETEDATE		--완료일
+					,	X.SHIPMENTDATE													--출하일자
+					,	ISNULL(DC10.DICTIONARYNAME, CD10.CODENAME)	AS ISEXAM			--심사여부
+				FROM	UL_XMANAGE										X
+				LEFT JOIN UL_CAPA										C	ON	X.CLAIMNUMBER 		= C.CLAIMNUMBER
+				LEFT JOIN [UCKERP].[$!{DBLINKNAME}].[dbo].[uck_VIEW_Cust]	V	ON	X.CUSTOMERID 		= CAST(V.CUSTSEQ AS VARCHAR)
+				LEFT JOIN SF_USER										U	ON	X.PUBLISHER			= U.USERID
+				LEFT JOIN SF_CODE										CD1 ON 	CD1.CODECLASSID 	= 'ClaimType'
+																			AND C.CLAIMTYPE 		= CD1.CODEID
+				LEFT JOIN SF_DICTIONARY 								DC1 ON 	CD1.DICTIONARYID 	= DC1.DICTIONARYID 
+																			AND DC1.LANGUAGETYPE 	= '$!{LANGUAGETYPE}'
+				LEFT JOIN SF_CODE										CD2 ON 	CD2.CODECLASSID 	= 'ReportType'
+																			AND X.ISREPORT	 		= CD2.CODEID
+				LEFT JOIN SF_DICTIONARY 								DC2 ON 	CD2.DICTIONARYID 	= DC2.DICTIONARYID 
+																			AND DC2.LANGUAGETYPE 	= '$!{LANGUAGETYPE}'
+				LEFT JOIN SF_CODE										CD3 ON 	CD3.CODECLASSID 	= 'XManageState'
+																			AND X.PROGRESSSTATE		= CD3.CODEID
+				LEFT JOIN SF_DICTIONARY 								DC3 ON 	CD3.DICTIONARYID 	= DC3.DICTIONARYID 
+																			AND DC3.LANGUAGETYPE 	= '$!{LANGUAGETYPE}'
+				LEFT JOIN SF_CODE										CD4 ON 	CD4.CODECLASSID 	= 'FreeType'
+																			AND X.CHARGETYPE		= CD4.CODEID
+				LEFT JOIN SF_DICTIONARY 								DC4 ON 	CD4.DICTIONARYID 	= DC4.DICTIONARYID 
+																			AND DC4.LANGUAGETYPE 	= '$!{LANGUAGETYPE}'
+				LEFT JOIN SF_CODE										CD5 ON 	CD5.CODECLASSID 	= 'FreeType'
+																			AND X.XTYPE				= CD5.CODEID
+				LEFT JOIN SF_DICTIONARY 								DC5 ON 	CD5.DICTIONARYID 	= DC5.DICTIONARYID 
+																			AND DC5.LANGUAGETYPE 	= '$!{LANGUAGETYPE}'
+				LEFT JOIN SF_CODE										CD6 ON 	CD6.CODECLASSID 	= 'TrobleType'
+																			AND X.TROUBLETYPE		= CD6.CODEID
+				LEFT JOIN SF_DICTIONARY 								DC6 ON 	CD6.DICTIONARYID 	= DC6.DICTIONARYID 
+																			AND DC6.LANGUAGETYPE 	= '$!{LANGUAGETYPE}'
+				LEFT JOIN CT_TEAM										CD7 ON 	X.ITEMFAMILY		= CD7.TEAMID
+				LEFT JOIN SF_DICTIONARY 								DC7 ON 	CD7.DICTIONARYID 	= DC7.DICTIONARYID 
+																			AND DC7.LANGUAGETYPE 	= '$!{LANGUAGETYPE}'
+				LEFT JOIN SF_CODE										CD8 ON 	CD8.CODECLASSID 	= 'ModelCode'
+																			AND X.MODELID			= CD8.CODEID
+				LEFT JOIN SF_DICTIONARY 								DC8 ON 	CD8.DICTIONARYID 	= DC8.DICTIONARYID 
+																			AND DC8.LANGUAGETYPE 	= '$!{LANGUAGETYPE}'
+				LEFT JOIN SF_CODE										CD9 ON 	CD9.CODECLASSID 	= 'NationalType'
+																			AND X.CUSTOMERREGIONID	= CD9.CODEID
+				LEFT JOIN SF_DICTIONARY 								DC9 ON 	CD9.DICTIONARYID 	= DC9.DICTIONARYID 
+																			AND DC9.LANGUAGETYPE 	= '$!{LANGUAGETYPE}'
+				LEFT JOIN SF_CODE										CD10 ON CD10.CODECLASSID 	= 'YESNO'
+																			AND X.ISEXAM			= CD10.CODEID
+				LEFT JOIN SF_DICTIONARY 								DC10 ON CD10.DICTIONARYID 	= DC10.DICTIONARYID 
+																			AND DC10.LANGUAGETYPE 	= '$!{LANGUAGETYPE}'		
+				WHERE	1 = 1
+				AND		X.MANUFACTURENUMBER = '$!{P_MANUFACTURENUMBER}'
+			]]>
+		</statement>
+	</query>
+	
+		<!--
+	프 로 그 램 명	: 품질관리 > 클레임 관리 > X번 관리대장
+	설		명	: X번 발행정보 조회 
+	작	성	자	: 정승원
+	작	성	일	: 2020-04-24
+	주요 변경 로그	: 2020-06-17, jhpark, X번관리대장의 Query를 복사하여 Lot추적에서 활용 (각 코드별 다국어 적용)
+				: 2020-11-04 | 이준용 | 쿼리속도 이슈사항이 발생하여 ERP DBLNK 주석처리
+				========================================================================
+				★ 쿼리 변경시 version = "00001" 확인 !! ★
+				========================================================================
+	-->
+	<query id="SelectLotTraceLotXManageList" version="00002">
+		<statement>
+			<![CDATA[
+				--
+				-- Id = SelectLotTraceLotXManageList
+				-- Version = 00002
+				
+	            SELECT	
+						X.XNUMBER														--X번호
+					,	X.CLAIMNUMBER													--Claim No
+					,	CONVERT(CHAR(10), X.PUBLISHDATE, 23)		AS PUBLISHDATE 		--발행일자
+					,	ISNULL(DC1.DICTIONARYNAME, CD1.CODENAME)	AS CLAIMTYPE		--Claim 구분
+					,	ISNULL(DC2.DICTIONARYNAME, CD2.CODENAME)	AS ISREPORT			--보고서
+					,	ISNULL(U.USERNAME, X.PUBLISHER)				AS PUBLISHER 		--발행자
+					,	ISNULL(DC3.DICTIONARYNAME, CD3.CODENAME)	AS PROGRESSSTATE 	--진행상태
+					,	DATEDIFF(DAY, X.PUBLISHDATE, GETDATE())		AS ELAPSEDDAY		--경과일
+					,	ISNULL(DC4.DICTIONARYNAME, CD4.CODENAME)	AS CHARGETYPE		--유/무상
+					,	ISNULL(DC5.DICTIONARYNAME, CD5.CODENAME)	AS XTYPE			--유형
+					,	ISNULL(DC6.DICTIONARYNAME, CD6.CODENAME)	AS TROUBLETYPE		--TROUBLE 분류
+					,	ISNULL(DC7.DICTIONARYNAME, CD7.TEAMNAME)	AS ITEMFAMILY		--제품군
+					,	X.MANUFACTURERID												--제조사
+					,	ISNULL(DC8.DICTIONARYNAME, CD8.CODENAME)	AS MODELID			--기종
+					,	X.MANUFACTURENUMBER												--제조번호
+					,	X.ETMHOUR														--ETM(H)
+					,	ISNULL(DC9.DICTIONARYNAME, CD9.CODENAME)	AS CUSTOMERREGIONID	--지역
+					,	X.CUSTOMERBASE													--거래선			
+					,	X.DEVICECUSTOMERID												--장치사
+					,	X.CUSTOMERID													--고객사
+					-- ,	ISNULL(V.CUSTNAME, X.CUSTOMERID)			AS CUSTOMERNAME
+					,	X.CUSTOMERID		AS CUSTOMERNAME
+					,	X.LINEID														--LINE
+					,	X.CUSTOMERLOCATION												--소재지
+					,	X.CUSTOMERMANAGER												--담당자
+					,	X.TELLNUMBER													--연락처
+					,	X.FIXEDCOST														--고정비
+					,	X.VARIABLECOST													--변동비
+					,	ISNULL(X.PROCESSMONTH, 1)			 		AS PROCESSMONTH 	--처리월
+					,	X.ORDERPRICE													--수주액
+					,	ISNULL(X.ORDERMONTH, 1)						AS ORDERMONTH 		--수주월
+					,	X.SALESPRICE													--매출액
+					,	ISNULL(X.SALESMONTH, 1)						AS SALESMONTH 		--매출월
+					,	CONVERT(DATETIME, X.OCCURDATE)		 		AS OCCURDATE		--발생일
+					,	X.STATEDESC														--현상
+					,	X.RESPONSEDESC													--대응
+					,	X.RESPONSEFROM													--대응처
+					,	X.ORDERNUMBER													--작업지시번호
+					,	X.REQUESTDATE													--의뢰서 발행일
+					,	X.PROGRESSDESC													--진행현황
+					,	CONVERT(DATETIME, X.COMPLETEDATE)			AS COMPLETEDATE		--완료일
+					,	X.SHIPMENTDATE													--출하일자
+					,	ISNULL(DC10.DICTIONARYNAME, CD10.CODENAME)	AS ISEXAM			--심사여부
+				FROM	UL_XMANAGE										X
+				LEFT JOIN UL_CAPA										C	ON	X.CLAIMNUMBER 		= C.CLAIMNUMBER
+				-- LEFT JOIN [UCKERP].[$!{DBLINKNAME}].[dbo].[uck_VIEW_Cust]	V	ON	X.CUSTOMERID 		= CAST(V.CUSTSEQ AS VARCHAR) 2020-11-04 | 쿼리 시간 이슈문제로 주석처리
+				LEFT JOIN SF_USER										U	ON	X.PUBLISHER			= U.USERID
+				LEFT JOIN SF_CODE										CD1 ON 	CD1.CODECLASSID 	= 'ClaimType'
+																			AND C.CLAIMTYPE 		= CD1.CODEID
+				LEFT JOIN SF_DICTIONARY 								DC1 ON 	CD1.DICTIONARYID 	= DC1.DICTIONARYID 
+																			AND DC1.LANGUAGETYPE 	= '$!{LANGUAGETYPE}'
+				LEFT JOIN SF_CODE										CD2 ON 	CD2.CODECLASSID 	= 'ReportType'
+																			AND X.ISREPORT	 		= CD2.CODEID
+				LEFT JOIN SF_DICTIONARY 								DC2 ON 	CD2.DICTIONARYID 	= DC2.DICTIONARYID 
+																			AND DC2.LANGUAGETYPE 	= '$!{LANGUAGETYPE}'
+				LEFT JOIN SF_CODE										CD3 ON 	CD3.CODECLASSID 	= 'XManageState'
+																			AND X.PROGRESSSTATE		= CD3.CODEID
+				LEFT JOIN SF_DICTIONARY 								DC3 ON 	CD3.DICTIONARYID 	= DC3.DICTIONARYID 
+																			AND DC3.LANGUAGETYPE 	= '$!{LANGUAGETYPE}'
+				LEFT JOIN SF_CODE										CD4 ON 	CD4.CODECLASSID 	= 'FreeType'
+																			AND X.CHARGETYPE		= CD4.CODEID
+				LEFT JOIN SF_DICTIONARY 								DC4 ON 	CD4.DICTIONARYID 	= DC4.DICTIONARYID 
+																			AND DC4.LANGUAGETYPE 	= '$!{LANGUAGETYPE}'
+				LEFT JOIN SF_CODE										CD5 ON 	CD5.CODECLASSID 	= 'FreeType'
+																			AND X.XTYPE				= CD5.CODEID
+				LEFT JOIN SF_DICTIONARY 								DC5 ON 	CD5.DICTIONARYID 	= DC5.DICTIONARYID 
+																			AND DC5.LANGUAGETYPE 	= '$!{LANGUAGETYPE}'
+				LEFT JOIN SF_CODE										CD6 ON 	CD6.CODECLASSID 	= 'TrobleType'
+																			AND X.TROUBLETYPE		= CD6.CODEID
+				LEFT JOIN SF_DICTIONARY 								DC6 ON 	CD6.DICTIONARYID 	= DC6.DICTIONARYID 
+																			AND DC6.LANGUAGETYPE 	= '$!{LANGUAGETYPE}'
+				LEFT JOIN CT_TEAM										CD7 ON 	X.ITEMFAMILY		= CD7.TEAMID
+				LEFT JOIN SF_DICTIONARY 								DC7 ON 	CD7.DICTIONARYID 	= DC7.DICTIONARYID 
+																			AND DC7.LANGUAGETYPE 	= '$!{LANGUAGETYPE}'
+				LEFT JOIN SF_CODE										CD8 ON 	CD8.CODECLASSID 	= 'ModelCode'
+																			AND X.MODELID			= CD8.CODEID
+				LEFT JOIN SF_DICTIONARY 								DC8 ON 	CD8.DICTIONARYID 	= DC8.DICTIONARYID 
+																			AND DC8.LANGUAGETYPE 	= '$!{LANGUAGETYPE}'
+				LEFT JOIN SF_CODE										CD9 ON 	CD9.CODECLASSID 	= 'NationalType'
+																			AND X.CUSTOMERREGIONID	= CD9.CODEID
+				LEFT JOIN SF_DICTIONARY 								DC9 ON 	CD9.DICTIONARYID 	= DC9.DICTIONARYID 
+																			AND DC9.LANGUAGETYPE 	= '$!{LANGUAGETYPE}'
+				LEFT JOIN SF_CODE										CD10 ON CD10.CODECLASSID 	= 'YESNO'
+																			AND X.ISEXAM			= CD10.CODEID
+				LEFT JOIN SF_DICTIONARY 								DC10 ON CD10.DICTIONARYID 	= DC10.DICTIONARYID 
+																			AND DC10.LANGUAGETYPE 	= '$!{LANGUAGETYPE}'		
+				WHERE	1 = 1
+				AND		X.MANUFACTURENUMBER = '$!{P_MANUFACTURENUMBER}'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 공정관리 > 실적 등록 > 조립
+	설		명	: 불량수량 조회 
+	작	성	자	: 황유성
+	작	성	일	: 2020-06-19
+	주요 변경 로그	:
+	-->
+	<query id="GetAssyDefectQty" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id = GetAssyDefectQty
+				-- Version = 00001
+	
+				SELECT		COUNT(DISTINCT SRD.SEQ) AS DEFECTQTY
+				FROM		SF_LOT							L
+				JOIN		SF_PRODUCTDEFINITION			PD	ON	PD.PRODUCTDEFID = L.PRODUCTDEFID
+																AND	PD.PRODUCTDEFVERSION = L.PRODUCTDEFVERSION
+				JOIN		CT_SUBSEGMENTSPEC				SP	ON	SP.SPECDEFID = PD.SPECDEFID
+																AND	SP.VALIDSTATE = 'Valid'
+				JOIN		CT_SUBSEGMENTSPECDETAIL			SPD	ON	SPD.SPECDEFID = SP.SPECDEFID
+																AND	SPD.SPECSEQUENCE = SP.SPECSEQUENCE
+																AND	SPD.VALIDSTATE = 'Valid'
+				JOIN		UL_SUBPROCESSWORKRESULT			SR	ON	SR.LOTID = L.LOTID
+																AND	SR.SUBPROCESSSEGMENTID = SP.SUBPROCESSSEGMENTID
+				JOIN		UL_SUBPROCESSWORKRESULTDETAIL	SRD	ON	SRD.WORKRESULTHISTKEY = SR.TXNHISTKEY
+																AND	SRD.PARAMETERID = SPD.PARAMETERID
+				WHERE		L.LOTID = '$!{LOTID}'
+				AND			ISNULL(SRD.ISDEFECT, 'N') = 'Y'
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	프 로 그 램 명	: 
+	설		명	: 
+	작	성	자	: 
+	작	성	일	: 
+	주요 변경 로그	:
+	-->
+	<query id="SelectCancelLotInfo" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id = SelectCancelLotInfo
+				-- Version = 00001
+	
+				SELECT LOTID
+				    ,  QTY
+					,  L.PROCESSSTATE
+					,  L.LOTSTATE
+					,  PD.PARTNUMBER
+					,  PD.PRODUCTDEFNAME
+					,  ISNULL(SD.DICTIONARYNAME,SC.CODENAME) MODELNAME
+				FROM SF_LOT L
+				INNER JOIN SF_PRODUCTDEFINITION PD ON  L.PRODUCTDEFID = PD.PRODUCTDEFID
+				LEFT  JOIN SF_CODE              SC ON  PD.MODELID = SC.CODEID
+				                                   AND SC.CODECLASSID = 'ModelCode'  
+				LEFT  JOIN SF_DICTIONARY        SD ON  SC.DICTIONARYID = SD.DICTIONARYID
+				                                   AND SD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE LOTID = '$!{LOTID}'
+			]]>
+		</statement>
+	</query>
+	
+		<!--
+	프 로 그 램 명	: 
+	설		명	: 
+	작	성	자	: 
+	작	성	일	: 
+	주요 변경 로그	:
+	-->
+	<query id="SelectCancelLotInfo" version="00002">
+		<statement>
+			<![CDATA[
+				--
+				-- Id = SelectCancelLotInfo
+				-- Version = 00001
+			
+				SELECT 	TOP 1 IDCLASSID, PREFIX
+				FROM 	SF_IDCLASSSPLIT
+				WHERE 	IDCLASSID = '$!{IDCLASSID}'
+				ORDER BY 	CREATEDTIME DESC
+			]]>
+		</statement>
+	</query>
+	
+	
+	
+			<!--
+	프 로 그 램 명	: 
+	설		명	: 
+	작	성	자	: 
+	작	성	일	: 
+	주요 변경 로그	:
+	-->
+	<query id="LotSerialStartIndex" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id = SelectCancelLotInfo
+				-- Version = 00001
+			
+				SELECT 	SUM(LENGTH) AS STARTSERIAL FROM SF_IDDEFINITION
+				WHERE	1=1
+				AND 	IDCLASSID = '$!{IDCLASSID}'
+				AND 	SEQUENCE < (SELECT SEQUENCE FROM SF_IDDEFINITION
+				WHERE 	1=1
+				AND 	IDCLASSID = '$!{IDCLASSID}'
+					#if ('$!{IDCLASSID}' != 'CylinderLotNo')
+				AND 	IDDEFCATEGORY = 'SERIAL'
+					#else
+				AND		IDDEFID = 'SERIAL'
+					#end
+				)
+			]]>
+		</statement>
+	</query>
+
+		
+			<!--
+	프 로 그 램 명	: 
+	설		명	: 
+	작	성	자	: 
+	작	성	일	: 
+	주요 변경 로그	:
+	-->
+	<query id="LotSerialLastIndex" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id = SelectCancelLotInfo
+				-- Version = 00001
+			
+				SELECT 	SUM(LENGTH) AS LASTSERIAL FROM SF_IDDEFINITION
+				WHERE 	1=1
+				AND 	IDCLASSID = '$!{IDCLASSID}'
+				AND 	SEQUENCE <= (SELECT SEQUENCE FROM SF_IDDEFINITION
+				WHERE 	1=1
+				AND 	IDCLASSID = '$!{IDCLASSID}'
+					#if ('$!{IDCLASSID}' != 'CylinderLotNo')
+				AND 	IDDEFCATEGORY = 'SERIAL'
+					#else
+				AND		IDDEFID = 'SERIAL'
+					#end
+				)
+			]]>
+		</statement>
+	</query>
+	
+			<!--
+	프 로 그 램 명	: 
+	설		명	: 
+	작	성	자	: 
+	작	성	일	: 
+	주요 변경 로그	:
+	-->
+	<query id="SelectCancelLotInfo" version="00002">
+		<statement>
+			<![CDATA[
+				--
+				-- Id = SelectCancelLotInfo
+				-- Version = 00002
+			
+				SELECT 	TOP 1 IDCLASSID, PREFIX
+				FROM 	SF_IDCLASSSPLIT
+				WHERE 	IDCLASSID = '$!{IDCLASSID}'
+				ORDER BY 	CREATEDTIME DESC
+
+			]]>
+		</statement>
+	</query>
+	
+				<!--
+	프 로 그 램 명	: 
+	설		명	: 
+	작	성	자	: 
+	작	성	일	: 
+	주요 변경 로그	:
+	-->
+	<query id="SelectCancelLotInfo" version="00003">
+		<statement>
+			<![CDATA[
+				--
+				-- Id = SelectCancelLotInfo
+				-- Version = 00003
+			
+				SELECT 	TOP 1 IDCLASSID, PREFIX
+				FROM 	SF_IDCLASSSPLIT
+				WHERE 	IDCLASSID = '$!{IDCLASSID}'
+				AND 	PREFIX = '$!{PREFIX}'
+				ORDER BY 	CREATEDTIME DESC
+
+			]]>
+		</statement>
+	</query>
+	
+	
+		<!--
+	프 로 그 램 명	: 생산관리 > 생산계획 > 작업지시조회
+	설		명	: LOT 취소 시 마지막 번호라면 LOT번호 재사용하기 위하여 마지막 번호 조회
+	작	성	자	: 이현석
+	작	성	일	: 2021.12.16
+	주요 변경 로그	:
+	-->
+	<query id="SelectCancelLot" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id = SelectCancelLotInfo
+				-- Version = 00001
+	
+				SELECT	PREFIX,
+						LASTSERIALNO,
+						LEN(PREFIX)-LEN(REPLACE(PREFIX,' ','')) AS SPACELEN
+				FROM 	SF_IDCLASSSERIAL
+				WHERE 	IDCLASSID='$!{LOTCREATERULE}'
+				                                   AND '$!{LOTID}' like concat(replace(PREFIX, ' ', ''),'%') 
+			]]>
+		</statement>
+	</query>
+		
+	<!--
+	프 로 그 램 명	: 품질관리 > 수리품 관리 > X번관리대장
+	설		명	: X번 관리대장 취소 시 마지막 번호라면 X번호 재사용하기 위하여 마지막 번호 조회
+	작	성	자	: 이현석
+	작	성	일	: 2021.12.16
+	주요 변경 로그	:
+	-->
+	<query id="SelectCancelLot" version="00002">
+		<statement>
+			<![CDATA[
+				--
+				-- Id = SelectCancelLotInfo
+				-- Version = 00001
+	
+				SELECT	PREFIX,
+							LASTSERIALNO
+				FROM 	SF_IDCLASSSERIAL
+				WHERE 	IDCLASSID='$!{LOTCREATERULE}'
+				ORDER BY PREFIX DESC
+			]]>
+		</statement>
+	</query>
+		
+		
+		
+	<!--
+	프 로 그 램 명	: 공정관리 > 실적 등록 > 조립
+	설		명	: 양품 SEQ 조회
+				"조립 공정 실적완료 -> 자재전환 -> 자재 LOT 분할" 시 분할 LOT ID를 채번하기 위해 양품 SEQ 를 조회
+	작	성	자	: 황유성
+	작	성	일	: 2020-06-19
+	주요 변경 로그	:
+	-->
+	<query id="GetAssyGoodSeq" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id = GetAssyGoodSeq
+				-- Version = 00001
+	
+				WITH SEQUENCES AS (
+					SELECT 	1 AS SEQ
+					UNION ALL
+					SELECT 	SEQ + 1 
+					FROM 	SEQUENCES 
+					WHERE 	SEQ < $!{CREATEDQTY}
+				)
+				SELECT		SEQ
+				FROM		SEQUENCES S
+				WHERE		NOT EXISTS
+							(
+								SELECT		DISTINCT SRD.SEQ
+								FROM		SF_LOT							L
+								JOIN		SF_PRODUCTDEFINITION			PD	ON	PD.PRODUCTDEFID = L.PRODUCTDEFID
+																				AND	PD.PRODUCTDEFVERSION = L.PRODUCTDEFVERSION
+								JOIN		CT_SUBSEGMENTSPEC				SP	ON	SP.SPECDEFID = PD.SPECDEFID
+																				AND	SP.VALIDSTATE = 'Valid'
+								JOIN		CT_SUBSEGMENTSPECDETAIL			SPD	ON	SPD.SPECDEFID = SP.SPECDEFID
+																				AND	SPD.SPECSEQUENCE = SP.SPECSEQUENCE
+																				AND	SPD.VALIDSTATE = 'Valid'
+								JOIN		UL_SUBPROCESSWORKRESULT			SR	ON	SR.LOTID = L.LOTID
+																				AND	SR.SUBPROCESSSEGMENTID = SP.SUBPROCESSSEGMENTID
+								JOIN		UL_SUBPROCESSWORKRESULTDETAIL	SRD	ON	SRD.WORKRESULTHISTKEY = SR.TXNHISTKEY
+																				AND	SRD.PARAMETERID = SPD.PARAMETERID
+								WHERE		L.LOTID = '$!{LOTID}'
+								AND			ISNULL(SRD.ISDEFECT, 'N') = 'Y'
+								AND			SRD.SEQ = S.SEQ
+							)
+				ORDER BY SEQ	
+			]]>
+		</statement>
+	</query>
+	<!--
+	프 로 그 램 명	: 공정관리 > 공정실적 > 가공진척현황
+	설		명	: 등록된 가공실적 현황
+	작	성	자	: JYLEE
+	작	성	일	: 2020-06-22
+	주요 변경 로그	:
+	-->
+	<query id="GetMachiningStatus" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id = GetMachiningStatus
+				-- Version = 00001
+	
+					SELECT
+							MAX(LOT.TRACKINTIME) 									AS  RESULTDATE
+						,	LOT.LOTID 												AS 	LOTID
+						,	MAX(LOT.WORKORDERID)									AS	WORKORDERID 
+						,	MAX(LOT.PRODUCTDEFID) 									AS 	PRODUCTDEFID
+						,	MAX(ISNULL(DEF.PARTNUMBER,LOT.PRODUCTDEFID)) 					AS 	PARTNUMBER
+						,	MAX(ISNULL(DIC2.DICTIONARYNAME,DEF.PRODUCTDEFNAME))		AS 	PRODUCTDEFNAME
+						,	MAX(DEF.STANDARD)										AS  STANDARD
+						,	MAX(CODE.CODENAME) 										AS 	MODELNAME
+						,	MAX(ISNULL(DIC3.DICTIONARYNAME,SEG.PROCESSSEGMENTNAME))	AS	PROCESSSEGMENTNAME
+						,	COUNT(EQ.LOTID) 										AS  COUNT
+						,	MAX(DEF.LOTSIZE) 										AS 	LOTSIZE
+						,	CASE WHEN MAX(LOT.LOTSTATE) = 'InProduction' 
+									THEN NULL ELSE MAX(LOT.QTY) END 				AS RESULTQTY
+						,	MAX(LOT.TRACKINTIME) 									AS 	TRACKINTIME
+						,	CASE	WHEN MAX(LOT.PROCESSSTATE) = 'Run' 
+									THEN NULL ELSE MAX(LOT.TRACKOUTTIME) END 		AS TRACKOUTTIME
+						,	CASE	WHEN MAX(LOT.PROCESSSTATE) = 'Run' THEN NULL
+												ELSE ROUND(DATEDIFF(SECOND, MAX(LOT.TRACKINTIME), MAX(LOT.TRACKOUTTIME)) / 60.0, 2) 
+							END 	 												AS WORKTIME
+						,	MAX(LOT.WORKORDERID) 									AS WORKORDERID
+						,	MAX(ISNULL(DIC.DICTIONARYNAME, LOT.LOTSTATE)) 			AS LOTSTATE
+						,   ISNULL(MAX(RES.STANDARDTIME), MAX(DEF.STANDARDTIME)) 	AS STANDARDTIME
+					FROM SF_LOT LOT
+					LEFT JOIN UL_PROCESSWORKRESULT RES ON  RES.LOTID = LOT.LOTID
+					LEFT JOIN SF_PRODUCTDEFINITION DEF ON  DEF.PRODUCTDEFID = LOT.PRODUCTDEFID
+					LEFT JOIN SF_PROCESSPATH PATH      ON  PATH.PROCESSDEFID = DEF.PROCESSDEFID
+													   AND PATH.PATHSEQUENCE = 1
+					LEFT JOIN SF_PROCESSSEGMENT   SEG  ON  SEG.PROCESSSEGMENTID = PATH.PROCESSSEGMENTID
+					LEFT JOIN SF_CODE             CODE ON  CODE.CODEID	= DEF.MODELID 
+													   AND CODECLASSID = 'ModelCode'
+					LEFT JOIN SF_LOTEQUIPMENT       EQ ON  EQ.LOTID = LOT.LOTID
+					LEFT JOIN SF_DICTIONARY        DIC ON  DIC.DICTIONARYID = LOT.LOTSTATE
+													   AND DIC.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+					LEFT JOIN SF_DICTIONARY       DIC2 ON  DIC2.DICTIONARYID = DEF.DICTIONARYID
+													   AND DIC2.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+					LEFT JOIN SF_DICTIONARY       DIC3 ON  DIC3.DICTIONARYID = SEG.DICTIONARYID
+													   AND DIC3.LANGUAGETYPE = '$!{P_LANGUAGETYPE}'
+					WHERE 1=1
+						AND SEG.PROCESSSEGMENTCLASSID = 'SGC00001'
+						AND	LOT.TRACKINTIME BETWEEN '$!{P_DATEPERIOD_PERIODFR}' AND '$!{P_DATEPERIOD_PERIODTO}'
+					#if ("$!{P_PROCESSCODE}" != "" && "$!{P_PROCESSCODE}" != "*")
+						AND SEG.PROCESSSEGMENTID = '$!{P_PROCESSCODE}'
+					#end
+					#if ("$!{P_LOTSTATE}" != "" && "$!{P_LOTSTATE}" != "*")
+						AND LOT.LOTSTATE = '$!{P_LOTSTATE}'
+					#end
+					GROUP BY LOT.LOTID
+					ORDER BY MAX(LOT.TRACKINTIME) DESC
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 공정관리 > 공정실적 > 제조리드터임
+	설		명	: 리드타임 조회
+	작	성	자	: jhpark
+	작	성	일	: 2020-06-24
+	주요 변경 로그	:
+	-->
+	<query id="SelectLeadTimeList" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id = SelectLeadTimeList
+				-- Version = 00001
+	
+					SELECT	WORKDATE
+						,	LOTID
+						,	PROCESSSEGMENTID
+						,	PROCESSSEGMENTNAME
+						,	PRODUCTDEFID
+						,   PARTNUMBER
+						,	PRODUCTDEFNAME
+						,	WORKENDQTY
+						,	WORKSTARTTIME
+						,	WORKENDTIME
+						,	LEADTIME
+						,	SPECSEQUENCE
+						,	SUBPROCESSSEGMENTID
+						,	SUBPROCESSSEGMENTNAME
+						,	SUBWORKSTARTTIME
+						,	SUBWORKENDTIME
+						,	SUBLEADTIME
+						,	ROUND(DATEDIFF(SECOND, SUBWORKENDTIME,NEXTWORKSTARTTIME) / 60.0, 2)		AS WAITTIME
+					FROM
+					(
+						SELECT 	CONVERT(DATE, WR.WORKSTARTTIME)						AS WORKDATE
+							,	WR.LOTID
+							,	WR.PROCESSSEGMENTID
+							,	ISNULL(DC2.DICTIONARYNAME, SG1.PROCESSSEGMENTNAME)	AS PROCESSSEGMENTNAME
+							,	PD.PRODUCTDEFID
+							,	PD.PARTNUMBER
+							,	ISNULL(DC1.DICTIONARYNAME, PD.PRODUCTDEFNAME)		AS PRODUCTDEFNAME
+							,	WR.WORKENDQTY
+							,	WR.WORKSTARTTIME
+							,	WR.WORKENDTIME
+							,	ROUND((WR.WORKTIME / 60), 2)						AS LEADTIME
+							,	SP.USERSEQUENCE                                     AS SPECSEQUENCE
+							,	SWR.PROCESSSEGMENTID								AS SUBPROCESSSEGMENTID
+							,	ISNULL(DC3.DICTIONARYNAME, SG2.PROCESSSEGMENTNAME)	AS SUBPROCESSSEGMENTNAME
+							,	SWR.WORKSTARTTIME 									AS SUBWORKSTARTTIME
+							,	SWR.WORKENDTIME 									AS SUBWORKENDTIME
+							,	SWR.WORKTIME										AS SUBLEADTIME
+							,	LEAD(SWR.WORKSTARTTIME, 1, NULL) OVER (PARTITION BY SWR.LOTID ORDER BY SWR.WORKSTARTTIME)	AS NEXTWORKSTARTTIME
+						FROM 	UL_PROCESSWORKRESULT 			WR
+						LEFT JOIN UL_SUBPROCESSWORKRESULT 		SWR ON	WR.LOTID 				= SWR.LOTID
+						LEFT JOIN SF_LOT						L 	ON 	WR.LOTID 				= L.LOTID
+						LEFT JOIN SF_PRODUCTDEFINITION 			PD 	ON 	PD.PRODUCTDEFID 			= L.PRODUCTDEFID
+						LEFT JOIN SF_DICTIONARY 				DC1 ON 	PD.DICTIONARYID 		= DC1.DICTIONARYID 
+																	AND DC1.LANGUAGETYPE 		= '$!{LANGUAGETYPE}'
+						LEFT JOIN SF_PROCESSSEGMENT				SG1	ON 	WR.PROCESSSEGMENTID 	= SG1.PROCESSSEGMENTID
+						LEFT JOIN SF_DICTIONARY 				DC2	ON 	SG1.DICTIONARYID 		= DC2.DICTIONARYID
+																	AND DC2.LANGUAGETYPE 		= '$!{LANGUAGETYPE}'
+						LEFT JOIN SF_PROCESSSEGMENT				SG2	ON 	SWR.SUBPROCESSSEGMENTID = SG2.PROCESSSEGMENTID
+						LEFT JOIN SF_DICTIONARY 				DC3	ON 	SG2.DICTIONARYID 		= DC3.DICTIONARYID
+																	AND DC3.LANGUAGETYPE 		= '$!{LANGUAGETYPE}'
+						LEFT JOIN CT_SUBSEGMENTSPEC 			SP	ON 	SWR.SPECDEFID 	= SP.SPECDEFID
+						                                            AND SWR.SUBPROCESSSEGMENTID = SP.SUBPROCESSSEGMENTID
+						                                            AND SWR.SPECDEFIDVERSION = SP.SPECDEFIDVERSION
+						WHERE 	1=1
+						AND 	WR.WORKENDTIME BETWEEN '$!{P_DATEPERIOD_PERIODFR}' AND '$!{P_DATEPERIOD_PERIODTO}'
+						
+						-- 공정
+						#if ("$!{P_PROCESSSEGMENT}" != "" && "$!{P_PROCESSSEGMENT}" != "*")
+							AND 	SG1.PROCESSSEGMENTID = '$!{P_PROCESSSEGMENT}'
+						#end
+						
+						-- 기종
+						#if ("$!{P_MODEL}" != "" && "$!{P_MODEL}" != "*")
+							AND		PD.MODELID = '$!{P_MODEL}'
+						#end
+						
+						-- 품목
+						#if ("$!{PRODUCTDEFID}" != "" && "$!{PRODUCTDEFID}" != "*")
+							AND		EXISTS
+							(
+								SELECT	1
+								FROM	ufn_selectStringToSplit('$!{PRODUCTDEFID}', ',')		PMP
+								WHERE	PD.PRODUCTDEFID = PMP.VALUE
+							)
+						#end
+						
+					) X
+					ORDER BY WORKSTARTTIME
+						,	LOTID
+						,	PROCESSSEGMENTID
+					--	,	SPECSEQUENCE
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 공정관리 > 공정실적 > 기종별 리드타임
+	설		명	: 기종별 리드타임
+	작	성	자	: jhpark
+	작	성	일	: 2020-06-24
+	주요 변경 로그	:
+	-->
+	<query id="SelectLeadTimeByModel" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id = SelectLeadTimeByModel
+				-- Version = 00001
+	
+				SELECT	PROCESSSEGMENTID
+					,	PROCESSSEGMENTNAME
+					,	MODELID
+					,   SUM(WORKENDQTY)                             AS WORKENDQTY
+					,	MODELNAME
+					,	ROUND(SUM(LEADTIME) / COUNT(LOTID), 2)		AS LEADTIME
+					,	SPECSEQUENCE
+					,	SUBPROCESSSEGMENTID
+					,	SUBPROCESSSEGMENTNAME
+					,	ROUND(SUM(SUBLEADTIME) / COUNT(LOTID), 2)	AS SUBLEADTIME
+					,	ROUND(SUM(WAITTIME) / COUNT(LOTID), 2)		AS WAITTIME
+				FROM
+				(
+					SELECT  LOTID
+						,	PROCESSSEGMENTID
+						,	PROCESSSEGMENTNAME
+						,	MODELID
+						,   WORKENDQTY
+						,	MODELNAME
+						,	WORKENDTIME
+						,	LEADTIME
+						,	SPECSEQUENCE
+						,	SUBPROCESSSEGMENTID
+						,	SUBPROCESSSEGMENTNAME
+						,	SUBLEADTIME
+						,	ROUND(DATEDIFF(SECOND, SUBWORKENDTIME,NEXTWORKSTARTTIME) / 60.0, 2)		AS WAITTIME
+					FROM
+					(
+						SELECT 	WR.LOTID
+							,	WR.PROCESSSEGMENTID
+							,	ISNULL(DC2.DICTIONARYNAME, SG1.PROCESSSEGMENTNAME)	AS PROCESSSEGMENTNAME
+							,	PD.MODELID
+							,   WR.WORKENDQTY 
+							,	ISNULL(CD.CODENAME, PD.MODELID)						AS MODELNAME
+							,	WR.WORKENDTIME
+							,	ROUND((WR.WORKTIME / 60), 2)						AS LEADTIME
+							,	SP.SPECSEQUENCE
+							,	SWR.PROCESSSEGMENTID								AS SUBPROCESSSEGMENTID
+							,	ISNULL(DC3.DICTIONARYNAME, SG2.PROCESSSEGMENTNAME)	AS SUBPROCESSSEGMENTNAME
+							,	SWR.WORKENDTIME 									AS SUBWORKENDTIME
+							,	SWR.WORKTIME										AS SUBLEADTIME
+							,	LEAD(SWR.WORKSTARTTIME, 1, NULL) OVER (PARTITION BY SWR.LOTID ORDER BY SWR.WORKSTARTTIME)	AS NEXTWORKSTARTTIME
+						FROM 	UL_PROCESSWORKRESULT 		WR
+						LEFT JOIN UL_SUBPROCESSWORKRESULT 	SWR ON	WR.LOTID 				= SWR.LOTID
+						LEFT JOIN SF_LOT					L 	ON 	WR.LOTID 				= L.LOTID
+						LEFT JOIN SF_PRODUCTDEFINITION 		PD 	ON 	PD.PRODUCTDEFID 		= L.PRODUCTDEFID
+						LEFT JOIN SF_DICTIONARY 			DC1 ON 	PD.DICTIONARYID 		= DC1.DICTIONARYID 
+																AND DC1.LANGUAGETYPE 		= 'ko-KR'
+						LEFT JOIN SF_PROCESSSEGMENT			SG1	ON 	WR.PROCESSSEGMENTID 	= SG1.PROCESSSEGMENTID
+						LEFT JOIN SF_DICTIONARY 			DC2	ON 	SG1.DICTIONARYID 		= DC2.DICTIONARYID
+																AND DC2.LANGUAGETYPE 		= 'ko-KR'
+						LEFT JOIN SF_PROCESSSEGMENT			SG2	ON 	SWR.SUBPROCESSSEGMENTID = SG2.PROCESSSEGMENTID
+						LEFT JOIN SF_DICTIONARY 			DC3	ON 	SG2.DICTIONARYID 		= DC3.DICTIONARYID
+																AND DC3.LANGUAGETYPE 		= 'ko-KR'
+						LEFT JOIN CT_SUBSEGMENTSPEC 		SP	ON 	SWR.SPECDEFID 	        = SP.SPECDEFID
+						                                        AND SWR.SUBPROCESSSEGMENTID = SP.SUBPROCESSSEGMENTID
+						                                        AND SWR.SPECDEFIDVERSION	= SP.SPECDEFIDVERSION
+						LEFT JOIN SF_CODE 					CD 	ON 	PD.MODELID 				= CD.CODEID
+																AND CD.CODECLASSID 			= 'ModelCode'
+						WHERE 	1=1
+						AND 	WR.WORKENDTIME BETWEEN '$!{P_DATEPERIOD_PERIODFR}' AND '$!{P_DATEPERIOD_PERIODTO}'
+						
+						-- 공정
+						#if ("$!{P_PROCESSSEGMENT}" != "" && "$!{P_PROCESSSEGMENT}" != "*")
+							AND 	SG1.PROCESSSEGMENTID = '$!{P_PROCESSSEGMENT}'
+						#end
+						
+						-- 기종
+						#if ("$!{P_MODEL}" != "" && "$!{P_MODEL}" != "*")
+							AND		PD.MODELID = '$!{P_MODEL}'
+						#end
+						
+						-- 품목
+						#if ("$!{PRODUCTDEFID}" != "" && "$!{PRODUCTDEFID}" != "*")
+							AND		EXISTS
+							(
+								SELECT	1
+								FROM	ufn_selectStringToSplit('$!{PRODUCTDEFID}', ',')		PMP
+								WHERE	PD.PRODUCTDEFID = PMP.VALUE
+							)
+						#end
+					) Z
+				) X
+				GROUP BY PROCESSSEGMENTID
+					,	PROCESSSEGMENTNAME
+					,	MODELID
+					,	MODELNAME
+					,	SPECSEQUENCE
+					,	SUBPROCESSSEGMENTID
+					,	SUBPROCESSSEGMENTNAME
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 공정관리 > 공정실적 > 제품별 리드타임
+	설		명	: 제품별 리드타임
+	작	성	자	: jhpark
+	작	성	일	: 2020-06-24
+	주요 변경 로그	:
+	-->
+	<query id="SelectLeadTimeByProduct" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id = SelectLeadTimeByProduct
+				-- Version = 00001
+	
+				SELECT	PROCESSSEGMENTID
+					,	PROCESSSEGMENTNAME
+					,	MODELID
+					,	MODELNAME
+					,	PRODUCTDEFID
+					,	PRODUCTDEFNAME
+					,	ROUND(SUM(LEADTIME) / COUNT(LOTID), 2)		AS LEADTIME
+					,	SPECSEQUENCE
+					,	SUBPROCESSSEGMENTID
+					,	SUBPROCESSSEGMENTNAME
+					,	ROUND(SUM(SUBLEADTIME) / COUNT(LOTID), 2)	AS SUBLEADTIME
+					,	ROUND(SUM(WAITTIME) / COUNT(LOTID), 2)		AS WAITTIME
+				FROM
+				(
+					SELECT  LOTID
+						,	PROCESSSEGMENTID
+						,	PROCESSSEGMENTNAME
+						,	MODELID
+						,	MODELNAME
+						,	PRODUCTDEFID
+						,	PRODUCTDEFNAME
+						,	WORKENDTIME
+						,	LEADTIME
+						,	SPECSEQUENCE
+						,	SUBPROCESSSEGMENTID
+						,	SUBPROCESSSEGMENTNAME
+						,	SUBLEADTIME
+						,	ROUND(DATEDIFF(SECOND, SUBWORKENDTIME,NEXTWORKSTARTTIME) / 60.0, 2)		AS WAITTIME
+					FROM
+					(
+						SELECT 	WR.LOTID
+							,	WR.PROCESSSEGMENTID
+							,	ISNULL(DC2.DICTIONARYNAME, SG1.PROCESSSEGMENTNAME)	AS PROCESSSEGMENTNAME
+							,	PD.MODELID
+							,	ISNULL(CD.CODENAME, PD.MODELID)						AS MODELNAME
+							,	PD.PRODUCTDEFID
+							,	PD.PRODUCTDEFNAME
+							,	WR.WORKENDTIME
+							,	ROUND((WR.WORKTIME / 60), 2)						AS LEADTIME
+							,	SP.SPECSEQUENCE
+							,	SWR.PROCESSSEGMENTID								AS SUBPROCESSSEGMENTID
+							,	ISNULL(DC3.DICTIONARYNAME, SG2.PROCESSSEGMENTNAME)	AS SUBPROCESSSEGMENTNAME
+							,	SWR.WORKENDTIME 									AS SUBWORKENDTIME
+							,	SWR.WORKTIME										AS SUBLEADTIME
+							,	LEAD(SWR.WORKSTARTTIME, 1, NULL) OVER (PARTITION BY SWR.LOTID ORDER BY SWR.WORKSTARTTIME)	AS NEXTWORKSTARTTIME
+						FROM 	UL_PROCESSWORKRESULT 		WR
+						LEFT JOIN UL_SUBPROCESSWORKRESULT 	SWR ON	WR.LOTID 				= SWR.LOTID
+						LEFT JOIN SF_LOT					L 	ON 	WR.LOTID 				= L.LOTID
+						LEFT JOIN SF_PRODUCTDEFINITION 		PD 	ON 	PD.PRODUCTDEFID 			= L.PRODUCTDEFID
+						LEFT JOIN SF_DICTIONARY 			DC1 ON 	PD.DICTIONARYID 		= DC1.DICTIONARYID 
+																AND DC1.LANGUAGETYPE 		= 'ko-KR'
+						LEFT JOIN SF_PROCESSSEGMENT			SG1	ON 	WR.PROCESSSEGMENTID 	= SG1.PROCESSSEGMENTID
+						LEFT JOIN SF_DICTIONARY 			DC2	ON 	SG1.DICTIONARYID 		= DC2.DICTIONARYID
+																AND DC2.LANGUAGETYPE 		= 'ko-KR'
+						LEFT JOIN SF_PROCESSSEGMENT			SG2	ON 	SWR.SUBPROCESSSEGMENTID = SG2.PROCESSSEGMENTID
+						LEFT JOIN SF_DICTIONARY 			DC3	ON 	SG2.DICTIONARYID 		= DC3.DICTIONARYID
+																AND DC3.LANGUAGETYPE 		= 'ko-KR'
+						LEFT JOIN CT_SUBSEGMENTSPEC 			SP	ON 	SWR.SPECDEFID 	= SP.SPECDEFID
+						                                            AND SWR.SUBPROCESSSEGMENTID = SP.SUBPROCESSSEGMENTID
+						                                            AND SWR.SPECDEFIDVERSION = SP.SPECDEFIDVERSION
+						LEFT JOIN SF_CODE 					CD 	ON 	PD.MODELID 				= CD.CODEID
+																AND CD.CODECLASSID 			= 'ModelCode'
+						WHERE 	1=1
+						AND 	WR.WORKENDTIME BETWEEN '$!{P_DATEPERIOD_PERIODFR}' AND '$!{P_DATEPERIOD_PERIODTO}'
+						
+						-- 공정
+						#if ("$!{P_PROCESSSEGMENT}" != "" && "$!{P_PROCESSSEGMENT}" != "*")
+							AND 	SG1.PROCESSSEGMENTID = '$!{P_PROCESSSEGMENT}'
+						#end
+						
+						-- 기종
+						#if ("$!{P_MODEL}" != "" && "$!{P_MODEL}" != "*")
+							AND		PD.MODELID = '$!{P_MODEL}'
+						#end
+						
+						-- 품목
+						#if ("$!{PRODUCTDEFID}" != "" && "$!{PRODUCTDEFID}" != "*")
+							AND		EXISTS
+							(
+								SELECT	1
+								FROM	ufn_selectStringToSplit('$!{PRODUCTDEFID}', ',')		PMP
+								WHERE	PD.PRODUCTDEFID = PMP.VALUE
+							)
+						#end
+					) Z
+				) X
+				GROUP BY PROCESSSEGMENTID
+					,	PROCESSSEGMENTNAME
+					,	MODELID
+					,	MODELNAME
+					,	PRODUCTDEFID
+					,	PRODUCTDEFNAME
+					,	SPECSEQUENCE
+					,	SUBPROCESSSEGMENTID
+					,	SUBPROCESSSEGMENTNAME
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 공정관리 > 공정실적 > 조립
+	설		명	: 비추적자재 BOM 조회
+	작	성	자	: yshwang
+	작	성	일	: 2020-06-24
+	주요 변경 로그	:
+	-->
+	<query id="GetUnTrackingBom" version="00001">
+		<statement>
+			<![CDATA[
+				--	
+				-- Id = GetUnTrackingBom
+				-- Version = 00001
+
+				-- BOM 에 등록된 자재
+				WITH MATINPUT AS
+				(
+					SELECT
+								BOM.CONSUMABLEDEFID																-- 자재코드
+							,	MAX(CD.PARTNUMBER) 										AS PARTNUMBER
+							,	MAX(CD.CONSUMABLEDEFNAME)								AS CONSUMABLEDEFNAME	-- 자재명
+							,	MAX(CD.UNIT)											AS UNIT					-- 단위코드
+							,	(MAX(BOM.QTY) / MAX(WO.ORDERQTY)) * MAX(L.CREATEDQTY)	AS BOMQTY				-- 소요량
+							,	ISNULL(MAX(CML.GOODQTY), 0)								AS INPUTQTY				-- 투입수량
+							,	ISNULL(SUM(CL.CONSUMABLELOTQTY), 0) 					AS CONSUMABLELOTQTY		-- 창고재고(가투입수량 반영안됨)
+							,	ISNULL(MAX(CML.GOODQTY)
+								,	(MAX(BOM.QTY) / MAX(WO.ORDERQTY)) * MAX(L.CREATEDQTY))	AS GOODQTY			-- 양품수량(투입예정정보)
+							,	ISNULL(MAX(CML.GOODQTY), 0)								AS ORG_GOODQTY			-- 양품수량(투입예정정보)
+							,	ISNULL(MAX(CML.BADQTY), 0)								AS BADQTY				-- 불량수량(투입예정정보)
+							,	MAX(CML.DESCRIPTION)									AS COMMENT				-- 특이사항(투입예정정보)
+					FROM		SF_LOT						L
+					JOIN		SF_WORKORDER				WO	ON	WO.WORKORDERID = L.WORKORDERID
+					JOIN		SF_WORKORDERBOM				BOM	ON	BOM.WORKORDERID = WO.WORKORDERID
+																AND	BOM.VALIDSTATE = 'Valid'
+					JOIN		SF_CONSUMABLEDEFINITION		CD	ON	CD.CONSUMABLEDEFID = BOM.CONSUMABLEDEFID
+																AND	(ISNULL(CD.ISTRACKING, 'N') <> 'Y' 
+																	AND CD.CONSUMABLETYPE = 'Material')			-- 추적대상이 아닌 원자재
+					LEFT JOIN	SF_CONSUMEMATERIALLOTTEMP	CML	ON	CML.LOTID = L.LOTID
+																AND	CML.MATERIALDEFID = CD.CONSUMABLEDEFID
+																AND	CML.MATERIALLOTID = '*'
+					LEFT JOIN	SF_AREA						AR	ON	AR.AREAID = L.AREAID
+					LEFT JOIN	SF_CONSUMABLELOT			CL	ON	CL.CONSUMABLEDEFID = CD.CONSUMABLEDEFID
+																AND	CL.WAREHOUSEID = AR.WAREHOUSEID
+																AND	CL.CONSUMABLESTATE = 'Available'
+																AND	CASE WHEN CD.ISNOTORDERRESULT = 'Y' AND ISNULL(CL.ISNOTORDERRESULT, 'N') <> 'Y' THEN 'FAIL'
+																		ELSE 'PASS'
+																	END = 'PASS'
+																AND	ISNULL(CL.ISHOLD, 'N') <> 'Y'
+					WHERE 		L.LOTID = '$!{LOTID}'
+					GROUP BY	BOM.CONSUMABLEDEFID
+				)
+				, USED AS -- 가투입수량(품목별 재고수량에서 차감하기 위함)
+				(
+					SELECT
+								BOM.CONSUMABLEDEFID							-- 자재코드
+							,	SUM(CML.CONSUMEDQTY)		AS	USEDQTY		-- 가투입수량
+					FROM		SF_LOT						L
+					JOIN		SF_WORKORDERBOM				BOM	ON	BOM.WORKORDERID = L.WORKORDERID
+																AND	BOM.VALIDSTATE = 'Valid'
+					JOIN		SF_CONSUMABLEDEFINITION		CD	ON	CD.CONSUMABLEDEFID = BOM.CONSUMABLEDEFID
+																AND	(ISNULL(CD.ISTRACKING, 'N') <> 'Y' 
+																	AND CD.CONSUMABLETYPE = 'Material')			-- 추적대상이 아닌 원자재
+					JOIN		SF_CONSUMEMATERIALLOTTEMP	CML	ON	CML.MATERIALDEFID = CD.CONSUMABLEDEFID
+																AND	CML.MATERIALLOTID = '*'
+					JOIN		SF_LOT						L2	ON	L2.LOTID = CML.LOTID
+					JOIN		SF_AREA						AR	ON	AR.AREAID = L.AREAID
+					JOIN		SF_AREA						AR2	ON	AR2.AREAID = L2.AREAID
+					WHERE 		L.LOTID = '$!{LOTID}'
+					AND			AR.WAREHOUSEID = AR2.WAREHOUSEID
+					GROUP BY	BOM.CONSUMABLEDEFID
+				)
+				, MATINPUT_NOBOM AS -- BOM 에 등록되지 않은 투입자재
+				(
+					SELECT
+								CML.MATERIALDEFID										AS CONSUMABLEDEFID		-- 자재코드
+							,	MAX(CD.PARTNUMBER)										AS PARTNUMBER
+							,	MAX(CD.CONSUMABLEDEFNAME)								AS CONSUMABLEDEFNAME	-- 자재명
+							,	MAX(CD.UNIT)											AS UNIT					-- 단위코드
+							,	0														AS BOMQTY				-- 소요량
+							,	ISNULL(MAX(CML.GOODQTY), 0)								AS INPUTQTY				-- 투입수량
+							,	ISNULL(SUM(CL.CONSUMABLELOTQTY), 0) 					AS CONSUMABLELOTQTY		-- 창고재고(가투입수량 반영안됨)
+							,	ISNULL(MAX(CML.GOODQTY), 0)								AS GOODQTY				-- 양품수량(투입예정정보)
+							,	ISNULL(MAX(CML.GOODQTY), 0)								AS ORG_GOODQTY			-- 양품수량(투입예정정보)
+							,	ISNULL(MAX(CML.BADQTY), 0)								AS BADQTY				-- 불량수량(투입예정정보)
+							,	MAX(CML.DESCRIPTION)									AS COMMENT				-- 특이사항(투입예정정보)
+					FROM		SF_LOT						L
+					JOIN		SF_CONSUMEMATERIALLOTTEMP	CML	ON	CML.LOTID = L.LOTID
+																AND	CML.MATERIALLOTID = '*'
+					LEFT JOIN	SF_CONSUMABLEDEFINITION		CD	ON	CD.CONSUMABLEDEFID = CML.MATERIALDEFID
+					LEFT JOIN	SF_WORKORDERBOM				BOM	ON	BOM.WORKORDERID = L.WORKORDERID
+																AND	BOM.CONSUMABLEDEFID = CML.MATERIALDEFID
+																AND	BOM.VALIDSTATE = 'Valid'
+					LEFT JOIN	SF_AREA						AR	ON	AR.AREAID = L.AREAID
+					LEFT JOIN	SF_CONSUMABLELOT			CL	ON	CL.CONSUMABLEDEFID = CML.MATERIALDEFID
+																AND	CL.WAREHOUSEID = AR.WAREHOUSEID
+																AND	CL.CONSUMABLESTATE = 'Available'
+																AND	CASE WHEN CD.ISNOTORDERRESULT = 'Y' AND ISNULL(CL.ISNOTORDERRESULT, 'N') <> 'Y' THEN 'FAIL'
+																		ELSE 'PASS'
+																	END = 'PASS'
+																AND	ISNULL(CL.ISHOLD, 'N') <> 'Y'
+					WHERE 		L.LOTID = '$!{LOTID}'
+					AND			BOM.CONSUMABLEDEFID IS NULL	-- BOM 에 없는 자재 조회
+					GROUP BY	CML.MATERIALDEFID
+				)
+				, USED_NOBOM AS -- 가투입수량(품목별 재고수량에서 차감하기 위함)
+				(
+					SELECT
+								CMM.MATERIALDEFID			AS	CONSUMABLEDEFID		-- 자재코드
+							,	SUM(CML.CONSUMEDQTY)		AS	USEDQTY				-- 가투입수량
+					FROM		SF_LOT						L
+					JOIN		SF_CONSUMEMATERIALLOTTEMP	CMM	ON	CMM.LOTID = L.LOTID
+																AND	CMM.MATERIALLOTID = '*'
+					LEFT JOIN	SF_WORKORDERBOM				BOM	ON	BOM.WORKORDERID = L.WORKORDERID
+																AND	BOM.CONSUMABLEDEFID = CMM.MATERIALDEFID
+																AND	BOM.VALIDSTATE = 'Valid'
+					JOIN		SF_CONSUMEMATERIALLOTTEMP	CML	ON	CML.MATERIALDEFID = CMM.MATERIALDEFID
+																AND	CML.MATERIALLOTID = '*'
+					JOIN		SF_LOT						L2	ON	L2.LOTID = CML.LOTID
+					JOIN		SF_AREA						AR	ON	AR.AREAID = L.AREAID
+					JOIN		SF_AREA						AR2	ON	AR2.AREAID = L2.AREAID
+					WHERE 		L.LOTID = '$!{LOTID}'
+					AND			BOM.CONSUMABLEDEFID IS NULL	-- BOM 에 없는 자재 조회
+					AND			AR.WAREHOUSEID = AR2.WAREHOUSEID
+					GROUP BY	CMM.MATERIALDEFID
+				)
+				SELECT
+							MAT.CONSUMABLEDEFID													-- 자재코드
+						,	MAT.PARTNUMBER											AS PARTNUMBER
+						,	MAT.CONSUMABLEDEFNAME												-- 자재명
+						,	ISNULL(UN.UNIT, MAT.UNIT)								AS UNIT		-- 단위
+						,	MAT.BOMQTY															-- 소요량
+						,	MAT.INPUTQTY														-- 투입수량
+						,	MAT.BOMQTY - MAT.INPUTQTY								AS NEEDQTY 	-- 필요수량(BOM 수량 - 투입수량)
+						,	MAT.CONSUMABLELOTQTY 
+								- ISNULL(U.USEDQTY, 0)
+								- (MAT.GOODQTY - MAT.ORG_GOODQTY)					AS STOCKQTY	-- 창고재고(가투입수량, 소요량 반영)
+						,	MAT.GOODQTY															-- 양품수량
+						,	MAT.BADQTY 														 	-- 불량수량
+						,	MAT.COMMENT															-- 특이사항
+						-- 양품/불량수량 조정 시 투입/필요/재고 수량 변경사항을 실시간으로 보여주기 위한 보조 컬럼들
+						,	MAT.INPUTQTY					AS ORG_INPUTQTY		-- 투입수량
+						,	MAT.BOMQTY - MAT.INPUTQTY		AS ORG_NEEDQTY 		-- 필요수량(소요량 - 투입수량)
+						,	MAT.CONSUMABLELOTQTY 
+								- ISNULL(U.USEDQTY, 0)		AS ORG_STOCKQTY		-- 창고재고(가투입수량 반영)
+						,	MAT.ORG_GOODQTY										-- 양품수량
+						,	MAT.BADQTY 						AS ORG_BADQTY 		-- 불량수량
+						,	'Y'								AS ISINBOM			-- BOM 등록여부
+				FROM 		MATINPUT			MAT
+				LEFT JOIN	USED				U	ON	U.CONSUMABLEDEFID = MAT.CONSUMABLEDEFID
+				LEFT JOIN	CT_UNITDEFINITION	UN	ON	UN.UNITID = MAT.UNIT
+
+				UNION ALL
+
+				SELECT
+							MAT.CONSUMABLEDEFID													-- 자재코드
+						,	MAT.PARTNUMBER											AS PARTNUMBER
+						,	MAT.CONSUMABLEDEFNAME												-- 자재명
+						,	ISNULL(UN.UNIT, MAT.UNIT)								AS UNIT		-- 단위
+						,	0														AS BOMQTY	-- 소요량(BOM 에 등록되지 않은 자재라서 0 고정)
+						,	MAT.INPUTQTY														-- 투입수량
+						,	0														AS NEEDQTY 	-- 필요수량(BOM 에 등록되지 않은 자재라서 0 고정)
+						,	MAT.CONSUMABLELOTQTY 
+								- ISNULL(U.USEDQTY, 0)
+								- (MAT.GOODQTY - MAT.ORG_GOODQTY)					AS STOCKQTY	-- 창고재고(가투입수량, 소요량 반영)
+						,	MAT.GOODQTY															-- 양품수량
+						,	MAT.BADQTY 														 	-- 불량수량
+						,	MAT.COMMENT															-- 특이사항
+						-- 양품/불량수량 조정 시 투입/필요/재고 수량 변경사항을 실시간으로 보여주기 위한 보조 컬럼들
+						,	MAT.INPUTQTY					AS ORG_INPUTQTY		-- 투입수량
+						,	MAT.BOMQTY - MAT.INPUTQTY		AS ORG_NEEDQTY 		-- 필요수량(소요량 - 투입수량)
+						,	MAT.CONSUMABLELOTQTY 
+								- ISNULL(U.USEDQTY, 0)		AS ORG_STOCKQTY		-- 창고재고(가투입수량 반영)
+						,	MAT.ORG_GOODQTY										-- 양품수량
+						,	MAT.BADQTY 						AS ORG_BADQTY 		-- 불량수량
+						,	'N'								AS ISINBOM			-- BOM 등록여부
+				FROM 		MATINPUT_NOBOM		MAT
+				LEFT JOIN	USED_NOBOM			U	ON	U.CONSUMABLEDEFID = MAT.CONSUMABLEDEFID
+				LEFT JOIN	CT_UNITDEFINITION	UN	ON	UN.UNITID = MAT.UNIT
+
+				ORDER BY	ISINBOM DESC, CONSUMABLEDEFID
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	프 로 그 램 명	: 공정관리 > 공정실적
+	설		명	: 자재 재고조회(비추적 자재)
+	작	성	자	: yshwang
+	작	성	일	: 2020-06-25
+	주요 변경 로그	:
+	-->
+	<query id="GetStockQty" version="00001">
+		<statement>
+			<![CDATA[
+				--	
+				-- Id = GetStockQty
+				-- Version = 00001
+	
+				SELECT
+							ISNULL(SUM(CL.CONSUMABLELOTQTY), 0) - ISNULL(SUM(CLT.CONSUMEDQTY), 0) AS STOCKQTY	-- 재고수량(현재 창고의 가용 자재 LOT 수량)
+				FROM		SF_CONSUMABLELOT			CL
+				JOIN		SF_CONSUMABLEDEFINITION		CD	ON	CD.CONSUMABLEDEFID = CL.CONSUMABLEDEFID
+				LEFT JOIN	SF_CONSUMEMATERIALLOTTEMP	CLT	ON	CLT.MATERIALDEFID = CL.CONSUMABLEDEFID
+															AND	CLT.MATERIALLOTID = '*'
+				WHERE 		CL.CONSUMABLEDEFID = '$!{CONSUMABLEDEFID}'
+				AND			CL.WAREHOUSEID = '$!{WAREHOUSEID}'
+				AND			CL.CONSUMABLESTATE = 'Available'
+				AND			ISNULL(CL.ISHOLD, 'N') <> 'Y'
+				AND			CASE WHEN CD.ISNOTORDERRESULT = 'Y' AND ISNULL(CL.ISNOTORDERRESULT, 'N') <> 'Y' THEN 'FAIL'
+								ELSE 'PASS'
+							END = 'PASS'
+			]]>
+		</statement>
+	</query>
+	
+	<!--
+	프 로 그 램 명	: 공정관리 > 공정실적
+	설		명	: 투입대상 자재 조회(비추적 자재)
+	작	성	자	: yshwang
+	작	성	일	: 2020-06-25
+	주요 변경 로그	:
+	-->
+	<query id="GetConsumableLotsToInput" version="00001">
+		<statement>
+			<![CDATA[
+				--	
+				-- Id = GetConsumableLotsToInput
+				-- Version = 00001
+	
+				WITH STOCK AS
+				(
+					SELECT
+							X.CREATEDTIME
+						,	X.CONSUMABLELOTID
+						,	X.STOCKQTY
+						,	X.ROWNUM
+						,	SUM(X.STOCKQTY) OVER(ORDER BY X.ROWNUM ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS RUNNING_TOTAL
+						,	SUM(X.STOCKQTY) OVER(ORDER BY X.ROWNUM ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING) AS LAG_RUNNING_TOTAL
+					FROM
+					(
+						SELECT		MAX(CL.CREATEDTIME) 												AS CREATEDTIME	
+								,	CL.CONSUMABLELOTID
+								,	ISNULL(SUM(CL.CONSUMABLELOTQTY), 0)									AS STOCKQTY
+								,	ROW_NUMBER() OVER(ORDER BY MAX(CL.CREATEDTIME), CL.CONSUMABLELOTID) AS ROWNUM
+						FROM		SF_CONSUMABLELOT			CL
+						JOIN		SF_CONSUMABLEDEFINITION		CD	ON	CD.CONSUMABLEDEFID = CL.CONSUMABLEDEFID
+						WHERE 		CL.CONSUMABLEDEFID = '$!{CONSUMABLEDEFID}'
+						AND			CL.WAREHOUSEID = '$!{WAREHOUSEID}'
+						AND			CL.CONSUMABLESTATE = 'Available'
+						AND			ISNULL(CL.ISHOLD, 'N') <> 'Y'
+						AND			CASE WHEN CD.ISNOTORDERRESULT = 'Y' AND ISNULL(CL.ISNOTORDERRESULT, 'N') <> 'Y' THEN 'FAIL'
+										ELSE 'PASS'
+									END = 'PASS'
+						GROUP BY 	CL.CONSUMABLELOTID
+						HAVING		ISNULL(SUM(CL.CONSUMABLELOTQTY), 0) > 0
+					) X	
+				)
+				SELECT
+						CREATEDTIME													-- 자재 LOT 생성 시간
+					,	CONSUMABLELOTID												-- 자재 LOT ID				
+					,	STOCKQTY													-- 가용수량
+					,	ROWNUM														-- 투입순서(선입선출)
+					,	ISNULL(LAG_RUNNING_TOTAL, 0) AS LAG_RUNNING_TOTAL			-- 이전 자재까지의 가용수량 누계
+					,	RUNNING_TOTAL												-- 현 자재까지의 가용수량 누계
+					,	CASE	WHEN RUNNING_TOTAL <= $!{CONSUMEQTY} THEN STOCKQTY
+								ELSE $!{CONSUMEQTY} - ISNULL(LAG_RUNNING_TOTAL, 0)
+						END AS INPUTQTY												-- 투입수량
+					,	CASE	WHEN RUNNING_TOTAL <= $!{CONSUMEQTY} THEN STOCKQTY
+								ELSE $!{CONSUMEQTY} - ISNULL(LAG_RUNNING_TOTAL, 0)
+						END 
+						- 
+						CASE	WHEN RUNNING_TOTAL <= $!{BADQTY} THEN STOCKQTY
+								ELSE CASE WHEN $!{BADQTY} - ISNULL(LAG_RUNNING_TOTAL, 0) > 0 THEN $!{BADQTY} - ISNULL(LAG_RUNNING_TOTAL, 0) ELSE 0 END 
+						END AS GOODQTY												-- 양품수량(투입수량 - 불량수량)
+					,	CASE	WHEN RUNNING_TOTAL <= $!{BADQTY} THEN STOCKQTY
+								ELSE CASE WHEN $!{BADQTY} - ISNULL(LAG_RUNNING_TOTAL, 0) > 0 THEN $!{BADQTY} - ISNULL(LAG_RUNNING_TOTAL, 0) ELSE 0 END 
+						END AS BADQTY												-- 불량수량
+				FROM	STOCK
+				WHERE 	ISNULL(LAG_RUNNING_TOTAL, 0) < $!{CONSUMEQTY}
+				ORDER BY ROWNUM
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	프 로 그 램 명	: 공정관리 > 공정실적
+	설		명	: 자재투입 여부 확인(비추적 자재)
+	작	성	자	: yshwang
+	작	성	일	: 2020-06-25
+	주요 변경 로그	:
+	-->
+	<query id="GetIsUnTrackingMaterialEnough" version="00001">
+		<statement>
+			<![CDATA[
+				--	
+				-- Id = GetIsUnTrackingMaterialEnough
+				-- Version = 00001
+
+				SELECT	ISNULL(COUNT(*), 0) AS NOTENOUGH
+				FROM
+				(
+					SELECT	BOM.CONSUMABLEDEFID
+						,	(MAX(BOM.QTY) / MAX(WO.ORDERQTY)) * MAX(L.CREATEDQTY)			AS NEEDQTY
+						,	ISNULL(SUM(CASE WHEN CML.MATERIALLOTID IS NOT NULL THEN CML.GOODQTY ELSE 0 END), 0)	AS INPUTQTY
+						,	CASE 	WHEN (MAX(BOM.QTY) / MAX(WO.ORDERQTY)) * MAX(L.CREATEDQTY) 									-- 필요수량 <= 투입수량
+										<= ISNULL(SUM(CASE WHEN CML.MATERIALLOTID IS NOT NULL THEN CML.GOODQTY ELSE 0 END), 0)	
+									THEN 'Y'
+									ELSE 'N'
+							END AS ISENOUGH
+					FROM		SF_LOT						L
+					INNER JOIN	SF_WORKORDER				WO	ON	WO.WORKORDERID = L.WORKORDERID
+					INNER JOIN	SF_WORKORDERBOM				BOM	ON	BOM.WORKORDERID = WO.WORKORDERID
+																AND	BOM.VALIDSTATE = 'Valid'
+					INNER JOIN	SF_CONSUMABLEDEFINITION		CD	ON	CD.CONSUMABLEDEFID = BOM.CONSUMABLEDEFID
+																AND	(ISNULL(CD.ISTRACKING, 'N') <> 'Y' AND CD.CONSUMABLETYPE = 'Material')
+					LEFT  JOIN	SF_CONSUMEMATERIALLOTTEMP	CML	ON	CML.LOTID = L.LOTID
+																AND	CML.MATERIALDEFID = CD.CONSUMABLEDEFID
+																AND	CML.MATERIALLOTID = '*'
+					WHERE 		L.LOTID = '$!{LOTID}'
+					GROUP BY	BOM.CONSUMABLEDEFID
+				) AS X
+				WHERE	X.ISENOUGH = 'N'
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	프 로 그 램 명	: 공정관리 > 공정실적
+	설		명	: ERP I/F 용 작업자 수 조회
+	작	성	자	: yshwang
+	작	성	일	: 2020-06-26
+	주요 변경 로그	:
+	-->
+	<query id="GetWorkerQty" version="00001">
+		<statement>
+			<![CDATA[
+				--	
+				-- Id = GetWorkerQty
+				-- Version = 00001
+	
+				SELECT	COUNT(DISTINCT USERID) AS WORKERQTY 
+				FROM 	SF_LOTWORKER
+				WHERE	LOTID = '$!{LOTID}'
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	프 로 그 램 명	: 공정관리 > 공정작업 > 출하라벨 발행
+	설		명	: 출하라벨 발행대상 LOT 조회
+	작	성	자	: yshwang
+	작	성	일	: 2020-06-29
+	주요 변경 로그	:
+	-->
+	<query id="GetLotsForPackageLabel" version="00001">
+		<statement>
+			<![CDATA[
+				--	
+				-- Id = GetLotsForPackageLabel
+				-- Version = 00001
+
+				WITH GENEAL AS
+				(
+					SELECT
+							CL.PARENTCONSUMABLELOTID
+						,	CL.CONSUMABLELOTID
+						,	CL.CONSUMABLELOTID	AS FIRSTCONSUMABLELOTID
+						,	1					AS LVL
+					FROM	SF_CONSUMABLELOT		CL
+					JOIN	SF_CONSUMABLEDEFINITION CD	ON	CD.CONSUMABLEDEFID = CL.CONSUMABLEDEFID
+					WHERE	CD.CONSUMABLETYPE IN ('Product', 'HalfProduct')
+					#if ("$!{P_SHIPPINGSTATE}" != "" && "$!{P_SHIPPINGSTATE}" != "*")	
+					AND		CL.CONSUMABLESTATE = '$!{P_SHIPPINGSTATE}'
+					#else
+					AND		CL.CONSUMABLESTATE IN ('Available', 'Shipped')
+					#end
+					AND		CL.CREATEDTIME BETWEEN '$!{P_DATEPERIOD_PERIODFR}' AND '$!{P_DATEPERIOD_PERIODTO}'
+					#if ("$!{P_WAREHOUSE}" != "" && "$!{P_WAREHOUSE}" != "*")	
+					AND		CL.WAREHOUSEID = '$!{P_WAREHOUSE}'
+					#end
+					#if ("$!{P_LOTNUM}" != "")	
+					AND		CL.CONSUMABLELOTID LIKE '%$!{P_LOTNUM}%'
+					#end
+
+					UNION ALL
+
+					SELECT
+							CL.PARENTCONSUMABLELOTID
+						,	CL.CONSUMABLELOTID
+						,	G.FIRSTCONSUMABLELOTID
+						,	G.LVL + 1 AS LVL
+					FROM	SF_CONSUMABLELOT	CL
+					JOIN	GENEAL				G	ON	G.PARENTCONSUMABLELOTID = CL.CONSUMABLELOTID
+				)
+				, ROOT_TEMP AS
+				(
+					SELECT
+							CONSUMABLELOTID
+						,	FIRSTCONSUMABLELOTID
+						,	ROW_NUMBER() OVER(PARTITION BY FIRSTCONSUMABLELOTID ORDER BY LVL DESC) AS RN
+					FROM	GENEAL
+				)
+				, ROOT AS
+				(
+					SELECT
+							CONSUMABLELOTID			AS ROOTCONSUMABLELOTID
+						,	FIRSTCONSUMABLELOTID
+					FROM	ROOT_TEMP
+					WHERE	RN = 1
+				)
+				SELECT
+							RT.FIRSTCONSUMABLELOTID								AS LOTID
+						,	ISNULL(ARD.DICTIONARYNAME, AR.AREANAME)				AS AREANAME
+						,	ISNULL(WHD.DICTIONARYNAME, WH.WAREHOUSENAME)		AS WAREHOUSENAME
+						,	L.PROCESSSEGMENTID
+						,	ISNULL(PSD.DICTIONARYNAME, PS.PROCESSSEGMENTNAME)	AS PROCESSSEGMENTNAME
+						,	L.PRODUCTDEFID
+						,	PD.PARTNUMBER
+						,	PD.PRODUCTDEFNAME
+						,	CL.SUBPARTNUMBER
+						,	PD.STANDARD
+						,	ISNULL(MDD.DICTIONARYNAME, MD.CODENAME) 			AS MODEL
+						,	ISNULL(CL.CONSUMABLELOTQTY, L.QTY)					AS QTY
+						,	ISNULL(SSD.DICTIONARYNAME, SS.CODENAME)				AS SHIPPINGSTATE
+						,	L.TRACKINTIME
+						,	L.TRACKOUTTIME
+						,	ISNULL(USR.USERNAME, L.TRACKOUTUSER)				AS WORKER
+				FROM		ROOT					RT
+				JOIN		SF_LOT					L	ON	L.LOTID = RT.ROOTCONSUMABLELOTID
+				JOIN		SF_PRODUCTDEFINITION	PD	ON	PD.PRODUCTDEFID = L.PRODUCTDEFID
+				LEFT JOIN	SF_CONSUMABLELOT		CL	ON	CL.CONSUMABLELOTID = RT.FIRSTCONSUMABLELOTID
+				LEFT JOIN	SF_AREA					AR	ON	AR.AREAID = L.AREAID
+				LEFT JOIN	SF_DICTIONARY			ARD	ON	ARD.DICTIONARYID = AR.DICTIONARYID
+														AND	ARD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN	SF_PROCESSSEGMENT		PS	ON	PS.PROCESSSEGMENTID = L.PROCESSSEGMENTID
+				LEFT JOIN	SF_DICTIONARY			PSD	ON	PSD.DICTIONARYID = PS.DICTIONARYID
+														AND	PSD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN	SF_CODE					MD	ON	MD.CODECLASSID = 'ModelCode'
+														AND	MD.CODEID = PD.MODELID
+				LEFT JOIN	SF_DICTIONARY			MDD	ON	MDD.DICTIONARYID = MD.DICTIONARYID
+														AND	MDD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN	SF_USER					USR	ON	USR.USERID = L.TRACKOUTUSER
+				LEFT JOIN	SF_WAREHOUSE			WH	ON	WH.WAREHOUSEID = CL.WAREHOUSEID
+				LEFT JOIN	SF_DICTIONARY			WHD	ON	WHD.DICTIONARYID = WH.DICTIONARYID
+														AND WHD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN	SF_CODE					SS	ON	SS.CODECLASSID = 'ShippingState'
+														AND	SS.CODEID = CL.CONSUMABLESTATE
+				LEFT JOIN	SF_DICTIONARY			SSD	ON	SSD.DICTIONARYID = SS.DICTIONARYID
+														AND SSD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE		1 = 1
+				AND			L.LOTSTATE = 'Finished'
+				AND	EXISTS
+				(
+					SELECT	* 
+					FROM	SF_LABELMAP	MAP	
+					JOIN	SF_LABELDEFINITION		LD	ON	LD.LABELID = MAP.LABELID
+					WHERE	LD.LABELTYPE IN ('Product', 'Package')
+					AND		MAP.PRODUCTDEFID = L.PRODUCTDEFID
+					AND		MAP.VALIDSTATE = 'Valid'
+				)
+				ORDER BY	L.TRACKOUTTIME DESC
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	프 로 그 램 명	: 공정관리 > 공정작업 > 출하라벨 발행
+	설		명	: 출하라벨 발행대상 LOT 조회
+	작	성	자	: yshwang
+	작	성	일	: 2020-06-29
+	주요 변경 로그	:
+	-->
+	<query id="GetMappedPackageLabels" version="00001">
+		<statement>
+			<![CDATA[
+				--	
+				-- Id = GetMappedPackageLabels
+				-- Version = 00001
+
+				WITH LOT AS 
+				(
+					SELECT	LOTID
+						,	PRODUCTDEFID
+					FROM	SF_LOT
+					WHERE	LOTID = '$!{LOTID}'
+
+					UNION
+
+					SELECT	CONSUMABLELOTID	AS LOTID
+						,	CONSUMABLEDEFID	AS PRODUCTDEFID
+					FROM	SF_CONSUMABLELOT
+					WHERE	CONSUMABLELOTID = '$!{LOTID}'
+				)
+				SELECT
+							LD.LABELID
+						,	LD.LABELNAME
+						,	LD.DESCRIPTION
+						,	ISNULL(LTD.DICTIONARYNAME, LD.LABELTYPE)	AS LABELTYPE
+				FROM 		LOT					L
+				JOIN		SF_LABELMAP			MAP	ON	MAP.PRODUCTDEFID = L.PRODUCTDEFID
+													AND	MAP.VALIDSTATE = 'Valid'
+				JOIN		SF_LABELDEFINITION	LD	ON	LD.LABELID = MAP.LABELID
+				LEFT JOIN	SF_CODE				LT	ON	LT.CODECLASSID = 'LabelType'
+													AND	LT.CODEID = LD.LABELTYPE
+				LEFT JOIN	SF_DICTIONARY		LTD	ON	LTD.DICTIONARYID = LT.DICTIONARYID
+													AND	LTD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE	L.LOTID = '$!{LOTID}'
+				AND		LD.LABELTYPE IN ('Package', 'Product')
+				AND		LD.VALIDSTATE = 'Valid'
+				ORDER BY LD.LABELTYPE, LD.LABELID
+			]]>
+		</statement>
+	</query>
+
+	<!--
+	프 로 그 램 명	: 공정관리 > 공정작업 > 가공실적 등록
+	설		명	: 인터락 여부 확인(INTERLOCK > 0 인 경우 인터락)
+	생	성	자	: 황유성
+	생	성	일	: 2020-06-30
+	수  정   이  력	: 
+	-->
+	<query id="GetInterLockInfo" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- Id : GetInterLockInfo
+				-- Version : 00001
+	
+				SELECT
+						EQ.EQUIPMENTNAME
+					,	A.ALARMID
+					,	A.ALARMNAME
+					,	A.OCCURETIME
+				FROM	SF_EQUIPMENT		EQ
+				JOIN	CT_EQUIPMENTALARM	A	ON	A.EQUIPMENTID = EQ.EQUIPMENTID
+				WHERE	1 = 1
+				AND		EQ.EQUIPMENTID = '$!{EQUIPMENTID}'	
+				AND		EQ.IFSTATE = 'Y'	-- 인터락 대상 설비
+				AND	 	A.STATE = 'Occure' 	-- 처리되지 않은 알람
+				AND		A.ALARMID IN ('004' , '005' , '036' , '039' , '047' , '050' , '051' , '052' , '053' , '054' , '055' , '056') -- 인터락 대상 알람코드
+			]]>
+		</statement>
+	</query>
+	
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 가공	
+	설		명	: 자재투입 => 가투입내역 조회
+	작	성	자	: JYLEE	
+	작	성	일	: 2020-07-02	
+	주요 변경 로그	: 2021-05-14 scmo 자재입고처 추가
+				: 2021-08-09 이준용  쿼리속도로 인해 기존 CT_CONSUMABLETRANSACTION 조인테이블을
+				  UL_ORDERDETAIL로 변경하여 거래처 정보 조회
+	-->	
+	<query id="GetMachiningInsertMaterialInfo" version="00003">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = GetMachiningInsertMaterialInfo	
+				-- Version = 00003
+				
+				SELECT
+							COM.MATERIALDEFID		AS CONSUMABLEDEFID 		-- 자재ID
+						,   COD.PARTNUMBER	
+						, 	COD.CONSUMABLEDEFNAME	AS CONSUMABLEDEFNAME	-- 자재명
+						, 	COM.MATERIALLOTID		AS MATERIALLOTID 		-- 자재LOT
+						, 	COM.SERIALNO			AS SERIALNO 			-- SERIALNO
+						, 	COM.GOODQTY				AS GOODQTY 				-- 양품
+						, 	COM.BADQTY				AS BADQTY 				-- 불량품
+						,	COM.DESCRIPTION
+						,	CASE WHEN COM.MATERIALLOTID <> '*' AND BOM.CONSUMABLEDEFID IS NOT NULL THEN 1
+								WHEN COM.MATERIALLOTID <> '*' AND BOM.CONSUMABLEDEFID IS NULL THEN 2
+								WHEN COM.MATERIALLOTID = '*' AND BOM.CONSUMABLEDEFID IS NOT NULL THEN 3
+								ELSE 4
+							END AS DISPLAYSEQUENCE
+						,	ISNULL(CUST.CUSTNAME, '')AS CUSTOMERNAME
+
+				FROM		SF_CONSUMEMATERIALLOTTEMP	COM
+				LEFT JOIN	SF_CONSUMABLELOT 			COL	ON	COL.CONSUMABLELOTID = COM.MATERIALLOTID
+				LEFT JOIN	SF_CONSUMABLEDEFINITION 	COD ON	COD.CONSUMABLEDEFID = COM.MATERIALDEFID
+				LEFT JOIN	SF_LOT						L	ON	L.LOTID = COM.LOTID
+				LEFT JOIN	SF_WORKORDERBOM				BOM	ON	BOM.WORKORDERID = L.WORKORDERID
+															AND	BOM.VALIDSTATE = 'Valid'
+															AND	BOM.CONSUMABLEDEFID = COD.CONSUMABLEDEFID
+															AND (COD.ISTRACKING = 'Y' OR COD.CONSUMABLETYPE = 'HalfProduct')
+				LEFT JOIN	UL_ORDERDETAIL				ORD	ON ORD.SEQ = COL.ORDERSEQ
+				LEFT JOIN	[UCKERP].[$!{DBLINKNAME}].[dbo].[uck_VIEW_Cust] CUST ON CUST.CUSTSEQ = ORD.CUSTSEQ
+				WHERE 		COM.LOTID = '$!{P_LOTID}'
+				ORDER BY	DISPLAYSEQUENCE, COL.CONSUMABLEDEFID
+			]]>	
+		</statement>	
+	</query>
+
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록	
+	설		명	: LOT의 작업장/창고 조회
+	작	성	자	: yshwang	
+	작	성	일	: 2020-07-14	
+	주요 변경 로그	:	
+	-->	
+	<query id="GetAreaAndWarehouseOfLot" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = GetAreaAndWarehouseOfLot	
+				-- Version = 00001
+				
+				SELECT
+							L.LOTID
+						,	AR.AREAID
+						,	WH.WAREHOUSEID
+						,	ISNULL(ARD.DICTIONARYNAME, AR.AREANAME) AS AREANAME
+						,	ISNULL(WHD.DICTIONARYNAME, WH.WAREHOUSENAME) AS WAREHOUSENAME
+				FROM		SF_LOT			L
+				LEFT JOIN	SF_AREA			AR	ON	AR.AREAID = L.AREAID
+				LEFT JOIN	SF_WAREHOUSE	WH	ON	WH.WAREHOUSEID = AR.WAREHOUSEID
+				LEFT JOIN	SF_DICTIONARY	ARD	ON	ARD.DICTIONARYID = AR.DICTIONARYID
+												AND	ARD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				LEFT JOIN	SF_DICTIONARY	WHD	ON	WHD.DICTIONARYID = WH.DICTIONARYID
+												AND WHD.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				WHERE		L.LOTID = '$!{LOTID}'
+			]]>	
+		</statement>	
+	</query>
+	
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 수리
+	설		명	: 사용자 리스트
+	작	성	자	: jylee
+	작	성	일	: 2020-06-09
+	주요 변경 로그	:	
+	-->	
+	<query id="ProceeResultUserList" version="00002">	
+		<statement>	
+			<![CDATA[	
+				--
+				-- Id : ProceeResultUserList
+				-- Version : 00002
+
+				WITH SUBSEGMENT_WORKER AS
+				(
+					SELECT	USERID
+					FROM	CT_SUBPROCESSWORKER
+					WHERE 	1 = 1
+					AND   	VALIDSTATE = 'Valid'
+					AND   	PROCESSSEGMENTID = '$!{P_PROCESSSEGMENTID}'
+					AND   	SUBPROCESSSEGMENTID = '$!{P_SUBPROCESSSEGMENTID}'
+				)
+				, AREA_WORKER AS
+				(
+					SELECT	USERID
+					FROM	CT_AREAWORKER
+					WHERE	1 = 1
+					AND		VALIDSTATE = 'Valid'
+					AND		AREAID = '$!{P_AREAID}'
+				)
+				SELECT
+						X.USERID
+					,	ISNULL(USR.USERNAME, X.USERID)	AS USERNAME
+					,	'N' 					AS ISCHARGE
+					,	CASE WHEN LW.USERID IS NOT NULL THEN 'Y' ELSE 'N' END AS ISCHECKED
+				FROM
+				(
+					SELECT	USERID
+					FROM	SUBSEGMENT_WORKER
+
+					UNION ALL
+
+					SELECT	USERID
+					FROM	AREA_WORKER
+					WHERE	0 = (SELECT COUNT(*) FROM SUBSEGMENT_WORKER)
+				) X
+				LEFT JOIN	SF_USER			USR	ON	USR.USERID = X.USERID
+				LEFT JOIN	SF_LOTWORKER	LW	ON	LW.LOTID = '$!{LOTID}'
+												AND	LW.USERID = X.USERID
+				WHERE 1 = 1
+				AND USR.VALIDSTATE = 'Valid'
+				#if ("$!{USERID}" != "")
+				AND X.USERID = '$!{USERID}'
+				#end
+				ORDER BY X.USERID
+			]]>	
+		</statement>	
+	</query>
+
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적등록 > 조립실적상세현황
+	설		명	: 세부공정 항목별 스펙
+	작	성	자	: yshwang
+	작	성	일	: 2020-07-20
+	주요 변경 로그	:	
+	-->	
+	<query id="GetSpecForAssyDetailResult" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--
+				-- Id : GetSpecForAssyDetailResult
+				-- Version : 00001
+
+				SELECT 
+					   		SS.SUBPROCESSSEGMENTID + '_' + SSD.PARAMETERID AS COLUMNNAME
+					   ,	SSD.SPECTYPE
+					   ,	PA.INPUTTYPE
+					   ,	SSD.USL
+					   ,	SSD.LSL
+				FROM SF_LOT L
+				INNER JOIN SF_PRODUCTDEFINITION     PD ON  L.PRODUCTDEFID = PD.PRODUCTDEFID
+				INNER JOIN CT_SPECDEFINITION        SD ON  PD.SPECDEFID = SD.SPECDEFID
+				INNER JOIN CT_SUBSEGMENTSPEC        SS ON  SD.SPECDEFID = SS.SPECDEFID 
+													   AND SS.SPECDEFIDVERSION = (SELECT TOP 1 SPECDEFIDVERSION FROM UL_SUBPROCESSWORKRESULT WHERE LOTID = '$!{LOTID}')
+				INNER JOIN CT_SUBSEGMENTSPECDETAIL SSD ON  SS.SPECDEFID = SSD.SPECDEFID
+													   AND SS.SPECSEQUENCE = SSD.SPECSEQUENCE
+													   AND SSD.SPECDEFIDVERSION = (SELECT TOP 1 SPECDEFIDVERSION FROM UL_SUBPROCESSWORKRESULT WHERE LOTID = '$!{LOTID}')
+				INNER JOIN CT_PARAMETERDEFINITION	PA ON  PA.PARAMETERID = SSD.PARAMETERID
+				WHERE 1 = 1
+				AND   L.LOTID = '$!{LOTID}'
+				AND   SSD.ISMEASURE = 'Y'
+			]]>	
+		</statement>	
+	</query>
+
+	<!--
+	프 로 그 램 명	: 공정관리 > 무지시공정 > 무지시창고(가공, 컴프레서)
+	설		명	: 검색조건 무지시 창고
+	작	성	자	: jylee
+	작	성	일	: 2020-07-22
+	주요 변경 로그	: 
+	-->
+	<query id="GetNonWorkOrderWarehouse" version="00001">
+		<statement>
+			<![CDATA[
+				--
+				-- id : GetNonWorkOrderWarehouse
+				-- version : 00001
+				
+				SELECT 
+						WH.WAREHOUSEID
+					, 	ISNULL(WHD.DICTIONARYNAME, WH.WAREHOUSENAME) 		AS WAREHOUSENAME
+				FROM 	SF_WAREHOUSE 										WH 
+				LEFT OUTER JOIN SF_DICTIONARY 								WHD ON  WH.DICTIONARYID = WHD.DICTIONARYID
+								 												AND WHD.LANGUAGETYPE ='$!{LANGUAGETYPE}'
+				WHERE 	1 = 1
+					AND 	WH.VALIDSTATE ='Valid'
+					AND 	WH.WAREHOUSEID = 7 OR WH.WAREHOUSEID = 8 -- 7:가공, 8:컴프레서
+				ORDER BY WH.WAREHOUSEID
+			]]>
+		</statement>
+	</query>
+
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정실적 > 수리/개조실적등록  
+	설		명	: 개조 공정 조회
+	작	성	자	: yshwang
+	작	성	일	: 2020-07-20
+	주요 변경 로그	:	
+	-->	
+	<query id="GetRenovationProcessList" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--
+				-- Id : GetRenovationProcessList
+				-- Version : 00001
+	
+				SELECT 
+						X.PROCESSSEGMENTID
+					,	X.PROCESSSEGMENTNAME
+					,	X.LOTCREATERULEID
+					,	ISNULL(SD2.DICTIONARYNAME, X.LOTCREATERULEID) LOTCREATERULENAME
+				FROM
+				(
+					SELECT
+								PS.PROCESSSEGMENTID
+							,	ISNULL(SD1.DICTIONARYNAME,PS.PROCESSSEGMENTID) PROCESSSEGMENTNAME
+							,	CASE WHEN ISNULL(PS.LOTCREATERULEID, '') = '' THEN 'PLotNo'
+									WHEN PROCESSSEGMENTID = 'SGM010' THEN 'MBSCLotNo' 	-- MBS-C 조립
+									ELSE PS.LOTCREATERULEID
+								END LOTCREATERULEID
+					FROM		SF_PROCESSSEGMENT	PS
+					LEFT JOIN	SF_DICTIONARY		SD1	ON	PS.DICTIONARYID = SD1.DICTIONARYID
+														AND SD1.LANGUAGETYPE = '$!{LANGUAGETYPE}'   
+					WHERE	1 = 1
+					AND		PS.PROCESSSEGMENTCLASSID = 'SGC00002'	-- 조립
+					AND		PS.PROCESSSEGMENTTYPE = 'MAIN'
+					AND		PS.PROCESSSEGMENTID NOT IN ('SGM007','SGM008','SGM009')	-- 1단 실린더조립, 2단 실린더조립, 실린더조립 제외
+				) X
+				LEFT JOIN 	SF_CODE			SC	ON  X.LOTCREATERULEID = SC.CODEID
+												AND SC.CODECLASSID = 'LotCreateRule'
+				LEFT JOIN 	SF_DICTIONARY	SD2 ON  SC.DICTIONARYID = SD2.DICTIONARYID
+												AND SD2.LANGUAGETYPE = '$!{LANGUAGETYPE}'
+				ORDER BY X.PROCESSSEGMENTID
+			]]>	
+		</statement>	
+	</query>
+	
+	<!--	
+	프 로 그 램 명	: 공정관리 > 실적관리 > 조립 실적 등록
+	설		명	: 공정실적 등록 팝업 콤보박스 CodeClass 목록 조회
+	작	성	자	: yshwang 
+	작	성	일	: 2020-07-23
+	주요 변경 로그	:	
+	-->	
+	<query id="GetInspParameterComboBox" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = GetInspParameterComboBox
+				-- Version = 00001
+
+				SELECT		DISTINCT
+							PA.CODECLASSID
+				FROM		SF_LOT							L	
+				JOIN		SF_PRODUCTDEFINITION			PD	ON	PD.PRODUCTDEFID = L.PRODUCTDEFID
+				JOIN		CT_SUBSEGMENTSPEC				SP	ON	SP.SPECDEFID = PD.SPECDEFID
+																AND	SP.VALIDSTATE = 'Valid'
+				JOIN		CT_SUBSEGMENTSPECDETAIL 		SD	ON	SD.SPECDEFID = SP.SPECDEFID
+																AND	SD.SPECSEQUENCE = SP.SPECSEQUENCE
+																AND	SD.VALIDSTATE = 'Valid'
+				JOIN		CT_PARAMETERDEFINITION			PA	ON	PA.PARAMETERID = SD.PARAMETERID
+				WHERE		L.LOTID = '$!{P_LOTID}'
+				AND			SP.SUBPROCESSSEGMENTID = '$!{P_SUBPROCESSSEGMENTID}'
+				AND			ISNULL(SD.ISMEASURE, 'N') <> 'Y'
+				AND			ISNULL(PA.CODECLASSID, '') <> ''				
+				ORDER BY	PA.CODECLASSID
+			]]>	
+		</statement>	
+	</query>
+	
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정관리 > 제품/출하 라벨 발행
+	설		명	: 출하라벨 맵핑여부 확인
+	작	성	자	: yshwang
+	작	성	일	: 2020-07-27
+	주요 변경 로그	:	
+	-->	
+	<query id="GetHasPackageLabel" version="00001">	
+		<statement>	
+			<![CDATA[	
+				--	
+				-- Id = GetHasPackageLabel
+				-- Version = 00001
+	
+				SELECT	COUNT(*)	AS	PACKAGELABEL
+				FROM	SF_LABELMAP			MAP
+				JOIN	SF_LABELDEFINITION	LD	ON	LD.LABELID = MAP.LABELID
+				WHERE	MAP.PRODUCTDEFID = '$!{PRODUCTDEFID}'
+				AND		LD.LABELTYPE = 'Package'
+			]]>	
+		</statement>	
+	</query>
+	
+	<!--	
+	프 로 그 램 명	: 공정관리 > 공정관리 > 공정작업 > 조립실적등록, 수리/개조실적
+	설		명	: 리드타임 수동입력 기능 On/Off 여부
+	작	성	자	: scmo
+	작	성	일	: 2021-05-07
+	주요 변경 로그	:	
+	-->	
+	<query id="GetManualInputYn" version="00001">
+		<statement>
+			<![CDATA[
+				SELECT  
+					A.CODEID
+					,A.DESCRIPTION AS YNVALUE
+				FROM    
+					SF_CODE A
+				WHERE   
+					A.VALIDSTATE = 'Valid'
+				AND
+					A.CODECLASSID = '$!{CODECLASSID}'
+				AND 
+					A.CODEID = '$!{CODEID}'
+			]]>
+		</statement>
+	</query>
+	
+</list>

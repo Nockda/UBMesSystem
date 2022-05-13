@@ -1,0 +1,398 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{9E13BD22-48D9-44AD-B1B9-6240F1AD1A2F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Micube.SmartMES.Quality</RootNamespace>
+    <AssemblyName>Micube.SmartMES.Quality</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\..\bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\..\bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="DevExpress.Charts.v18.1.Core, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Charts.v18.1.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.CodeParser.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.CodeParser.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Data.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Data.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Diagram.v18.1.Core, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Diagram.v18.1.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Office.v18.1.Core, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Office.v18.1.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.PivotGrid.v18.1.Core, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.PivotGrid.v18.1.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Printing.v18.1.Core, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Printing.v18.1.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.RichEdit.v18.1.Core, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.RichEdit.v18.1.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Sparkline.v18.1.Core, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Sparkline.v18.1.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Spreadsheet.v18.1.Core, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Spreadsheet.v18.1.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Utils.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Utils.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Utils.v18.1.UI, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.Utils.v18.1.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraBars.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraBars.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraCharts.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraCharts.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraCharts.v18.1.UI, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraCharts.v18.1.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraDiagram.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraDiagram.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraEditors.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraEditors.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraGrid.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraGrid.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraLayout.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraLayout.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraNavBar.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraNavBar.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraPivotGrid.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraPivotGrid.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraPrinting.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraPrinting.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraReports.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraReports.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraReports.v18.1.Extensions, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.XtraRichEdit.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraRichEdit.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraSpreadsheet.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.XtraTreeList.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraTreeList.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraVerticalGrid.v18.1, Version=18.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\DevExpress\DevExpress.XtraVerticalGrid.v18.1.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Office.Interop.Excel, Version=12.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c">
+      <SpecificVersion>False</SpecificVersion>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <HintPath>..\..\..\lib\Microsoft.Office.Interop.Excel.dll</HintPath>
+    </Reference>
+    <Reference Include="Micube.Framework, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\Micube.Framework.dll</HintPath>
+    </Reference>
+    <Reference Include="Micube.Framework.Log, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\Micube.Framework.Log.dll</HintPath>
+    </Reference>
+    <Reference Include="Micube.Framework.Net, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\Micube.Framework.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="Micube.Framework.Net.Wcf, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\Micube.Framework.Net.Wcf.dll</HintPath>
+    </Reference>
+    <Reference Include="Micube.Framework.SmartControls, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\Micube.Framework.SmartControls.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Windows.Forms.DataVisualization" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ClaimManager\ClaimManagerReg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ClaimManager\ClaimManagerReg.Designer.cs">
+      <DependentUpon>ClaimManagerReg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ClaimManager\popup\ClaimManagerExcelPopup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ClaimManager\popup\ClaimManagerExcelPopup.designer.cs">
+      <DependentUpon>ClaimManagerExcelPopup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Defect\popup\DefectExcelPopup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Defect\popup\DefectExcelPopup.Designer.cs">
+      <DependentUpon>DefectExcelPopup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Defect\DefectManage.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Defect\DefectManage.Designer.cs">
+      <DependentUpon>DefectManage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Defect\DefectReg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Defect\DefectReg.Designer.cs">
+      <DependentUpon>DefectReg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CheckResult.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CheckResult.Designer.cs">
+      <DependentUpon>CheckResult.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Inspection\FreezingOPC.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Inspection\FreezingOPC.Designer.cs">
+      <DependentUpon>FreezingOPC.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Inspection\PumpOPC.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Inspection\PumpOPC.Designer.cs">
+      <DependentUpon>PumpOPC.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Inspection\MaterialIQC.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Inspection\MaterialIQC.designer.cs">
+      <DependentUpon>MaterialIQC.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Inspection\ProductOQC.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Inspection\ProductOQC.Designer.cs">
+      <DependentUpon>ProductOQC.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ProductShipment.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ProductShipment.Designer.cs">
+      <DependentUpon>ProductShipment.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SearchProductOQC.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SearchProductOQC.Designer.cs">
+      <DependentUpon>SearchProductOQC.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ShipmentReportMgt.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ShipmentReportMgt.Designer.cs">
+      <DependentUpon>ShipmentReportMgt.cs</DependentUpon>
+    </Compile>
+    <Compile Include="RepairMgt.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RepairMgt.Designer.cs">
+      <DependentUpon>RepairMgt.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Iqc\IqcInspList.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Iqc\IqcInspList.Designer.cs">
+      <DependentUpon>IqcInspList.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Iqc\IqcInspManage.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Iqc\IqcInspManage.Designer.cs">
+      <DependentUpon>IqcInspManage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Iqc\IqcInspReg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Iqc\IqcInspReg.Designer.cs">
+      <DependentUpon>IqcInspReg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Status\CapaMgtStatus.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Status\CapaMgtStatus.Designer.cs">
+      <DependentUpon>CapaMgtStatus.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Status\ClaimStatus.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Status\ClaimStatus.Designer.cs">
+      <DependentUpon>ClaimStatus.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Status\XMgtOverhaulStatus.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Status\XMgtOverhaulStatus.Designer.cs">
+      <DependentUpon>XMgtOverhaulStatus.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ucFileControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ucFileControl.Designer.cs">
+      <DependentUpon>ucFileControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="XManage\XManageReg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="XManage\XManageReg.Designer.cs">
+      <DependentUpon>XManageReg.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\02.Common\Micube.SmartMES.Commons\Micube.SmartMES.Commons.csproj">
+      <Project>{1B6A2EB9-F134-49FC-80FA-982418D6490F}</Project>
+      <Name>Micube.SmartMES.Commons</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="CheckResult.resx">
+      <DependentUpon>CheckResult.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ClaimManager\ClaimManagerReg.resx">
+      <DependentUpon>ClaimManagerReg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ClaimManager\popup\ClaimManagerExcelPopup.resx">
+      <DependentUpon>ClaimManagerExcelPopup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Defect\popup\DefectExcelPopup.resx">
+      <DependentUpon>DefectExcelPopup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Defect\DefectManage.resx">
+      <DependentUpon>DefectManage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Defect\DefectReg.resx">
+      <DependentUpon>DefectReg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Inspection\FreezingOPC.resx">
+      <DependentUpon>FreezingOPC.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Inspection\PumpOPC.resx">
+      <DependentUpon>PumpOPC.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Inspection\MaterialIQC.resx">
+      <DependentUpon>MaterialIQC.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Inspection\ProductOQC.resx">
+      <DependentUpon>ProductOQC.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Iqc\IqcInspList.resx">
+      <DependentUpon>IqcInspList.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Iqc\IqcInspManage.resx">
+      <DependentUpon>IqcInspManage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Iqc\IqcInspReg.resx">
+      <DependentUpon>IqcInspReg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ProductShipment.resx">
+      <DependentUpon>ProductShipment.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RepairMgt.resx">
+      <DependentUpon>RepairMgt.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SearchProductOQC.resx">
+      <DependentUpon>SearchProductOQC.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ShipmentReportMgt.resx">
+      <DependentUpon>ShipmentReportMgt.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Status\CapaMgtStatus.resx">
+      <DependentUpon>CapaMgtStatus.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Status\ClaimStatus.resx">
+      <DependentUpon>ClaimStatus.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Status\XMgtOverhaulStatus.resx">
+      <DependentUpon>XMgtOverhaulStatus.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ucFileControl.resx">
+      <DependentUpon>ucFileControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="XManage\XManageReg.resx">
+      <DependentUpon>XManageReg.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ExcelFile\%28QEP-Q-02-02%29Defect.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ExcelFile\%28QEP-Q-01-01%29Claim.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
